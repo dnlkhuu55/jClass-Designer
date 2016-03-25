@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This XML file allows us to easily customize the look and language used
+    in our program's user interface. Note that this properties file is only
+    for the workspace controls, which are custom for each application
+-->
+<properties>
+    <property_list>
+        <!-- PROGRAM ICON FILES -->
+        <property name="SELECTION_TOOL_ICON"	    value="SelectionTool.png"></property>
+        <property name="REMOVE_ICON"                value="Remove.png"></property>
+        <property name="RECTANGLE_ICON"             value="Rect.png"></property>
+        <property name="ELLIPSE_ICON"               value="Ellipse.png"></property>
+        <property name="UP_ICON"                    value="MoveToFront.png"></property>
+        <property name="DOWN_ICON"                  value="MoveToBack.png"></property>
+        <property name="CAMERA"                     value="Snapshot.png"></property>
+        
+        <!-- TOOLTIPS FOR BUTTONS -->
+        <property name="SELECTION_TOOL_TOOLTIP"	    value="Selection"></property>
+        <property name="REMOVE_TOOL_TOOLTIP"	    value="Selection"></property>
+        <property name="RECTANGLE_TOOLTIP"	    value="Rectangle"></property>
+        <property name="ELLIPSE_TOOLTIP"	    value="Ellipse"></property>
+        <property name="UP_TOOLTIP"                 value="Move To Front"></property>
+        <property name="DOWN_TOOLTIP"               value="Move To Back"></property>
+        <property name="CAMERA_TOOLTIP"             value="Snapshot"></property>
+	
+	<!-- MESSAGES -->
+		
+	<!-- ERROR MESSAGES AND TITLES FOR THEIR DIALOGS -->
+
+    </property_list>
+    <property_options_list>
+    </property_options_list>
+</properties>
