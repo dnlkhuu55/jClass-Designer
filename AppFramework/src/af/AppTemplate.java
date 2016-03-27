@@ -47,7 +47,7 @@ public abstract class AppTemplate extends Application {
     
     AppEditComponent editComponent;
     AppViewComponent viewComponent;
-
+    
     // AND THEN THE COMPONENT FOR THE GUI WORKSPACE
     AppWorkspaceComponent workspaceComponent;
     
@@ -62,9 +62,9 @@ public abstract class AppTemplate extends Application {
     // COMPONENT ACCESSOR METHODS
     public AppDataComponent getDataComponent() { return dataComponent; }
     public AppFileComponent getFileComponent() { return fileComponent; }
+    public AppWorkspaceComponent getWorkspaceComponent() { return workspaceComponent; }
     public AppEditComponent getEditComponent() {return editComponent; }
     public AppViewComponent getViewComponent() {return viewComponent; }
-    public AppWorkspaceComponent getWorkspaceComponent() { return workspaceComponent; }
     public AppGUI getGUI() { return gui; }
 
     /**
@@ -96,6 +96,8 @@ public abstract class AppTemplate extends Application {
 		AppComponentsBuilder builder = makeAppBuilderHook();
 		fileComponent = builder.buildFileComponent();
 		dataComponent = builder.buildDataComponent();
+                editComponent = builder.buildEditComponent();
+                viewComponent = builder.buildViewComponent();
 
 		// AND NOW THAT THE COMPONENTS HAVE BEEN INSTANTIATED
 		// WE CAN INITIALIZE THE GUI

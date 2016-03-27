@@ -50,6 +50,17 @@ public class AppGUI implements AppStyleArbiter {
     protected Button saveAsButton;
     protected Button exitButton;
     
+    protected FlowPane editToolbarPane;
+    protected Button selectButton;
+    protected Button resizeButton;
+    protected Button addClass;
+    protected Button addInterface;
+    protected Button remove;
+    protected Button undo;
+    protected Button redo;
+    
+    
+    
     // HERE ARE OUR DIALOGS
     protected AppYesNoCancelDialogSingleton yesNoCancelDialog;
     
@@ -134,7 +145,7 @@ public class AppGUI implements AppStyleArbiter {
      * the application window. These are related to file management.
      */
     private void initFileToolbar(AppTemplate app) {
-        fileToolbarPane = new FlowPane();
+        fileToolbarPane = new FlowPane(); //SET A HBOX AND PUT THIS fileToolBarPane first in.
 
         // HERE ARE OUR FILE TOOLBAR BUTTONS, NOTE THAT SOME WILL
         // START AS ENABLED (false), WHILE OTHERS DISABLED (true)
@@ -162,6 +173,17 @@ public class AppGUI implements AppStyleArbiter {
             fileController.handleExitRequest();
         });	
     }
+    
+    private void initEditToolbar(AppTemplate app){
+        editToolbarPane = new FlowPane();
+        
+        newButton = initChildButton(fileToolbarPane,	NEW_ICON.toString(),	    NEW_TOOLTIP.toString(),	false);
+        loadButton = initChildButton(fileToolbarPane,	LOAD_ICON.toString(),	    LOAD_TOOLTIP.toString(),	false);
+        saveButton = initChildButton(fileToolbarPane,	SAVE_ICON.toString(),	    SAVE_TOOLTIP.toString(),	true);
+        saveAsButton = initChildButton(fileToolbarPane,	SAVEAS_ICON.toString(),	    SAVEAS_TOOLTIP.toString(),	false);
+        exitButton = initChildButton(fileToolbarPane,	EXIT_ICON.toString(),	    EXIT_TOOLTIP.toString(),	false);
+
+    }
 
     // INITIALIZE THE WINDOW (i.e. STAGE) PUTTING ALL THE CONTROLS
     // THERE EXCEPT THE WORKSPACE, WHICH WILL BE ADDED THE FIRST
@@ -183,7 +205,7 @@ public class AppGUI implements AppStyleArbiter {
         // ADD THE TOOLBAR ONLY, NOTE THAT THE WORKSPACE
         // HAS BEEN CONSTRUCTED, BUT WON'T BE ADDED UNTIL
         // THE USER STARTS EDITING A COURSE
-        appPane = new BorderPane();
+        appPane = new BorderPane(); //CHANGE THIS 
         appPane.setTop(fileToolbarPane);
         primaryScene = new Scene(appPane);
         

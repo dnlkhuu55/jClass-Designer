@@ -13,7 +13,7 @@ import javafx.scene.layout.Pane;
  * @author ?
  * @version 1.0
  */
-public abstract class AppWorkspaceComponent implements AppStyleArbiter {
+public abstract class AppWorkspaceComponent implements AppStyleArbiter {  
     // THIS IS THE WORKSPACE WHICH WILL BE DIFFERENT
     // DEPENDING ON THE CUSTOM APP USING THIS FRAMEWORK
     protected Pane workspace;

@@ -17,7 +17,7 @@ public interface AppFileComponent {
     public void loadData(AppDataComponent data, String filePath) throws IOException;
     public void exportData(AppDataComponent data, String filePath) throws IOException;
     public void importData(AppDataComponent data, String filePath) throws IOException;
-    
+    /*
     public void selectData(AppDataComponent data);
     public void resizeData(AppDataComponent data);
     public void addClasses(AppDataComponent data);
@@ -31,5 +31,5 @@ public interface AppFileComponent {
     
     public void gridding(AppDataComponent data);
     public void snapping(AppDataComponent data);
-    
+    */
 }

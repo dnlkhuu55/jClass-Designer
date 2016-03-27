@@ -10,8 +10,5 @@ package af.components;
  * @author dnlkhuu77
  */
 public interface AppEditComponent {
-    public void saveData(AppDataComponent data, String filePath);
-    public void loadData(AppDataComponent data, String filePath);
-    public void exportData(AppDataComponent data, String filePath);
-    public void importData(AppDataComponent data, String filePath);
+    public void select(AppDataComponent data);
 }
