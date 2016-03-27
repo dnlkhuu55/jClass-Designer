@@ -50,15 +50,6 @@ public class AppGUI implements AppStyleArbiter {
     protected Button saveAsButton;
     protected Button exitButton;
     
-    protected FlowPane editToolbarPane;
-    protected Button selectButton;
-    protected Button resizeButton;
-    protected Button addClass;
-    protected Button addInterface;
-    protected Button remove;
-    protected Button undo;
-    protected Button redo;
-    
     
     
     // HERE ARE OUR DIALOGS
@@ -173,17 +164,6 @@ public class AppGUI implements AppStyleArbiter {
             fileController.handleExitRequest();
         });	
     }
-    
-    private void initEditToolbar(AppTemplate app){
-        editToolbarPane = new FlowPane();
-        
-        newButton = initChildButton(fileToolbarPane,	NEW_ICON.toString(),	    NEW_TOOLTIP.toString(),	false);
-        loadButton = initChildButton(fileToolbarPane,	LOAD_ICON.toString(),	    LOAD_TOOLTIP.toString(),	false);
-        saveButton = initChildButton(fileToolbarPane,	SAVE_ICON.toString(),	    SAVE_TOOLTIP.toString(),	true);
-        saveAsButton = initChildButton(fileToolbarPane,	SAVEAS_ICON.toString(),	    SAVEAS_TOOLTIP.toString(),	false);
-        exitButton = initChildButton(fileToolbarPane,	EXIT_ICON.toString(),	    EXIT_TOOLTIP.toString(),	false);
-
-    }
 
     // INITIALIZE THE WINDOW (i.e. STAGE) PUTTING ALL THE CONTROLS
     // THERE EXCEPT THE WORKSPACE, WHICH WILL BE ADDED THE FIRST
@@ -253,6 +233,10 @@ public class AppGUI implements AppStyleArbiter {
 	
 	// AND RETURN THE COMPLETED BUTTON
         return button;
+    }
+    
+    public FlowPane getFileToolbarPane(){
+        return fileToolbarPane;
     }
     
     /**

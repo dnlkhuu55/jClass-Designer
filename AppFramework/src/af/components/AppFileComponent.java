@@ -17,19 +17,5 @@ public interface AppFileComponent {
     public void loadData(AppDataComponent data, String filePath) throws IOException;
     public void exportData(AppDataComponent data, String filePath) throws IOException;
     public void importData(AppDataComponent data, String filePath) throws IOException;
-    /*
-    public void selectData(AppDataComponent data);
-    public void resizeData(AppDataComponent data);
-    public void addClasses(AppDataComponent data);
-    public void addInterferes(AppDataComponent data);
-    public void remove(AppDataComponent data);
-    public void undo(AppDataComponent data);
-    public void redo(AppDataComponent data);
-    
-    public void zoomin(AppDataComponent data);
-    public void zoomout(AppDataComponent data);
-    
-    public void gridding(AppDataComponent data);
-    public void snapping(AppDataComponent data);
-    */
+
 }

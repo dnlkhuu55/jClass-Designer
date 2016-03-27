@@ -234,7 +234,6 @@ public class AppFileController {
      * This method will exit the application, making sure the user doesn't lose
      * any data first.
      * 
-     * @param gui
      */
     public void handleExitRequest() {
         try {
