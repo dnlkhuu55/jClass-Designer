@@ -78,36 +78,24 @@ public class Workspace extends AppWorkspaceComponent {
     BorderPane entirePane;
     Pane leftPane;
     Pane rightPane;
-    HBox buttonPane_1;
-    HBox buttonPane_2;
-    VBox background_in;
-    VBox filler_in;
-    VBox outline_in;
-    VBox thickness_in;
-    HBox camera;
-    Button selection = new Button();
-    Button remove = new Button();
-    Button rectangle = new Button();
-    Button oval = new Button();
-    Button down = new Button();
-    Button up = new Button();
-    Button camera_button = new Button();
+    HBox classPane;
+    HBox packagePane;
+    VBox variables;
+    VBox methods;
+    Button select = new Button();
+    Button variableadd = new Button();
+    Button variableremove = new Button();
+    Button methodAdd = new Button();
+    Button methodRemove = new Button();
     Button selectedButton;
     Shape currentShape = null;
     
     static final int BUTTON_TAG_WIDTH = 40;
     double startingx, startingy,endingx, endingy;
     Rectangle r;
-    Ellipse ell;
     Color color1 = Color.WHITE;
-    Color color2 = Color.WHITE;
-    ColorPicker color_2;
-    ColorPicker color_3;
     Color previousStroke;
     Shape pr = null;
-    Slider slider; 
-    double slider_number;
-    
     
     // HERE ARE OUR DIALOGS
     AppMessageDialogSingleton messageDialog;
@@ -135,236 +123,60 @@ public class Workspace extends AppWorkspaceComponent {
         rightPane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         expo.setBackgroundColor(Color.WHITE);
         
-        buttonPane_1 = new HBox();
+        
+        
+        FlowPane fileToolbarPane = gui.getFileToolbarPane();
+        
+        select = initChildButton(fileToolbarPane, PropertyType.SELECTION_ICON.toString(), PropertyType.SELECTION_TOOLTIP.toString(), false);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        classPane = new HBox();
+        
+        
+        //MAKE A LABEL
+        
 
-	// MAKE THE BUTTONS
-	selection = initChildButton(buttonPane_1, PropertyType.SELECTION_TOOL_ICON.toString(), PropertyType.SELECTION_TOOL_TOOLTIP.toString(), false);
-        remove = initChildButton(buttonPane_1, PropertyType.REMOVE_ICON.toString(), PropertyType.REMOVE_TOOLTIP.toString(), true);
-        rectangle = initChildButton(buttonPane_1, PropertyType.RECTANGLE_ICON.toString(), PropertyType.RECTANGLE_TOOLTIP.toString(), false);
-        oval = initChildButton(buttonPane_1, PropertyType.ELLIPSE_ICON.toString(), PropertyType.ELLIPSE_TOOLTIP.toString(), false);
 	
+         leftPane.getChildren().add(classPane);
         
-        selection.setOnAction(e -> {
-	    rightPane.setCursor(Cursor.DEFAULT);
-            selectedButton = selection;
-            });
-        
-        remove.setOnAction(e -> {
-           // DataManager expo = (DataManager) app.getDataComponent();
-	   ((BorderPane) workspace).setCursor(Cursor.DEFAULT); //REMOVE
-           
-           if(currentShape != null){
-               up.setDisable(true);
-               down.setDisable(true);
-               remove.setDisable(true);
-               
-               rightPane.getChildren().remove(currentShape);
-               expo.getShapeList().remove(currentShape);
-               gui.updateToolbarControls(false);
-           }
-        });
-        
-        rectangle.setOnAction(e -> {
-        rightPane.setCursor(Cursor.CROSSHAIR);
-        if(currentShape != null){
-            currentShape.setStroke(previousStroke);
-        }
-        currentShape = null;
-        selectedButton = rectangle;//Change cursor to crosshair
-        });  
-        
-        oval.setOnAction(e -> {
-        rightPane.setCursor(Cursor.CROSSHAIR);
-        if(currentShape != null){
-        currentShape.setStroke(previousStroke);
-        }
-        currentShape = null;
-        selectedButton = oval;//Change cursor to crosshair
-        });
-        
-        rightPane.setOnMousePressed((MouseEvent event) -> {
-       //     DataManager expo = (DataManager) app.getDataComponent();
-         if(rightPane.getCursor().equals(Cursor.CROSSHAIR) && selectedButton == rectangle){
-            startingx = event.getX();
-            startingy = event.getY();
-            r = getNewRectangle();
-            rightPane.getChildren().add(r);
-            expo.getShapeList().add(r);
-        }
-         if(rightPane.getCursor().equals(Cursor.CROSSHAIR) && selectedButton == oval){
-             startingx = event.getX();
-             startingy = event.getY();
-             ell = getNewEllipse();
-             rightPane.getChildren().add(ell);
-            expo.getShapeList().add(ell);
-         }
-        });
-        rightPane.setOnMouseDragged((MouseEvent evo)->{
-         if (rightPane.getCursor().equals(Cursor.CROSSHAIR) && selectedButton == rectangle){
-            endingx = evo.getX() ;
-            endingy = evo.getY();
-            r = makingRectangle(startingx, startingy, endingx, endingy, r); 
-        }
-         if(rightPane.getCursor().equals(Cursor.CROSSHAIR) && selectedButton == oval){
-             endingx = evo.getX();
-             endingy = evo.getY();
-             ell = makingNewEllipse(startingx, startingy, endingx, endingy, ell); 
-         }
-        }); 
-        rightPane.setOnMouseReleased((MouseEvent ei)->{
-         if (rightPane.getCursor().equals(Cursor.CROSSHAIR) && selectedButton == rectangle){
-            //Rectangle rect = makingRectangle(startingx, startingy, endingx, endingy, r); 
-            createListener(r);
-            up.setDisable(false);
-            down.setDisable(false);
-            remove.setDisable(false);
-            //rightPane.getChildren().add(r);
-            gui.updateToolbarControls(false);
-        }
-         if(rightPane.getCursor().equals(Cursor.CROSSHAIR) && selectedButton == oval){
-            // Ellipse ova = makingNewEllipse(startingx, startingy, endingx, endingy, ell);
-             createListener(ell);
-             up.setDisable(false);
-             down.setDisable(false);
-             remove.setDisable(false);
-             //rightPane.getChildren().add(ova);
-             gui.updateToolbarControls(false);
-         }
-        });
-    leftPane.getChildren().add(buttonPane_1);
-        
-    buttonPane_2 = new HBox();
+         packagePane = new HBox();
      
-    up = initChildButton(buttonPane_2, PropertyType.UP_ICON.toString(), PropertyType.UP_TOOLTIP.toString(), true);
-    down = initChildButton(buttonPane_2, PropertyType.DOWN_ICON.toString(), PropertyType.DOWN_TOOLTIP.toString(), true);
+    
+    
+         leftPane.getChildren().add(packagePane);
+    
+          //ParentPane
+    
+    
      
-    up.setOnAction(e -> {
-        
-    //    DataManager expo = (DataManager) app.getDataComponent();
-        rightPane.setCursor(Cursor.DEFAULT);
-        expo.getShapeList().remove(currentShape);
-        expo.getShapeList().add(currentShape);
-        reloadWorkspace();
-        });
-    down.setOnAction(e -> {
-        
-    //    DataManager expo = (DataManager) app.getDataComponent();
-        rightPane.setCursor(Cursor.DEFAULT);
-        expo.getShapeList().remove(currentShape);
-        expo.getShapeList().add(0, currentShape);
-        reloadWorkspace();
-        });
-    
-    leftPane.getChildren().add(buttonPane_2);
+        variables = new VBox();
      
-    background_in = new VBox();
+        Label backc = new Label("Background Color");
+        backc.setFont(Font.font("Verdana", 20));
+        variables.getChildren().add(backc);
+    
+    
+    
+        leftPane.getChildren().add(variables);
      
-    Label backc = new Label("Background Color");
-    backc.setFont(Font.font("Verdana", 20));
-    background_in.getChildren().add(backc);
+        methods = new VBox();
     
+        Label fillerc = new Label("Filler Color");
+        fillerc.setFont(Font.font("Arial", 20));
+        methods.getChildren().add(fillerc);
     
+        leftPane.getChildren().add(methods);
     
-    ColorPicker color_1 = new ColorPicker();      
-    color_1.setOnAction(new EventHandler(){
-            public void handle(Event event) {
-                DataManager expo = (DataManager) app.getDataComponent();
-                Color fill = color_1.getValue();
-                BackgroundFill backgroundFill = 
-                    new BackgroundFill(fill, 
-                            CornerRadii.EMPTY, 
-                            Insets.EMPTY);
-                Background background = new Background(backgroundFill);
-                rightPane.setBackground(background);
-                gui.updateToolbarControls(false);
-                
-                expo.setBackgroundColor(fill);
-            }
-        });
- 
-    background_in.getChildren().add(color_1);
-    
-    leftPane.getChildren().add(background_in);
-     
-    filler_in = new VBox();
-    
-    Label fillerc = new Label("Filler Color");
-    fillerc.setFont(Font.font("Arial", 20));
-    filler_in.getChildren().add(fillerc);
-    
-    color_2 = new ColorPicker();     
-    color_2.setOnAction(new EventHandler(){
-            public void handle(Event event) {
-                if(currentShape != null){
-                    System.out.println(color_2.getValue());
-                    Color fill = color_2.getValue();
-                    System.out.println(currentShape);
-                    System.out.println(fill);
-                    currentShape.setFill(fill);
-                    color1 = fill;
-                }
-                Color fill = color_2.getValue();
-                color1 = fill;
-                gui.updateToolbarControls(false);
-            }
-        });
-    filler_in.getChildren().add(color_2);
-    leftPane.getChildren().add(filler_in);
-    
-    outline_in = new VBox();
-    
-    Label outlinec = new Label("Outline Color");
-    outlinec.setFont(Font.font("Arial", 20));
-    outline_in.getChildren().add(outlinec);
-    
-    color_3 = new ColorPicker();      
-    color_3.setOnAction(new EventHandler(){
-            public void handle(Event event) {
-                if(currentShape != null){
-                    System.out.println(color_3.getValue());
-                    Color fill = color_3.getValue();
-                    System.out.println(currentShape);
-                    System.out.println(fill);
-                    previousStroke = fill;
-
-                    currentShape.setStroke(fill);
-                   // currentShape.strokeWidthProperty().bind(slider.valueProperty());
-                    color2 = fill;
-                    gui.updateToolbarControls(false);
-                }
-                Color fill = color_3.getValue();
-                color2 = fill;
-            }
-        });
-    outline_in.getChildren().add(color_3);
-    leftPane.getChildren().add(outline_in);
-    
-    //ADD A SLIDER
-    thickness_in = new VBox();
-    
-    Label thicknessc = new Label("Thickness Color");
-    thicknessc.setFont(Font.font("Arial", 20));
-    thickness_in.getChildren().add(thicknessc);
-    
-    slider = new Slider(1, 100, 1);
-    
-    slider_number = slider.getValue();
-    
-    slider.valueProperty().addListener(new ChangeListener<Number>() {
-            public void changed(ObservableValue<? extends Number> ov,
-                Number old_val, Number new_val) {
-                    if(currentShape != null){
-                        currentShape.setStrokeWidth(slider.getValue());
-                        gui.updateToolbarControls(false);
-                    }
-            }
-        });
-    
-
-    thickness_in.getChildren().add(slider);
-    
-    leftPane.getChildren().add(thickness_in);
-    
+    /*
     //ADD CAMERA BUTTON
     camera = new HBox();
     
@@ -393,10 +205,11 @@ public class Workspace extends AppWorkspaceComponent {
 	});
     
      leftPane.getChildren().add(camera);
-     ((BorderPane) workspace).setLeft(leftPane); //set the leftPane to the left of the BorderPane
+        */
+     ((BorderPane) workspace).setRight(leftPane); //set the leftPane to the left of the BorderPane
      ((BorderPane) workspace).setCenter(rightPane);
     }
-    
+    /*
     private Rectangle getNewRectangle() {
         Rectangle r = new Rectangle();
         r.setFill(color1);
@@ -415,24 +228,6 @@ public class Workspace extends AppWorkspaceComponent {
         return r;
     }
     
-    private Ellipse getNewEllipse(){
-        Ellipse some = new Ellipse();
-        some.setFill(color1);
-        some.setStroke(color2);
-        some.strokeWidthProperty().set(slider.getValue());
-        //some.strokeWidthProperty().bind(slider.valueProperty());
-        return some;
-    }
-    public Ellipse makingNewEllipse(double centerx, double centery, double endingx, double endingy,
-            Ellipse some){
-        some.setCenterX(centerx);
-        some.setCenterY(centery);
-        some.setRadiusX(endingx - centerx);
-        some.setRadiusY(endingy - centery);
-        some.setFill(color1);
-        some.setStroke(color2);
-        return some;
-    }
     public void createListener(Shape s){
         
         s.setOnMousePressed((MouseEvent e) -> {
@@ -473,16 +268,14 @@ public class Workspace extends AppWorkspaceComponent {
         });
     
     }
-    
+    */
     public void initStyle(){
        leftPane.getStyleClass().add("max_pane");
-       buttonPane_1.getStyleClass().add("bordered_pane");
-       buttonPane_2.getStyleClass().add("bordered_pane");
-       background_in.getStyleClass().add("bordered_pane");
-       filler_in.getStyleClass().add("bordered_pane");
-       outline_in.getStyleClass().add("bordered_pane");
-       camera.getStyleClass().add("bordered_pane");
-       thickness_in.getStyleClass().add("bordered_pane");
+       classPane.getStyleClass().add("bordered_pane");
+       packagePane.getStyleClass().add("bordered_pane");
+       //parentPane.getStyleClass().add("bordered_pane");
+       variables.getStyleClass().add("bordered_pane");
+       methods.getStyleClass().add("bordered_pane");
     }
     
     public Button initChildButton(Pane toolbar, String icon, String tooltip, boolean disabled) {
@@ -505,7 +298,12 @@ public class Workspace extends AppWorkspaceComponent {
 	// AND RETURN THE COMPLETED BUTTON
         return button;
     }
-        
+    
+    
+      
+    public void resetWorkspace(){
+        rightPane.getChildren().clear();
+    }
 
     /**
      * This function reloads all the controls for editing tag attributes into
@@ -516,18 +314,12 @@ public class Workspace extends AppWorkspaceComponent {
         DataManager expo = (DataManager) app.getDataComponent();
         rightPane.getChildren().clear();
        for(Shape s : expo.getShapeList()){
-           createListener(s);
+           //createListener(s);
            //currentShape = s;
             rightPane.getChildren().add(s);
         }
-       BackgroundFill backgroundFill = 
-                    new BackgroundFill(expo.getBackgroundColor(), 
-                            CornerRadii.EMPTY, 
-                            Insets.EMPTY);
-                Background background = new Background(backgroundFill);
-                rightPane.setBackground(background);
                 
         rightPane.setCursor(Cursor.DEFAULT);
-        selectedButton = selection;
+        selectedButton = null; //bugger
     }
 }

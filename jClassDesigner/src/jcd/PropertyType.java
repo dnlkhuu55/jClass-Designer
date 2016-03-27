@@ -21,8 +21,8 @@ package jcd;
  * @version 1.0
  */
 public enum PropertyType {
-    SELECTION_TOOL_ICON,
-    SELECTION_TOOL_TOOLTIP,
+    SELECTION_ICON,
+    SELECTION_TOOLTIP,
     RECTANGLE_ICON,
     RECTANGLE_TOOLTIP,
     ELLIPSE_ICON,
