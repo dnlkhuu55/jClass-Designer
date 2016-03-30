@@ -18,6 +18,7 @@ import static af.settings.AppPropertyType.*;
 import static af.settings.AppStartupConstants.FILE_PROTOCOL;
 import static af.settings.AppStartupConstants.PATH_IMAGES;
 import af.components.AppStyleArbiter;
+import javafx.scene.layout.HBox;
 
 /**
  * This class provides the basic user interface for this application,
@@ -41,6 +42,9 @@ public class AppGUI implements AppStyleArbiter {
     // THIS PANE ORGANIZES THE BIG PICTURE CONTAINERS FOR THE
     // APPLICATION AppGUI
     protected BorderPane appPane;
+    protected HBox wholePane;
+    protected FlowPane editToolbarPane;
+    protected FlowPane viewToolbarPane;
     
     // THIS IS THE TOP TOOLBAR AND ITS CONTROLS
     protected FlowPane fileToolbarPane;
@@ -136,7 +140,10 @@ public class AppGUI implements AppStyleArbiter {
      * the application window. These are related to file management.
      */
     private void initFileToolbar(AppTemplate app) {
-        fileToolbarPane = new FlowPane(); //SET A HBOX AND PUT THIS fileToolBarPane first in.
+        fileToolbarPane = new FlowPane();
+        editToolbarPane = new FlowPane();
+        viewToolbarPane = new FlowPane();
+        wholePane = new HBox();
 
         // HERE ARE OUR FILE TOOLBAR BUTTONS, NOTE THAT SOME WILL
         // START AS ENABLED (false), WHILE OTHERS DISABLED (true)
@@ -163,6 +170,7 @@ public class AppGUI implements AppStyleArbiter {
         exitButton.setOnAction(e -> {
             fileController.handleExitRequest();
         });	
+        
     }
 
     // INITIALIZE THE WINDOW (i.e. STAGE) PUTTING ALL THE CONTROLS
@@ -185,8 +193,12 @@ public class AppGUI implements AppStyleArbiter {
         // ADD THE TOOLBAR ONLY, NOTE THAT THE WORKSPACE
         // HAS BEEN CONSTRUCTED, BUT WON'T BE ADDED UNTIL
         // THE USER STARTS EDITING A COURSE
-        appPane = new BorderPane(); //CHANGE THIS 
-        appPane.setTop(fileToolbarPane);
+        appPane = new BorderPane();
+        wholePane.getChildren().add(fileToolbarPane);
+        wholePane.getChildren().add(editToolbarPane);
+        wholePane.getChildren().add(viewToolbarPane);
+        
+        appPane.setTop(wholePane);
         primaryScene = new Scene(appPane);
         
         // SET THE APP ICON
@@ -238,6 +250,12 @@ public class AppGUI implements AppStyleArbiter {
     public FlowPane getFileToolbarPane(){
         return fileToolbarPane;
     }
+    public FlowPane getEditToolbarPane(){
+        return editToolbarPane;
+    }
+    public FlowPane getViewToolbarPane(){
+        return viewToolbarPane;
+    }
     
     /**
      * This function specifies the CSS style classes for the controls managed
@@ -246,6 +264,8 @@ public class AppGUI implements AppStyleArbiter {
     @Override
     public void initStyle() {
 	fileToolbarPane.getStyleClass().add(CLASS_BORDERED_PANE);
+        editToolbarPane.getStyleClass().add(CLASS_BORDERED_PANE);
+        viewToolbarPane.getStyleClass().add(CLASS_BORDERED_PANE);
 	newButton.getStyleClass().add(CLASS_FILE_BUTTON);
 	loadButton.getStyleClass().add(CLASS_FILE_BUTTON);
 	saveButton.getStyleClass().add(CLASS_FILE_BUTTON);
