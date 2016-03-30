@@ -58,11 +58,13 @@ import static af.settings.AppStartupConstants.PATH_IMAGES;
 import static af.settings.AppStartupConstants.PATH_WORK;
 import af.ui.AppMessageDialogSingleton;
 import af.ui.AppYesNoCancelDialogSingleton;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
 
 /**
  * This class serves as the workspace component for this application, providing
@@ -80,16 +82,17 @@ public class Workspace extends AppWorkspaceComponent {
     // IT KNOWS THE GUI IT IS PLACED INSIDE
     AppGUI gui;
 
-    BorderPane entirePane;
-    ScrollPane leftPane;
+    ScrollPane tempo;
+    BorderPane lPane;
+    Pane leftPane;
     VBox rightPane;
     HBox classPane;
     HBox packagePane;
     HBox parentPane;
     HBox variablePane;
-    StackPane variableTablePane;
+    ScrollPane variableTablePane;
     HBox methodPane;
-    StackPane methodTablePane;
+    ScrollPane methodTablePane;
     Button photoButton = new Button();
     Button codeButton = new Button();
     Button selectionButton = new Button();
@@ -112,12 +115,18 @@ public class Workspace extends AppWorkspaceComponent {
     Button selectedButton;
     Shape currentShape = null;
     
+    CheckBox gridBox, snapBox;
+    VBox checkBox = new VBox();
+    
     static final int BUTTON_TAG_WIDTH = 40;
     double startingx, startingy,endingx, endingy;
-    Rectangle r;
-    Color color1 = Color.WHITE;
-    Color previousStroke;
-    Shape pr = null;
+    GridPane sc;
+    //Previous Stroke is Black
+    GridPane currentPane = null;
+    FlowPane fileToolbarPane;
+    FlowPane editToolbarPane;
+    FlowPane viewToolbarPane;
+    HBox wholePane;
     
     // HERE ARE OUR DIALOGS
     AppMessageDialogSingleton messageDialog;
@@ -139,27 +148,101 @@ public class Workspace extends AppWorkspaceComponent {
         DataManager expo = (DataManager) app.getDataComponent();
 
 	workspace = new BorderPane();
-	leftPane = new ScrollPane();  
+       // leftPane = new Pane();
+       //lPane = new BorderPane();
+       leftPane = new Pane();
+       //lPane.setCenter(leftPane);
+       tempo = new ScrollPane();
+       tempo.setContent(leftPane);
+       
+       fileToolbarPane = gui.getFileToolbarPane();
+       editToolbarPane = gui.getEditToolbarPane();
+       viewToolbarPane = gui.getViewToolbarPane();
+        
+        
         rightPane = new VBox();
-        leftPane.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-        //expo.setBackgroundColor(Color.WHITE);
+        tempo.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
         
-  
-        FlowPane fileToolbarPane = gui.getFileToolbarPane();
-        
+
         photoButton = initChildButton(fileToolbarPane, PropertyType.PHOTO_ICON.toString(), PropertyType.PHOTO_TOOLTIP.toString(), false);
         codeButton = initChildButton(fileToolbarPane, PropertyType.CODE_ICON.toString(), PropertyType.CODE_TOOLTIP.toString(), false);
-        selectionButton = initChildButton(fileToolbarPane, PropertyType.SELECTION_ICON.toString(), PropertyType.SELECTION_TOOLTIP.toString(), false);
-        resizeButton = initChildButton(fileToolbarPane, PropertyType.RESIZE_ICON.toString(), PropertyType.RESIZE_TOOLTIP.toString(), false);
-        addClassButton = initChildButton(fileToolbarPane, PropertyType.ADDCLASS_ICON.toString(), PropertyType.ADDCLASS_TOOLTIP.toString(), false);
-        addInterfaceButton = initChildButton(fileToolbarPane, PropertyType.ADDINTERFACE_ICON.toString(), PropertyType.ADDINTERFACE_TOOLTIP.toString(), false);
-        removeButton = initChildButton(fileToolbarPane, PropertyType.REMOVE_ICON.toString(), PropertyType.REMOVE_TOOLTIP.toString(), false);
-        undoButton = initChildButton(fileToolbarPane, PropertyType.UNDO_ICON.toString(), PropertyType.UNDO_TOOLTIP.toString(), false);
-        redoButton = initChildButton(fileToolbarPane, PropertyType.REDO_ICON.toString(), PropertyType.REDO_TOOLTIP.toString(), false);
-        zoominButton = initChildButton(fileToolbarPane, PropertyType.ZOOMIN_ICON.toString(), PropertyType.ZOOMIN_TOOLTIP.toString(), false);
-        zoomoutButton = initChildButton(fileToolbarPane, PropertyType.ZOOMOUT_ICON.toString(), PropertyType.ZOOMOUT_TOOLTIP.toString(), false);
-      
-         
+        
+        selectionButton = initChildButton(editToolbarPane, PropertyType.SELECTION_ICON.toString(), PropertyType.SELECTION_TOOLTIP.toString(), false);
+        resizeButton = initChildButton(editToolbarPane, PropertyType.RESIZE_ICON.toString(), PropertyType.RESIZE_TOOLTIP.toString(), false);
+        addClassButton = initChildButton(editToolbarPane, PropertyType.ADDCLASS_ICON.toString(), PropertyType.ADDCLASS_TOOLTIP.toString(), false);
+        addInterfaceButton = initChildButton(editToolbarPane, PropertyType.ADDINTERFACE_ICON.toString(), PropertyType.ADDINTERFACE_TOOLTIP.toString(), false);
+        removeButton = initChildButton(editToolbarPane, PropertyType.REMOVE_ICON.toString(), PropertyType.REMOVE_TOOLTIP.toString(), false);
+        undoButton = initChildButton(editToolbarPane, PropertyType.UNDO_ICON.toString(), PropertyType.UNDO_TOOLTIP.toString(), false);
+        redoButton = initChildButton(editToolbarPane, PropertyType.REDO_ICON.toString(), PropertyType.REDO_TOOLTIP.toString(), false);
+        zoominButton = initChildButton(viewToolbarPane, PropertyType.ZOOMIN_ICON.toString(), PropertyType.ZOOMIN_TOOLTIP.toString(), false);
+        zoomoutButton = initChildButton(viewToolbarPane, PropertyType.ZOOMOUT_ICON.toString(), PropertyType.ZOOMOUT_TOOLTIP.toString(), false);
+        
+        checkBox.setSpacing(5);
+        checkBox.setPadding(new Insets(5));
+        gridBox =new CheckBox("Grid");
+        snapBox =new CheckBox("Snap");
+        checkBox.getChildren().addAll(gridBox, snapBox);
+        viewToolbarPane.getChildren().add(checkBox);
+        
+        fileToolbarPane.setHgap(10);
+        editToolbarPane.setHgap(10);
+        viewToolbarPane.setHgap(10);
+        
+        
+            //ADD CAMERA BUTTON
+        photoButton.setOnAction(e -> {
+	try {
+                PropertiesManager props = PropertiesManager.getPropertiesManager();
+                FileChooser fc = new FileChooser();
+		fc.setInitialDirectory(new File(PATH_WORK));
+		fc.setTitle(props.getProperty(SAVE_WORK_TITLE));
+		fc.getExtensionFilters().addAll(
+		new FileChooser.ExtensionFilter( "PNG Files", "*.png"));
+
+		File selectedFile = fc.showSaveDialog(app.getGUI().getWindow());
+                
+		if (selectedFile != null) {
+		    WritableImage wi = new WritableImage(1000, 700);
+                WritableImage snapshot = (leftPane.snapshot(new SnapshotParameters(), wi));
+                ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", selectedFile);
+		}
+           
+            } catch (IOException ex) {
+                Logger.getLogger(TakeSnapShoot.class.getName()).log(Level.SEVERE, null, ex);
+            }
+	});
+        
+        
+        selectionButton.setOnAction(e -> {
+	    leftPane.setCursor(Cursor.DEFAULT);
+            selectedButton = selectionButton;
+        });
+        
+        addClassButton.setOnAction(e -> {
+            tempo.setCursor(Cursor.CROSSHAIR);
+            selectedButton = addClassButton;
+        });
+        
+        
+        tempo.setOnMousePressed((MouseEvent event) -> {
+       //     DataManager expo = (DataManager) app.getDataComponent();
+         if(tempo.getCursor().equals(Cursor.CROSSHAIR) && selectedButton == addClassButton){
+        
+            sc = newClass();
+            //make the 3 rows
+            sc.addColumn(3, new Text(dummy.getText()), new Text(dummyData.getText()), new Text(" "));
+            createListener(sc);
+            sc.setLayoutX(event.getX());
+            sc.setLayoutY(event.getY());
+            
+            sc.setGridLinesVisible(true);
+            
+            leftPane.getChildren().add(sc);
+        }
+        }); 
+        
+        
+        /////////////////////////////////////////////////////////////////////////////
         classPane = new HBox();
         
         Label className = new Label("Class Name:");
@@ -170,7 +253,7 @@ public class Workspace extends AppWorkspaceComponent {
         
         rightPane.getChildren().add(classPane);
         
-        
+        ////////////////////////////////////////////////////////////////////////
         packagePane = new HBox();
      
         Label packageName = new Label("Package Name:");
@@ -181,7 +264,7 @@ public class Workspace extends AppWorkspaceComponent {
         
         rightPane.getChildren().add(packagePane);
         
-    
+        ////////////////////////////////////////////////////////////////////////
         parentPane = new HBox();
         
         Label parentName = new Label("Parent: ");
@@ -200,7 +283,7 @@ public class Workspace extends AppWorkspaceComponent {
         
         rightPane.getChildren().add(parentPane);
         
-       
+       //////////////////////////////////////////////////////////////////////////
         variablePane = new HBox();
         
         Label variableName = new Label("Variables: ");
@@ -212,8 +295,8 @@ public class Workspace extends AppWorkspaceComponent {
         
         rightPane.getChildren().add(variablePane);
         
-      
-        variableTablePane = new StackPane();
+      //////////////////////////////////////////////////////////////////////////
+        variableTablePane = new ScrollPane();
         table1.setEditable(true);
         
         TableColumn NameCol1 = new TableColumn("Name");
@@ -222,9 +305,13 @@ public class Workspace extends AppWorkspaceComponent {
         TableColumn AccessCol1 = new TableColumn("Access");
         
         table1.getColumns().addAll(NameCol1, TypeCol1, StaticCol1, AccessCol1);
-        variableTablePane.getChildren().add(table1);
+        table1.setPrefWidth(350);
+        table1.setPrefHeight(200);
+
+        variableTablePane.setContent(table1);
         rightPane.getChildren().add(variableTablePane);
         
+        ////////////////////////////////////////////////////////////////////////
         methodPane = new HBox();
         
         Label methodName = new Label("Methods: ");
@@ -236,8 +323,8 @@ public class Workspace extends AppWorkspaceComponent {
         
         rightPane.getChildren().add(methodPane);
         
-      
-        methodTablePane = new StackPane();
+        ////////////////////////////////////////////////////////////////////////
+        methodTablePane = new ScrollPane();
         table2.setEditable(true);
         
         TableColumn NameCol2 = new TableColumn("Name");
@@ -250,87 +337,40 @@ public class Workspace extends AppWorkspaceComponent {
         
         table2.getColumns().addAll(NameCol2, ReturnCol2, StaticCol2, AbstractCol2, AccessCol2,
                 Arg1, Arg2);
-        
-        methodTablePane.getChildren().add(table2);
+        table2.setPrefWidth(350);
+        table2.setPrefHeight(300);
+        methodTablePane.setContent(table2);
         rightPane.getChildren().add(methodTablePane);
-        
-    /*
-    //ADD CAMERA BUTTON
-    cameraButton.setOnAction(e -> {
-	try {
-                PropertiesManager props = PropertiesManager.getPropertiesManager();
-                FileChooser fc = new FileChooser();
-		fc.setInitialDirectory(new File(PATH_WORK));
-		fc.setTitle(props.getProperty(SAVE_WORK_TITLE));
-		fc.getExtensionFilters().addAll(
-		new FileChooser.ExtensionFilter( "PNG Files", "*.png"));
-
-		File selectedFile = fc.showSaveDialog(app.getGUI().getWindow());
-                
-		if (selectedFile != null) {
-		    WritableImage wi = new WritableImage(1000, 700);
-                WritableImage snapshot = (rightPane.snapshot(new SnapshotParameters(), wi));
-                ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", selectedFile);
-		}
-           
-            } catch (IOException ex) {
-                Logger.getLogger(TakeSnapShoot.class.getName()).log(Level.SEVERE, null, ex);
-            }
-	});
     
-     leftPane.getChildren().add(camera);
-        */
-    
-    ((BorderPane) workspace).setCenter(leftPane); //set the leftPane to the left of the BorderPane
+    ((BorderPane) workspace).setCenter(tempo); //set the leftPane to the left of the BorderPane
     ((BorderPane) workspace).setRight(rightPane); 
     }
+    /////////////////////////////////////////////////////////////////////////////
     
-    /*
-    private Rectangle getNewRectangle() {
-        Rectangle r = new Rectangle();
-        r.setFill(color1);
-        r.setStroke(color2);
-        r.strokeWidthProperty().set(slider.getValue());
-        return r;
-    }
-    public Rectangle makingRectangle(double startingx, double startingy, double endingx, double endingy,
-            Rectangle r){
-        r.setX(startingx);
-        r.setY(startingy);
-        r.setWidth(endingx - startingx);
-        r.setHeight(endingy - startingy);
-        r.setFill(color1);
-        r.setStroke(color2);
+    private GridPane newClass() {
+        GridPane r = new GridPane();
         return r;
     }
     
-    public void createListener(Shape s){
+    public void createListener(GridPane s){
         
         s.setOnMousePressed((MouseEvent e) -> {
            //THIS IS WHAT I TO HAPPEN
            DataManager expo = (DataManager) app.getDataComponent();
 
            
-           if(selectedButton == selection){
-           if (pr != null){
-               pr.setStroke(previousStroke);
+           if(selectedButton == selectionButton){
+           if (currentPane != null){
+                currentPane.getStyleClass().add("selecting");
                
            }
-           up.setDisable(false);
-           down.setDisable(false);
-           remove.setDisable(false);
-           pr = s;
-           previousStroke = (Color) s.getStroke();
-           color_3.setValue((Color) s.getStroke());
-           s.setStroke(Color.YELLOW);
-           currentShape = s; 
-           
-           color_2.setValue((Color) s.getFill());
-           slider.setValue(s.getStrokeWidth());
-           System.out.println((Color) s.getStroke());
+         //  pr = s;
+          // s.setStroke(Color.YELLOW); //set the Border to yellow
+          // currentPane = s; 
         }
            
         });
+        /*
         s.setOnMouseDragged(e -> {
             if(s instanceof Rectangle){
             Rectangle r = (Rectangle) s;
@@ -342,16 +382,17 @@ public class Workspace extends AppWorkspaceComponent {
             some.setCenterY(e.getY());    
             }
         });
-    
-    }
     */
+    }
+    
     public void initStyle(){
        rightPane.getStyleClass().add("max_pane");
        classPane.getStyleClass().add("bordered_pane");
        packagePane.getStyleClass().add("bordered_pane");
-       //parentPane.getStyleClass().add("bordered_pane");
+       parentPane.getStyleClass().add("bordered_pane");
        variablePane.getStyleClass().add("bordered_pane");
        methodPane.getStyleClass().add("bordered_pane");
+       
     }
     
     public Button initChildButton(Pane toolbar, String icon, String tooltip, boolean disabled) {
@@ -370,6 +411,7 @@ public class Workspace extends AppWorkspaceComponent {
 	
 	// PUT THE BUTTON IN THE TOOLBAR
         toolbar.getChildren().add(button);
+       // button.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 	
 	// AND RETURN THE COMPLETED BUTTON
         return button;
