@@ -115,7 +115,7 @@ public class Workspace extends AppWorkspaceComponent {
     TableView table1 = new TableView();
     TableView table2 = new TableView();
     Button selectedButton;
-    double sceneX, sceneY, translateX, translateY;
+    //double sceneX, sceneY, translateX, translateY;
     
     CheckBox gridBox, snapBox;
     VBox checkBox = new VBox();
@@ -237,12 +237,15 @@ public class Workspace extends AppWorkspaceComponent {
             sc.setLayoutX(event.getX());
             sc.setLayoutY(event.getY());
             
-            
+            sc.setSceneX(event.getSceneX());
+            sc.setSceneY(event.getSceneY());
+            sc.setTranslateXer(sc.getTranslateX());
+            sc.setTranslateYer(sc.getTranslateY());
             sc.setGridLinesVisible(true);
             
             //expo.getClassList().add(sc);
             leftPane.getChildren().add(sc);
-            
+            /*
 
             sc.setOnMousePressed(e -> {
                sceneX = e.getSceneX();
@@ -254,7 +257,7 @@ public class Workspace extends AppWorkspaceComponent {
                sc.setTranslateX(translateX + e.getSceneX() - sceneX);
                sc.setTranslateY(translateY + e.getSceneY() - sceneY);
             });
-   
+   */
         }
         }); 
         
@@ -396,17 +399,12 @@ public class Workspace extends AppWorkspaceComponent {
         }
            
         });
-        /*
+        
         s.setOnMouseDragged(e -> {
-           //save inital x, y , then current-initial+current
-           // s.setLayoutX(e.getX());
-           // s.setLayoutY(e.getY());
-            
-           // s.setInitalx(e.getX() - s.getInitalx());
-           // s.setInitaly(e.getY() - s.getInitaly());
-           s.relocate(e.getX(), e.getY());
+           s.setTranslateX(s.getTranslateXer() + e.getSceneX() - s.getSceneX());
+           s.setTranslateY(s.getTranslateYer() + e.getSceneY() - s.getSceneY());
         });
-    */
+    
 
     }
     
