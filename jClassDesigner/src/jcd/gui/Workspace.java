@@ -65,6 +65,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
+import static javafx.scene.layout.GridPane.setRowIndex;
 import javafx.scene.text.Text;
 import jcd.data.UMLClasses;
 
@@ -225,12 +226,16 @@ public class Workspace extends AppWorkspaceComponent {
             selectedButton = addClassButton; //LOAD INTO TOOLBAAR BY DEFAULT
         });
         
-        
+        //ADDING A CLASS INTO THE PANE
         leftPane.setOnMousePressed((MouseEvent event) -> {
        //     DataManager expo = (DataManager) app.getDataComponent();
          if(tempo.getCursor().equals(Cursor.CROSSHAIR) && selectedButton == addClassButton){
-            sc = new UMLClasses(new Text(dummy.getText()), new Text(dummyData.getText()),
+            sc = new UMLClasses(new Text(dummy.getText()), new Text(" "),
             new Text(" "));
+            //sc.setFill(Color.WHITE);
+            sc.setClassNametoString(dummy.getText());
+            sc.setPackageName(dummyData.getText());
+            
             
             createListener(sc);
             
@@ -243,25 +248,15 @@ public class Workspace extends AppWorkspaceComponent {
             sc.setTranslateYer(sc.getTranslateY());
             sc.setGridLinesVisible(true);
             
+            if (currentPane != null)
+                 prevPane = currentPane;
+            currentPane = sc;
+            
             //expo.getClassList().add(sc);
             leftPane.getChildren().add(sc);
-            /*
 
-            sc.setOnMousePressed(e -> {
-               sceneX = e.getSceneX();
-               sceneY = e.getSceneY();
-               translateX = sc.getTranslateX();
-               translateY = sc.getTranslateY();
-            });
-            sc.setOnMouseDragged(e -> {
-               sc.setTranslateX(translateX + e.getSceneX() - sceneX);
-               sc.setTranslateY(translateY + e.getSceneY() - sceneY);
-            });
-   */
         }
         }); 
-        
-        
         
         /////////////////////////////////////////////////////////////////////////////
         classPane = new HBox();
@@ -270,9 +265,7 @@ public class Workspace extends AppWorkspaceComponent {
         className.setFont(Font.font("Arial", 10));
         classPane.getChildren().add(className);
         
-        classPane.getChildren().add(dummy);
-        
-        
+        classPane.getChildren().add(dummy);  
         
         rightPane.getChildren().add(classPane);
         
@@ -381,29 +374,32 @@ public class Workspace extends AppWorkspaceComponent {
            if (prevPane != null){
             // prevPane.setStroke(Color.BLACK);   
            }
-           prevPane = s;
+           prevPane = currentPane;
          //s.setStroke(Color.YELLOW);
            currentPane = s; 
-           if(dummy != null)
-                dummy.setText(currentPane.getClassName().toString());
-//          if(dummyData != null) //ERROR HERE
- //              dummyData.setText(currentPane.getPackageName().toString());
-          //String stuff = currentPane.getColumnConstraints();
-        dummy.setOnKeyPressed(new EventHandler<KeyEvent>(){ //
-            @Override
-            public void handle(KeyEvent eh){
-                s.setClassName(new Text(dummy.getText()));
-                s.update();
-            }
-        });   
-        }
            
+           
+           if(dummy != null)
+                dummy.setText(currentPane.getClassNametoString());
+           if(dummyData != null) //ERROR HERE
+                dummyData.setText(currentPane.getPackageName());
+           
+           dummy.setOnKeyPressed(eh -> {
+            
+            currentPane.setClassName(new Text(dummy.getText()));
+            currentPane.setClassNametoString(dummy.getText());
+            currentPane.setRowIndex(new Text(dummy.getText()), 0);
         });
+           
+        }   
+    });
+        
+        
         
         s.setOnMouseDragged(e -> {
            s.setTranslateX(s.getTranslateXer() + e.getSceneX() - s.getSceneX());
            s.setTranslateY(s.getTranslateYer() + e.getSceneY() - s.getSceneY());
-        });
+    });
     
 
     }
