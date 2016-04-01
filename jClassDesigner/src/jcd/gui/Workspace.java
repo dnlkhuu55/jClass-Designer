@@ -116,7 +116,8 @@ public class Workspace extends AppWorkspaceComponent {
     TableView table1 = new TableView();
     TableView table2 = new TableView();
     Button selectedButton;
-    //double sceneX, sceneY, translateX, translateY;
+    Text prevText = new Text();
+    Text currentText = new Text();
     
     CheckBox gridBox, snapBox;
     VBox checkBox = new VBox();
@@ -164,7 +165,7 @@ public class Workspace extends AppWorkspaceComponent {
         
         rightPane = new VBox();
         tempo.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-        leftPane.setBackground(new Background(new BackgroundFill(Color.YELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
+        leftPane.setBackground(new Background(new BackgroundFill(Color.AQUA, CornerRadii.EMPTY, Insets.EMPTY)));
         
 
         photoButton = initChildButton(fileToolbarPane, PropertyType.PHOTO_ICON.toString(), PropertyType.PHOTO_TOOLTIP.toString(), false);
@@ -229,12 +230,25 @@ public class Workspace extends AppWorkspaceComponent {
         //ADDING A CLASS INTO THE PANE
         leftPane.setOnMousePressed((MouseEvent event) -> {
        //     DataManager expo = (DataManager) app.getDataComponent();
+       /*
+        if(tempo.getCursor().equals(Cursor.DEFAULT) && selectedButton == selectionButton){
+            //deselect the current 
+            if (currentPane != null){
+                currentPane.setStyle("-fx-border-width: 1px");
+                currentPane.setStyle("-fx-border-color: #000000");
+                prevPane = currentPane;
+           }
+            currentPane = null;
+        }
+       */
          if(tempo.getCursor().equals(Cursor.CROSSHAIR) && selectedButton == addClassButton){
-            sc = new UMLClasses(new Text(dummy.getText()), new Text(" "),
-            new Text(" "));
-            //sc.setFill(Color.WHITE);
-            sc.setClassNametoString(dummy.getText());
-            sc.setPackageName(dummyData.getText());
+            sc = new UMLClasses(new Text("DEFAULT"), new Text(" "), new Text(" "));
+            sc.setStyle("-fx-background-color: #ffffff");
+            sc.setStyle("-fx-border-width: 10000px");
+            sc.setStyle("-fx-border-color: #ffff00");
+            sc.setClassNametoString("DEFAULT"); //currentText
+            sc.setPackageName(" "); //currentText
+            //bind the textpropropety here
             
             
             createListener(sc);
@@ -248,9 +262,13 @@ public class Workspace extends AppWorkspaceComponent {
             sc.setTranslateYer(sc.getTranslateY());
             sc.setGridLinesVisible(true);
             
-            if (currentPane != null)
-                 prevPane = currentPane;
-            currentPane = sc;
+        if (currentPane != null){
+            // prevPane.setStroke(Color.BLACK);
+            currentPane.setStyle("-fx-border-width: 1px");
+            currentPane.setStyle("-fx-border-color: #000000");
+            prevPane = currentPane;
+           }
+        currentPane = sc;
             
             //expo.getClassList().add(sc);
             leftPane.getChildren().add(sc);
@@ -267,6 +285,14 @@ public class Workspace extends AppWorkspaceComponent {
         
         classPane.getChildren().add(dummy);  
         
+        dummy.setOnKeyReleased((KeyEvent k) -> {
+            if(currentPane != null){
+                currentPane.setClassName(dummy.getText());
+                currentPane.setClassNametoString(dummy.getText());
+                
+            }
+        });
+        
         rightPane.getChildren().add(classPane);
         
         ////////////////////////////////////////////////////////////////////////
@@ -277,6 +303,13 @@ public class Workspace extends AppWorkspaceComponent {
         packagePane.getChildren().add(packageName);
         
         packagePane.getChildren().add(dummyData);
+        
+        dummyData.setOnKeyReleased((KeyEvent k) -> {
+            if(currentPane != null){
+                currentPane.setPackageName(dummyData.getText());
+                
+            }
+        });
         
         rightPane.getChildren().add(packagePane);
         
@@ -363,39 +396,40 @@ public class Workspace extends AppWorkspaceComponent {
     }
     /////////////////////////////////////////////////////////////////////////////
     
+    
+    
+    
+    
     public void createListener(UMLClasses s){
-        
+        currentText.textProperty().unbind();
         s.setOnMousePressed((MouseEvent e) -> {
            
         DataManager expo = (DataManager) app.getDataComponent();
-
-     
+        
         if(selectedButton == selectionButton){
-           if (prevPane != null){
-            // prevPane.setStroke(Color.BLACK);   
+           if (currentPane != null){
+            currentPane.setStyle("-fx-border-width: 1px");
+            currentPane.setStyle("-fx-border-color: #000000");
+            prevPane = currentPane;
+           // currentText.textProperty().unbind();
            }
-           prevPane = currentPane;
-         //s.setStroke(Color.YELLOW);
-           currentPane = s; 
            
+           currentPane = s; 
+        //   currentText.textProperty().bind(dummy.textProperty());
+            
+           
+           currentPane.setStyle("-fx-border-width: 1000px");
+           currentPane.setStyle("-fx-border-color: #ffff00");
            
            if(dummy != null)
                 dummy.setText(currentPane.getClassNametoString());
            if(dummyData != null) //ERROR HERE
                 dummyData.setText(currentPane.getPackageName());
            
-           dummy.setOnKeyPressed(eh -> {
-            
-            currentPane.setClassName(new Text(dummy.getText()));
-            currentPane.setClassNametoString(dummy.getText());
-            currentPane.setRowIndex(new Text(dummy.getText()), 0);
-        });
+         //  currentText.textProperty().bind(dummy.textProperty());
            
         }   
     });
-        
-        
-        
         s.setOnMouseDragged(e -> {
            s.setTranslateX(s.getTranslateXer() + e.getSceneX() - s.getSceneX());
            s.setTranslateY(s.getTranslateYer() + e.getSceneY() - s.getSceneY());
