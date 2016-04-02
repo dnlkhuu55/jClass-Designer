@@ -125,7 +125,6 @@ public class Workspace extends AppWorkspaceComponent {
     static final int BUTTON_TAG_WIDTH = 40;
     UMLClasses sc;
     
-    //Previous Stroke is Black
     UMLClasses prevPane = null;
     UMLClasses currentPane = null;
     FlowPane fileToolbarPane;
@@ -162,9 +161,9 @@ public class Workspace extends AppWorkspaceComponent {
        viewToolbarPane = gui.getViewToolbarPane();
         
         
-        rightPane = new VBox();
-        tempo.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-        leftPane.setBackground(new Background(new BackgroundFill(Color.AQUA, CornerRadii.EMPTY, Insets.EMPTY)));
+       rightPane = new VBox();
+       tempo.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
+       leftPane.setBackground(new Background(new BackgroundFill(Color.AQUA, CornerRadii.EMPTY, Insets.EMPTY)));
         
 
         photoButton = initChildButton(fileToolbarPane, PropertyType.PHOTO_ICON.toString(), PropertyType.PHOTO_TOOLTIP.toString(), false);
@@ -222,10 +221,8 @@ public class Workspace extends AppWorkspaceComponent {
         });
         
         addClassButton.setOnAction(e -> {
-            tempo.setCursor(Cursor.CROSSHAIR);
             selectedButton = addClassButton; //LOAD INTO TOOLBAAR BY DEFAULT
-            
-            
+
             sc = new UMLClasses(new Text("DEFAULT"), new Text(" "), new Text(" "));
             sc.setStyle("-fx-background-color: #ffffff");
             sc.setStyle("-fx-border-width: 10000px");
@@ -245,15 +242,12 @@ public class Workspace extends AppWorkspaceComponent {
             sc.setGridLinesVisible(true);
             
         if (currentPane != null){
-            // prevPane.setStroke(Color.BLACK);
             currentPane.setStyle("-fx-border-width: 1px");
             currentPane.setStyle("-fx-border-color: #000000");
             prevPane = currentPane;
            }
         currentPane = sc;
-            
-            //expo.getClassList().add(sc);
-            leftPane.getChildren().add(sc);
+        leftPane.getChildren().add(sc);
             
         if(dummy != null)
             dummy.setText(currentPane.getClassNametoString());
@@ -261,59 +255,6 @@ public class Workspace extends AppWorkspaceComponent {
             dummyData.setText(currentPane.getPackageName());
 
         });
-        
-        //ADDING A CLASS INTO THE PANE
-        leftPane.setOnMousePressed((MouseEvent event) -> {
-       /*
-        if(tempo.getCursor().equals(Cursor.DEFAULT) && selectedButton == selectionButton){
-            //deselect the current 
-            if (currentPane != null){
-                currentPane.setStyle("-fx-border-width: 1px");
-                currentPane.setStyle("-fx-border-color: #000000");
-                prevPane = currentPane;
-           }
-            currentPane = null;
-        }
-       */
-       /*
-         if(tempo.getCursor().equals(Cursor.CROSSHAIR) && selectedButton == addClassButton){
-            sc = new UMLClasses(new Text("DEFAULT"), new Text(" "), new Text(" "));
-            sc.setStyle("-fx-background-color: #ffffff");
-            sc.setStyle("-fx-border-width: 10000px");
-            sc.setStyle("-fx-border-color: #ffff00");
-            sc.setClassNametoString("DEFAULT"); //currentText
-            sc.setPackageName(" "); //currentText
-                 
-            createListener(sc);
-            
-            sc.setLayoutX(event.getX());
-            sc.setLayoutY(event.getY());
-            
-            sc.setSceneX(event.getSceneX());
-            sc.setSceneY(event.getSceneY());
-            sc.setTranslateXer(sc.getTranslateX());
-            sc.setTranslateYer(sc.getTranslateY());
-            sc.setGridLinesVisible(true);
-            
-        if (currentPane != null){
-            // prevPane.setStroke(Color.BLACK);
-            currentPane.setStyle("-fx-border-width: 1px");
-            currentPane.setStyle("-fx-border-color: #000000");
-            prevPane = currentPane;
-           }
-        currentPane = sc;
-            
-            //expo.getClassList().add(sc);
-            leftPane.getChildren().add(sc);
-            
-        if(dummy != null)
-            dummy.setText(currentPane.getClassNametoString());
-        if(dummyData != null) //ERROR HERE
-            dummyData.setText(currentPane.getPackageName());
-
-        }
-         */
-        }); 
         
         /////////////////////////////////////////////////////////////////////////////
         classPane = new HBox();
@@ -328,7 +269,6 @@ public class Workspace extends AppWorkspaceComponent {
             if(currentPane != null){
                 currentPane.setClassName(dummy.getText());
                 currentPane.setClassNametoString(dummy.getText());
-                
             }
         });
         
@@ -461,9 +401,11 @@ public class Workspace extends AppWorkspaceComponent {
         }   
     });
         s.setOnMouseDragged(e -> {
+            if(selectedButton == selectionButton){
            s.setTranslateX(s.getTranslateXer() + e.getSceneX() - s.getSceneX() - 25);
            s.setTranslateY(s.getTranslateYer() + e.getSceneY() - s.getSceneY() - 105);
-    });
+            }
+        });
     }
     
     public void initStyle(){
