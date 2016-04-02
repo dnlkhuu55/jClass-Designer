@@ -147,7 +147,6 @@ public class Workspace extends AppWorkspaceComponent {
      * data for setting up the user interface.
      */
     public Workspace(AppTemplate initApp) throws IOException {
-      //  GridPane sc = new UMLClasses(); 
 	app = initApp;
 	gui = app.getGUI();
         DataManager expo = (DataManager) app.getDataComponent();
@@ -225,11 +224,46 @@ public class Workspace extends AppWorkspaceComponent {
         addClassButton.setOnAction(e -> {
             tempo.setCursor(Cursor.CROSSHAIR);
             selectedButton = addClassButton; //LOAD INTO TOOLBAAR BY DEFAULT
+            
+            
+            sc = new UMLClasses(new Text("DEFAULT"), new Text(" "), new Text(" "));
+            sc.setStyle("-fx-background-color: #ffffff");
+            sc.setStyle("-fx-border-width: 10000px");
+            sc.setStyle("-fx-border-color: #ffff00");
+            sc.setClassNametoString("DEFAULT"); //currentText
+            sc.setPackageName(" "); //currentText
+                 
+            createListener(sc);
+            
+            sc.setLayoutX(10);
+            sc.setLayoutY(10);
+            
+            sc.setSceneX(10);
+            sc.setSceneY(10);
+            sc.setTranslateXer(10);
+            sc.setTranslateYer(10);
+            sc.setGridLinesVisible(true);
+            
+        if (currentPane != null){
+            // prevPane.setStroke(Color.BLACK);
+            currentPane.setStyle("-fx-border-width: 1px");
+            currentPane.setStyle("-fx-border-color: #000000");
+            prevPane = currentPane;
+           }
+        currentPane = sc;
+            
+            //expo.getClassList().add(sc);
+            leftPane.getChildren().add(sc);
+            
+        if(dummy != null)
+            dummy.setText(currentPane.getClassNametoString());
+        if(dummyData != null) //ERROR HERE
+            dummyData.setText(currentPane.getPackageName());
+
         });
         
         //ADDING A CLASS INTO THE PANE
         leftPane.setOnMousePressed((MouseEvent event) -> {
-       //     DataManager expo = (DataManager) app.getDataComponent();
        /*
         if(tempo.getCursor().equals(Cursor.DEFAULT) && selectedButton == selectionButton){
             //deselect the current 
@@ -241,6 +275,7 @@ public class Workspace extends AppWorkspaceComponent {
             currentPane = null;
         }
        */
+       /*
          if(tempo.getCursor().equals(Cursor.CROSSHAIR) && selectedButton == addClassButton){
             sc = new UMLClasses(new Text("DEFAULT"), new Text(" "), new Text(" "));
             sc.setStyle("-fx-background-color: #ffffff");
@@ -248,9 +283,7 @@ public class Workspace extends AppWorkspaceComponent {
             sc.setStyle("-fx-border-color: #ffff00");
             sc.setClassNametoString("DEFAULT"); //currentText
             sc.setPackageName(" "); //currentText
-            //bind the textpropropety here
-            
-            
+                 
             createListener(sc);
             
             sc.setLayoutX(event.getX());
@@ -272,8 +305,14 @@ public class Workspace extends AppWorkspaceComponent {
             
             //expo.getClassList().add(sc);
             leftPane.getChildren().add(sc);
+            
+        if(dummy != null)
+            dummy.setText(currentPane.getClassNametoString());
+        if(dummyData != null) //ERROR HERE
+            dummyData.setText(currentPane.getPackageName());
 
         }
+         */
         }); 
         
         /////////////////////////////////////////////////////////////////////////////
@@ -396,10 +435,7 @@ public class Workspace extends AppWorkspaceComponent {
     }
     /////////////////////////////////////////////////////////////////////////////
     
-    
-    
-    
-    
+                
     public void createListener(UMLClasses s){
         currentText.textProperty().unbind();
         s.setOnMousePressed((MouseEvent e) -> {
@@ -411,13 +447,10 @@ public class Workspace extends AppWorkspaceComponent {
             currentPane.setStyle("-fx-border-width: 1px");
             currentPane.setStyle("-fx-border-color: #000000");
             prevPane = currentPane;
-           // currentText.textProperty().unbind();
            }
            
            currentPane = s; 
-        //   currentText.textProperty().bind(dummy.textProperty());
-            
-           
+
            currentPane.setStyle("-fx-border-width: 1000px");
            currentPane.setStyle("-fx-border-color: #ffff00");
            
@@ -425,17 +458,12 @@ public class Workspace extends AppWorkspaceComponent {
                 dummy.setText(currentPane.getClassNametoString());
            if(dummyData != null) //ERROR HERE
                 dummyData.setText(currentPane.getPackageName());
-           
-         //  currentText.textProperty().bind(dummy.textProperty());
-           
         }   
     });
         s.setOnMouseDragged(e -> {
-           s.setTranslateX(s.getTranslateXer() + e.getSceneX() - s.getSceneX());
-           s.setTranslateY(s.getTranslateYer() + e.getSceneY() - s.getSceneY());
+           s.setTranslateX(s.getTranslateXer() + e.getSceneX() - s.getSceneX() - 25);
+           s.setTranslateY(s.getTranslateYer() + e.getSceneY() - s.getSceneY() - 105);
     });
-    
-
     }
     
     public void initStyle(){
@@ -475,6 +503,8 @@ public class Workspace extends AppWorkspaceComponent {
     public void resetWorkspace(){
         
         leftPane.getChildren().clear();
+        dummy.clear();
+        dummyData.clear();
     }
 
     /**
