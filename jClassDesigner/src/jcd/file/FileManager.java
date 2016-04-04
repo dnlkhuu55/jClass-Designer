@@ -30,6 +30,8 @@ import jcd.data.DataManager;
 import af.components.AppDataComponent;
 import af.components.AppFileComponent;
 import af.ui.AppMessageDialogSingleton;
+import javafx.scene.layout.GridPane;
+import jcd.data.UMLClasses;
 
 /**
  * This class serves as the file management component for this application,
@@ -60,30 +62,16 @@ public class FileManager implements AppFileComponent {
         DataManager expo = (DataManager) data;
         
         JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-        ArrayList<Shape> test = expo.getShapeList();
-        Color backy = expo.getBackgroundColor();
-        JsonObjectBuilder backing = Json.createObjectBuilder();
-        backing.add("Backy", backy.toString()).add("Flag", 2);
-        arrayBuilder.add(backing.build());
+        ArrayList<GridPane> test = expo.getClassList();
         
-        for(Shape sh: test){
+        for(GridPane sh: test){
             JsonObjectBuilder testing = Json.createObjectBuilder();
-            if(sh instanceof Rectangle){
-            testing.add("Fill", sh.getFill().toString())
-		.add("Stroke", sh.getStroke().toString())
-                .add("StrokeWidth", sh.getStrokeWidth()).add("Flag", 0).add("X", ((Rectangle) sh).getX())
-                    .add("Y", ((Rectangle) sh).getY()).add("Width", ((Rectangle) sh).getWidth())
-                    .add("Height", ((Rectangle) sh).getHeight()).add("Back", backy.toString());
-            }
-            if(sh instanceof Ellipse){
-                testing.add("Fill", sh.getFill().toString())
-		.add("Stroke", sh.getStroke().toString())
-                .add("StrokeWidth", sh.getStrokeWidth()).add("Flag", 1)
-                        .add("CenterX", ((Ellipse) sh).getCenterX())
-                        .add("CenterY", ((Ellipse) sh).getCenterY())
-                        .add("RadiusX", ((Ellipse) sh).getRadiusX())
-                        .add("RadiusY", ((Ellipse) sh).getRadiusY())
-                        .add("Back", backy.toString());
+            if(sh instanceof UMLClasses){
+            testing.add("Name", ((UMLClasses) sh).getClassNametoString())
+		.add("Package", ((UMLClasses) sh).getPackageName())
+                 .add("Flag", 0).add("X", ((UMLClasses) sh).getSceneX())
+                    .add("Y", ((UMLClasses) sh).getSceneY()).add("T_X", ((UMLClasses) sh).getTranslateXer())
+                    .add("T_Y", ((UMLClasses) sh).getTranslateYer());
             }
             arrayBuilder.add(testing.build());
         }
@@ -126,7 +114,7 @@ public class FileManager implements AppFileComponent {
         try{
         DataManager expo = (DataManager)data;
 	expo.reset();
-        expo.getShapeList().clear();
+        expo.getClassList().clear();
 	
 	// LOAD THE JSON FILE WITH ALL THE DATA
 	JsonArray json = loadJSONFile(filePath);
@@ -138,18 +126,17 @@ public class FileManager implements AppFileComponent {
             JsonObject shaping = (JsonObject) sh;
             flag = shaping.getInt("Flag");
             
-            if(flag == 0){ //rectangle
-                Rectangle r = new Rectangle();
-                r.setFill(Paint.valueOf(shaping.getString("Fill")));
-                r.setStroke(Paint.valueOf(shaping.getString("Stroke")));
-                r.strokeWidthProperty().set(shaping.getJsonNumber("StrokeWidth").doubleValue());
-                r.setX(shaping.getJsonNumber("X").doubleValue());
-                r.setY(shaping.getJsonNumber("Y").doubleValue());
-                r.setWidth(shaping.getJsonNumber("Width").doubleValue());
-                r.setHeight(shaping.getJsonNumber("Height").doubleValue());
-                expo.getShapeList().add(r);
-                
+            if(flag == 0){
+                UMLClasses r = new UMLClasses();
+                r.setClassName(shaping.getString("Name"));
+                r.setPackageName(shaping.getString("Package"));
+                r.setSceneX(shaping.getJsonNumber("X").doubleValue());
+                r.setSceneY(shaping.getJsonNumber("Y").doubleValue());
+                r.setTranslateXer(shaping.getJsonNumber("T_X").doubleValue());
+                r.setTranslateYer(shaping.getJsonNumber("T_Y").doubleValue());
+                expo.getClassList().add(r);   
             }
+            /*
             else if(flag==1){ //ellipse
                 Ellipse s = new Ellipse();
                 s.setFill(Paint.valueOf(shaping.getString("Fill")));
@@ -161,11 +148,12 @@ public class FileManager implements AppFileComponent {
                 s.setRadiusY(shaping.getJsonNumber("RadiusY").doubleValue());
                 expo.getShapeList().add(s);
             }
+            
             else{
                 backy = Color.valueOf(shaping.getString("Backy"));
                 expo.setBackgroundColor(backy);
             }
-            
+            */
         }
         }catch(IOException ex){
             System.out.println("This file cannot be loaded. Try again!");
