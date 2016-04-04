@@ -9,7 +9,7 @@
     Version:	1.0
 */
 
-// CSS CLASS FOR PAGE EDITING BUTTONS
+/* CSS CLASS FOR PAGE EDITING BUTTONS*/
 .tag_button {
     -fx-background-color: 
         linear-gradient(#ffd65b, #e68400),
@@ -63,4 +63,9 @@
 // CSS CLASS FOR TEXT FIELDS AT UI PROMPTS
 .prompt_text_field {
     -fx-font-size: 13pt;
+}
+
+.selecting {
+    -fx-border-width: 2px;
+    -fx-border-color: #7777dd;
 }

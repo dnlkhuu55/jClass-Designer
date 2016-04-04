@@ -7,23 +7,35 @@
 <properties>
     <property_list>
         <!-- PROGRAM ICON FILES -->
-        <property name="SELECTION_TOOL_ICON"	    value="SelectionTool.png"></property>
+        <property name="PHOTO_ICON"                 value="Photo.png"></property>
+        <property name="CODE_ICON"                  value="Code.png"></property>
+        <property name="SELECTION_ICON"             value="Selection.png"></property>
+        <property name="RESIZE_ICON"                value="Resize.png"></property>
+        <property name="ADDCLASS_ICON"              value="AddClass.png"></property>
+        <property name="ADDINTERFACE_ICON"	    value="AddInterface.png"></property>
         <property name="REMOVE_ICON"                value="Remove.png"></property>
-        <property name="RECTANGLE_ICON"             value="Rect.png"></property>
-        <property name="ELLIPSE_ICON"               value="Ellipse.png"></property>
-        <property name="UP_ICON"                    value="MoveToFront.png"></property>
-        <property name="DOWN_ICON"                  value="MoveToBack.png"></property>
-        <property name="CAMERA"                     value="Snapshot.png"></property>
+        <property name="UNDO_ICON"                  value="Undo.png"></property>
+        <property name="REDO_ICON"                  value="Redo.png"></property>
+        <property name="ZOOMIN_ICON"                value="Zoomin.png"></property>
+        <property name="ZOOMOUT_ICON"               value="Zoomout.png"></property>
+        <property name="ADD_ICON"                   value="Add.png"></property>
+        <property name="MINUS_ICON"                 value="Minus.png"></property>
         
         <!-- TOOLTIPS FOR BUTTONS -->
-        <property name="SELECTION_TOOL_TOOLTIP"	    value="Selection"></property>
-        <property name="REMOVE_TOOL_TOOLTIP"	    value="Selection"></property>
-        <property name="RECTANGLE_TOOLTIP"	    value="Rectangle"></property>
-        <property name="ELLIPSE_TOOLTIP"	    value="Ellipse"></property>
-        <property name="UP_TOOLTIP"                 value="Move To Front"></property>
-        <property name="DOWN_TOOLTIP"               value="Move To Back"></property>
-        <property name="CAMERA_TOOLTIP"             value="Snapshot"></property>
-	
+        <property name="PHOTO_TOOLTIP"              value="Export a photo"></property>
+        <property name="CODE_TOOLTIP"               value="Export Code"></property>
+        <property name="SELECTION_TOOLTIP"	    value="Select a diagram"></property>
+        <property name="RESIZE_TOOLTIP"             value="Resize a diagram"></property>
+        <property name="ADDCLASS_TOOLTIP"	    value="Add a class"></property>
+        <property name="ADDINTERFACE_TOOLTIP"	    value="Add an Interface"></property>
+        <property name="REMOVE_TOOLTIP"             value="Remove a class/interface"></property>
+        <property name="UNDO_TOOLTIP"               value="Undo an action"></property>
+        <property name="REDO_TOOLTIP"               value="Redo an action"></property>
+        <property name="ZOOMIN_TOOLTIP"             value="Zoom In"></property>
+        <property name="ZOOMOUT_TOOLTIP"            value="Zoom Out"></property>
+        <property name="ADD_TOOLTIP"                value="Add a variable/method"></property>
+        <property name="MINUS_TOOLTIP"              value="Remove a variable/method"></property>
+        
 	<!-- MESSAGES -->
 		
 	<!-- ERROR MESSAGES AND TITLES FOR THEIR DIALOGS -->

@@ -164,11 +164,7 @@ public class Workspace extends AppWorkspaceComponent {
        rightPane = new VBox();
        tempo.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
        leftPane.setBackground(new Background(new BackgroundFill(Color.AQUA, CornerRadii.EMPTY, Insets.EMPTY)));
-        
-
-        photoButton = initChildButton(fileToolbarPane, PropertyType.PHOTO_ICON.toString(), PropertyType.PHOTO_TOOLTIP.toString(), false);
-        codeButton = initChildButton(fileToolbarPane, PropertyType.CODE_ICON.toString(), PropertyType.CODE_TOOLTIP.toString(), false);
-        
+               
         selectionButton = initChildButton(editToolbarPane, PropertyType.SELECTION_ICON.toString(), PropertyType.SELECTION_TOOLTIP.toString(), false);
         resizeButton = initChildButton(editToolbarPane, PropertyType.RESIZE_ICON.toString(), PropertyType.RESIZE_TOOLTIP.toString(), false);
         addClassButton = initChildButton(editToolbarPane, PropertyType.ADDCLASS_ICON.toString(), PropertyType.ADDCLASS_TOOLTIP.toString(), false);
@@ -190,38 +186,15 @@ public class Workspace extends AppWorkspaceComponent {
         editToolbarPane.setHgap(10);
         viewToolbarPane.setHgap(10);
         
-        
-            //ADD CAMERA BUTTON
-        photoButton.setOnAction(e -> {
-	try {
-                PropertiesManager props = PropertiesManager.getPropertiesManager();
-                FileChooser fc = new FileChooser();
-		fc.setInitialDirectory(new File(PATH_WORK));
-		fc.setTitle(props.getProperty(SAVE_WORK_TITLE));
-		fc.getExtensionFilters().addAll(
-		new FileChooser.ExtensionFilter( "PNG Files", "*.png"));
-
-		File selectedFile = fc.showSaveDialog(app.getGUI().getWindow());
-                
-		if (selectedFile != null) {
-		    WritableImage wi = new WritableImage(1000, 700);
-                WritableImage snapshot = (leftPane.snapshot(new SnapshotParameters(), wi));
-                ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", selectedFile);
-		}
-           
-            } catch (IOException ex) {
-                Logger.getLogger(TakeSnapShoot.class.getName()).log(Level.SEVERE, null, ex);
-            }
-	});
-        
-        
         selectionButton.setOnAction(e -> {
 	    tempo.setCursor(Cursor.DEFAULT);
             selectedButton = selectionButton;
+            selectionButton.setDisable(true);
         });
         
         addClassButton.setOnAction(e -> {
             selectedButton = addClassButton; //LOAD INTO TOOLBAAR BY DEFAULT
+            selectionButton.setDisable(false);
 
             sc = new UMLClasses(new Text("DEFAULT"), new Text(" "), new Text(" "));
             sc.setStyle("-fx-background-color: #ffffff");
@@ -447,6 +420,28 @@ public class Workspace extends AppWorkspaceComponent {
         leftPane.getChildren().clear();
         dummy.clear();
         dummyData.clear();
+        selectionButton.setDisable(false);
+    }
+    
+    public void photoGo(){
+    	try {
+            PropertiesManager props = PropertiesManager.getPropertiesManager();
+            FileChooser fc = new FileChooser();
+            fc.setInitialDirectory(new File(PATH_WORK));
+            fc.setTitle(props.getProperty(SAVE_WORK_TITLE));
+            fc.getExtensionFilters().addAll(
+            new FileChooser.ExtensionFilter( "PNG Files", "*.png"));
+
+            File selectedFile = fc.showSaveDialog(app.getGUI().getWindow());
+                
+            if (selectedFile != null) {
+                WritableImage wi = new WritableImage(1000, 700);
+                WritableImage snapshot = (leftPane.snapshot(new SnapshotParameters(), wi));
+                ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", selectedFile);
+		}
+            }catch (IOException ex) {
+                Logger.getLogger(TakeSnapShoot.class.getName()).log(Level.SEVERE, null, ex);
+            }
     }
 
     /**

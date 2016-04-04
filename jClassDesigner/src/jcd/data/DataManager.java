@@ -5,6 +5,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import af.components.AppDataComponent;
 import af.AppTemplate;
+import javafx.scene.layout.GridPane;
+import jcd.gui.Workspace;
 
 /**
  * This class serves as the data management component for this application.
@@ -16,17 +18,10 @@ import af.AppTemplate;
 public class DataManager implements AppDataComponent {
     // THIS IS A SHARED REFERENCE TO THE APPLICATION
     AppTemplate app;
-    ArrayList<Shape> shapeList = new ArrayList<Shape>();
-    Color savingColor;
+    ArrayList<GridPane> classList = new ArrayList<GridPane>();
     
-    public ArrayList<Shape> getShapeList(){
-        return shapeList;
-    }
-    public void setBackgroundColor(Color savingColor){
-        this.savingColor = savingColor;
-    }
-    public Color getBackgroundColor(){
-        return savingColor;
+    public ArrayList<GridPane> getClassList(){
+        return classList;
     }
 
     /**
@@ -47,6 +42,12 @@ public class DataManager implements AppDataComponent {
      */
     @Override
     public void reset() {
-        
+        Workspace expo = (Workspace) app.getWorkspaceComponent();
+        expo.resetWorkspace();
+    }
+    
+    public void photo(){
+        Workspace expo = (Workspace) app.getWorkspaceComponent();
+        expo.photoGo();
     }
 }

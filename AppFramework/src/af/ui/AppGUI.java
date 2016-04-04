@@ -52,6 +52,8 @@ public class AppGUI implements AppStyleArbiter {
     protected Button loadButton;
     protected Button saveButton;
     protected Button saveAsButton;
+    protected Button photoButton;
+    protected Button codeButton;
     protected Button exitButton;
     
     
@@ -119,13 +121,16 @@ public class AppGUI implements AppStyleArbiter {
         // THIS TOGGLES WITH WHETHER THE CURRENT COURSE
         // HAS BEEN SAVED OR NOT
         saveButton.setDisable(saved);
+        saveAsButton.setDisable(saved);
+        photoButton.setDisable(saved);
+        codeButton.setDisable(saved);
+        
 
         // ALL THE OTHER BUTTONS ARE ALWAYS ENABLED
         // ONCE EDITING THAT FIRST COURSE BEGINS
 	newButton.setDisable(false);
         loadButton.setDisable(false);
 	exitButton.setDisable(false);
-        saveAsButton.setDisable(false);
 
         // NOTE THAT THE NEW, LOAD, AND EXIT BUTTONS
         // ARE NEVER DISABLED SO WE NEVER HAVE TO TOUCH THEM
@@ -150,7 +155,9 @@ public class AppGUI implements AppStyleArbiter {
         newButton = initChildButton(fileToolbarPane,	NEW_ICON.toString(),	    NEW_TOOLTIP.toString(),	false);
         loadButton = initChildButton(fileToolbarPane,	LOAD_ICON.toString(),	    LOAD_TOOLTIP.toString(),	false);
         saveButton = initChildButton(fileToolbarPane,	SAVE_ICON.toString(),	    SAVE_TOOLTIP.toString(),	true);
-        saveAsButton = initChildButton(fileToolbarPane,	SAVEAS_ICON.toString(),	    SAVEAS_TOOLTIP.toString(),	false);
+        saveAsButton = initChildButton(fileToolbarPane,	SAVEAS_ICON.toString(),	    SAVEAS_TOOLTIP.toString(),	true);
+        photoButton = initChildButton(fileToolbarPane,	PHOTO_ICON.toString(),	    PHOTO_TOOLTIP.toString(),	true);
+        codeButton = initChildButton(fileToolbarPane,	CODE_ICON.toString(),	    CODE_TOOLTIP.toString(),	true);
         exitButton = initChildButton(fileToolbarPane,	EXIT_ICON.toString(),	    EXIT_TOOLTIP.toString(),	false);
 
 	// AND NOW SETUP THEIR EVENT HANDLERS
@@ -167,6 +174,10 @@ public class AppGUI implements AppStyleArbiter {
         saveAsButton.setOnAction(e -> {
             fileController.handleSaveAsRequest();
         });
+        photoButton.setOnAction(e -> {
+            fileController.handlePhotoRequest();
+        });
+        //CODEBUTTON HANDLER
         exitButton.setOnAction(e -> {
             fileController.handleExitRequest();
         });	

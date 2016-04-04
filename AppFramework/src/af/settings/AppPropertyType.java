@@ -21,6 +21,8 @@ public enum AppPropertyType {
         SAVE_ICON,
 	SAVEAS_ICON,
         EXIT_ICON,
+        PHOTO_ICON,
+        CODE_ICON,
                
         // APPLICATION TOOLTIPS FOR BUTTONS
         NEW_TOOLTIP,
@@ -29,6 +31,8 @@ public enum AppPropertyType {
 	SAVEAS_TOOLTIP,
 	EXPORT_TOOLTIP,
         EXIT_TOOLTIP,
+        PHOTO_TOOLTIP,
+        CODE_TOOLTIP,
         
 	// ERROR MESSAGES
 	NEW_ERROR_MESSAGE,

@@ -12,4 +12,5 @@ package af.components;
  */
 public interface AppDataComponent {
     public void reset();
+    public void photo();
 }

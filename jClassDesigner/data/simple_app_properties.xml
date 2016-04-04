@@ -9,7 +9,7 @@
 <properties>
     <property_list>
         <property name="APP_TITLE"	    value="jClass Designer"></property>
-	<property name="APP_LOGO"	    value="PoseMakerLogo.png"></property>
+	<property name="APP_LOGO"	    value="Logo.png"></property>
 	<property name="APP_PATH_CSS"	    value="css/"></property>
 	<property name="APP_CSS"	    value="jcd_style.css"></property>
         
@@ -17,13 +17,20 @@
         <property name="NEW_ICON"	    value="New.png"></property>
         <property name="LOAD_ICON"	    value="Load.png"></property>
         <property name="SAVE_ICON"	    value="Save.png"></property>
+        <property name="SAVEAS_ICON"	    value="SaveAs.png"></property>
         <property name="EXIT_ICON"          value="Exit.png"></property> 
+        <property name="PHOTO_ICON"         value="Photo.png"></property>
+        <property name="CODE_ICON"          value="Code.png"></property>
         
         <!-- TOOLTIPS FOR BUTTONS -->
-        <property name="NEW_TOOLTIP"		value="Create a New Pose"></property>
-        <property name="LOAD_TOOLTIP"		value="Load an Existing Pose"></property>
-        <property name="SAVE_TOOLTIP"		value="Save this Pose"></property>
-        <property name="EXIT_TOOLTIP"		value="Exit the Application"></property>
+        <property name="NEW_TOOLTIP"		value="New"></property>
+        <property name="LOAD_TOOLTIP"		value="Load"></property>
+        <property name="SAVE_TOOLTIP"		value="Save"></property>
+        <property name="SAVEAS_TOOLTIP"         value="Save As"></property>
+        <property name="EXIT_TOOLTIP"		value="Exit"></property>
+        <property name="PHOTO_TOOLTIP"          value="Export a photo"></property>
+        <property name="CODE_TOOLTIP"           value="Export Code"></property>
+        
         
         <!-- ERROR MESSAGES -->
         <property name="CLOSE_BUTTON_TEXT"              value="Close"></property>

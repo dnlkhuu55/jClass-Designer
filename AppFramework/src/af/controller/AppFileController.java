@@ -78,7 +78,6 @@ public class AppFileController {
      * This method starts the process of editing new Work. If work is
      * already being edited, it will prompt the user to save it first.
      * 
-     * @param gui The user interface editing the Course.
      */
     public void handleNewRequest() {
 	AppMessageDialogSingleton dialog = AppMessageDialogSingleton.getSingleton();
@@ -122,8 +121,6 @@ public class AppFileController {
     /**
      * This method lets the user open a Course saved to a file. It will also
      * make sure data for the current Course is not lost.
-     * 
-     * @param gui The user interface editing the course.
      */
     public void handleLoadRequest() {
         try {
@@ -151,9 +148,6 @@ public class AppFileController {
      * This method will save the current course to a file. Note that we already
      * know the name of the file, so we won't need to prompt the user.
      * 
-     * @param gui The user interface editing the Course.
-     * 
-     * @param courseToSave The course being edited that is to be saved to a file.
      */
     public void handleSaveRequest() {
 	// WE'LL NEED THIS TO GET CUSTOM STUFF
@@ -228,6 +222,16 @@ public class AppFileController {
 	// AND REFRESH THE GUI, WHICH WILL ENABLE AND DISABLE
 	// THE APPROPRIATE CONTROLS
 	app.getGUI().updateToolbarControls(saved);	
+    }
+    
+    public void handlePhotoRequest(){
+        app.getDataComponent().photo();
+
+		// LOAD ALL THE DATA INTO THE WORKSPACE
+        app.getWorkspaceComponent().reloadWorkspace();	
+
+		// MAKE SURE THE WORKSPACE IS ACTIVATED
+        app.getWorkspaceComponent().activateWorkspace(app.getGUI().getAppPane());
     }
     
     /**
