@@ -18,11 +18,8 @@ import javafx.geometry.Orientation;
 import javafx.scene.Cursor;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
-import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Slider;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -37,9 +34,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Ellipse;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
 import javax.imageio.ImageIO;
@@ -66,6 +60,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import static javafx.scene.layout.GridPane.setRowIndex;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import jcd.data.UMLClasses;
 
@@ -132,6 +127,8 @@ public class Workspace extends AppWorkspaceComponent {
     FlowPane viewToolbarPane;
     HBox wholePane;
     
+    boolean canDeselect = true;
+    
     // HERE ARE OUR DIALOGS
     AppMessageDialogSingleton messageDialog;
     AppYesNoCancelDialogSingleton yesNoCancelDialog;
@@ -146,13 +143,13 @@ public class Workspace extends AppWorkspaceComponent {
      * data for setting up the user interface.
      */
     public Workspace(AppTemplate initApp) throws IOException {
-	app = initApp;
-	gui = app.getGUI();
-        DataManager expo = (DataManager) app.getDataComponent();
+       app = initApp;
+       gui = app.getGUI();
+       DataManager expo = (DataManager) app.getDataComponent();
 
        workspace = new BorderPane();
-       leftPane = new Pane();
-       leftPane.setPrefSize(2000, 2000);
+       leftPane = new Pane(); 
+       leftPane.setPrefSize(1000, 1000);
        tempo = new ScrollPane();
        tempo.setContent(leftPane);
        
@@ -163,7 +160,7 @@ public class Workspace extends AppWorkspaceComponent {
         
        rightPane = new VBox();
        tempo.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
-       leftPane.setBackground(new Background(new BackgroundFill(Color.AQUA, CornerRadii.EMPTY, Insets.EMPTY)));
+       leftPane.setBackground(new Background(new BackgroundFill(Color.LIGHTYELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
                
         selectionButton = initChildButton(editToolbarPane, PropertyType.SELECTION_ICON.toString(), PropertyType.SELECTION_TOOLTIP.toString(), false);
         resizeButton = initChildButton(editToolbarPane, PropertyType.RESIZE_ICON.toString(), PropertyType.RESIZE_TOOLTIP.toString(), false);
@@ -191,40 +188,52 @@ public class Workspace extends AppWorkspaceComponent {
             selectedButton = selectionButton;
             selectionButton.setDisable(true);
         });
+       
+        leftPane.setOnMousePressed(e -> {
+            if (e.getTarget() instanceof Pane){
+            if(currentPane != null && canDeselect){
+                currentPane.setStyle("-fx-border-width: 1px");
+                currentPane.setStyle("-fx-border-color: #000000");
+                currentPane = null;
+                prevPane = currentPane;
+                selectedButton = null;
+                selectionButton.setDisable(false);
+                System.out.println("LEFTPANE IS CLICKED!");
+            } }
+        }); 
         
         addClassButton.setOnAction(e -> {
-            selectedButton = addClassButton; //LOAD INTO TOOLBAAR BY DEFAULT
+            selectedButton = addClassButton; //LOAD INTO TOOLBAR BY DEFAULT
             selectionButton.setDisable(false);
 
             sc = new UMLClasses(new Text("DEFAULT"), new Text(" "), new Text(" "));
-            sc.setStyle("-fx-background-color: #ffffff");
             sc.setStyle("-fx-border-width: 10000px");
             sc.setStyle("-fx-border-color: #ffff00");
             sc.setClassNametoString("DEFAULT"); //currentText
             sc.setPackageName(" "); //currentText
-                 
+                
             createListener(sc);
             
-            sc.setLayoutX(10);
-            sc.setLayoutY(10);
+            sc.setLayoutX(0);
+            sc.setLayoutY(0);
             
-            sc.setSceneX(10);
-            sc.setSceneY(10);
-            sc.setTranslateXer(10);
-            sc.setTranslateYer(10);
-            sc.setGridLinesVisible(true);
+            sc.setSceneX(0);
+            sc.setSceneY(0);
+            sc.setTranslateXer(0);
+            sc.setTranslateYer(0);
             
         if (currentPane != null){
             currentPane.setStyle("-fx-border-width: 1px");
             currentPane.setStyle("-fx-border-color: #000000");
             prevPane = currentPane;
-           }
+        }
         currentPane = sc;
         leftPane.getChildren().add(sc);
+        expo.getClassList().add(sc); //ERROR?
             
         if(dummy != null)
             dummy.setText(currentPane.getClassNametoString());
-        if(dummyData != null) //ERROR HERE
+        if(dummyData != null)
             dummyData.setText(currentPane.getPackageName());
 
         });
@@ -350,7 +359,6 @@ public class Workspace extends AppWorkspaceComponent {
     
                 
     public void createListener(UMLClasses s){
-        currentText.textProperty().unbind();
         s.setOnMousePressed((MouseEvent e) -> {
            
         DataManager expo = (DataManager) app.getDataComponent();
@@ -359,9 +367,9 @@ public class Workspace extends AppWorkspaceComponent {
            if (currentPane != null){
             currentPane.setStyle("-fx-border-width: 1px");
             currentPane.setStyle("-fx-border-color: #000000");
-            prevPane = currentPane;
+            //prevPane = currentPane;
            }
-           
+           System.out.println("VBOX IS CLICKED!");
            currentPane = s; 
 
            currentPane.setStyle("-fx-border-width: 1000px");
@@ -375,12 +383,20 @@ public class Workspace extends AppWorkspaceComponent {
     });
         s.setOnMouseDragged(e -> {
             if(selectedButton == selectionButton){
-           s.setTranslateX(s.getTranslateXer() + e.getSceneX() - s.getSceneX() - 25);
-           s.setTranslateY(s.getTranslateYer() + e.getSceneY() - s.getSceneY() - 105);
+                //classBox.setTranslateX(e.getX() +classBox.getTranslateX())
+            //s.setTranslateX(s.getTranslateXer() + e.getSceneX() - s.getSceneX() - 25);
+            //s.setTranslateY(s.getTranslateYer() + e.getSceneY() - s.getSceneY() - 105);
+            s.setTranslateX(e.getX() + s.getTranslateX());
+            s.setTranslateY(e.getY() + s.getTranslateY());
+            canDeselect = false;
             }
         });
+        
+        s.setOnMouseReleased(eh -> {
+            canDeselect = true;
+        });
     }
-    
+
     public void initStyle(){
        rightPane.getStyleClass().add("max_pane");
        classPane.getStyleClass().add("bordered_pane");
@@ -407,7 +423,6 @@ public class Workspace extends AppWorkspaceComponent {
 	
 	// PUT THE BUTTON IN THE TOOLBAR
         toolbar.getChildren().add(button);
-       // button.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 	
 	// AND RETURN THE COMPLETED BUTTON
         return button;
@@ -450,17 +465,17 @@ public class Workspace extends AppWorkspaceComponent {
      */
     @Override
     public void reloadWorkspace() {
-        /*
+        
         DataManager expo = (DataManager) app.getDataComponent();
-        rightPane.getChildren().clear();
-       for(Shape s : expo.getShapeList()){
-           //createListener(s);
-           //currentShape = s;
-         //   rightPane.getChildren().add(s);
+        leftPane.getChildren().clear();
+        for(VBox s : expo.getClassList()){
+         //  createListener((UMLClasses) s);
+           currentPane = (UMLClasses) s;
+            leftPane.getChildren().add(s);
         }
                 
-        rightPane.setCursor(Cursor.DEFAULT);
-        selectedButton = null; //bugger
-*/
+        leftPane.setCursor(Cursor.DEFAULT);
+       // selectedButton = null; //bugger
+
     }
 }
