@@ -83,6 +83,8 @@ public class Workspace extends AppWorkspaceComponent {
     ScrollPane tempo;
     BorderPane lPane;
     Pane leftPane;
+    Pane varPane;
+    Pane metPane;
     VBox rightPane;
     HBox classPane;
     HBox packagePane;
@@ -108,8 +110,8 @@ public class Workspace extends AppWorkspaceComponent {
     Button minusMButton = new Button();
     TextField dummy = new TextField();
     TextField dummyData = new TextField();
-    TableView table1 = new TableView();
-    TableView table2 = new TableView();
+    TableView table1;
+    TableView table2;
     Button selectedButton;
     Text prevText = new Text();
     Text currentText = new Text();
@@ -149,6 +151,8 @@ public class Workspace extends AppWorkspaceComponent {
 
        workspace = new BorderPane();
        leftPane = new Pane(); 
+       varPane = new Pane();
+       metPane = new Pane();
        leftPane.setPrefSize(1000, 1000);
        tempo = new ScrollPane();
        tempo.setContent(leftPane);
@@ -156,8 +160,7 @@ public class Workspace extends AppWorkspaceComponent {
        fileToolbarPane = gui.getFileToolbarPane();
        editToolbarPane = gui.getEditToolbarPane();
        viewToolbarPane = gui.getViewToolbarPane();
-        
-        
+       
        rightPane = new VBox();
        tempo.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
        leftPane.setBackground(new Background(new BackgroundFill(Color.LIGHTYELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
@@ -190,8 +193,8 @@ public class Workspace extends AppWorkspaceComponent {
         });
        
         leftPane.setOnMousePressed(e -> {
-            if (e.getTarget() instanceof Pane){
-            if(currentPane != null && canDeselect){
+            if (e.getTarget() instanceof Pane && !(e.getTarget() instanceof VBox)){
+            if(currentPane != null && selectedButton == selectionButton){
                 currentPane.setStyle("-fx-border-width: 1px");
                 currentPane.setStyle("-fx-border-color: #000000");
                 currentPane = null;
@@ -213,6 +216,8 @@ public class Workspace extends AppWorkspaceComponent {
             sc.setPackageName(" "); //currentText
                 
             createListener(sc);
+            selectedButton = selectionButton;
+            selectionButton.setDisable(true);
             
             sc.setLayoutX(0);
             sc.setLayoutY(0);
@@ -307,6 +312,7 @@ public class Workspace extends AppWorkspaceComponent {
         
       //////////////////////////////////////////////////////////////////////////
         variableTablePane = new ScrollPane();
+        table1 = new TableView();
         table1.setEditable(true);
         
         TableColumn NameCol1 = new TableColumn("Name");
@@ -315,10 +321,12 @@ public class Workspace extends AppWorkspaceComponent {
         TableColumn AccessCol1 = new TableColumn("Access");
         
         table1.getColumns().addAll(NameCol1, TypeCol1, StaticCol1, AccessCol1);
+        //table1.autosize();
         table1.setPrefWidth(350);
         table1.setPrefHeight(200);
 
-        variableTablePane.setContent(table1);
+        varPane.getChildren().add(table1);
+        variableTablePane.setContent(varPane);
         rightPane.getChildren().add(variableTablePane);
         
         ////////////////////////////////////////////////////////////////////////
@@ -335,6 +343,7 @@ public class Workspace extends AppWorkspaceComponent {
         
         ////////////////////////////////////////////////////////////////////////
         methodTablePane = new ScrollPane();
+        table2 = new TableView();
         table2.setEditable(true);
         
         TableColumn NameCol2 = new TableColumn("Name");
@@ -343,13 +352,14 @@ public class Workspace extends AppWorkspaceComponent {
         TableColumn AbstractCol2 = new TableColumn("Abstract");
         TableColumn AccessCol2 = new TableColumn("Access");
         TableColumn Arg1 = new TableColumn("Arg1");
-        TableColumn Arg2 = new TableColumn("Arg2");
         
         table2.getColumns().addAll(NameCol2, ReturnCol2, StaticCol2, AbstractCol2, AccessCol2,
-                Arg1, Arg2);
+                Arg1);
         table2.setPrefWidth(350);
-        table2.setPrefHeight(300);
-        methodTablePane.setContent(table2);
+        table2.setPrefHeight(200);
+
+        metPane.getChildren().add(table2);
+        methodTablePane.setContent(metPane);
         rightPane.getChildren().add(methodTablePane);
     
     ((BorderPane) workspace).setCenter(tempo); //set the leftPane to the left of the BorderPane
@@ -377,13 +387,12 @@ public class Workspace extends AppWorkspaceComponent {
            
            if(dummy != null)
                 dummy.setText(currentPane.getClassNametoString());
-           if(dummyData != null) //ERROR HERE
+           if(dummyData != null)
                 dummyData.setText(currentPane.getPackageName());
-        }   
-    });
+            }   
+        });
         s.setOnMouseDragged(e -> {
             if(selectedButton == selectionButton){
-                //classBox.setTranslateX(e.getX() +classBox.getTranslateX())
             //s.setTranslateX(s.getTranslateXer() + e.getSceneX() - s.getSceneX() - 25);
             //s.setTranslateY(s.getTranslateYer() + e.getSceneY() - s.getSceneY() - 105);
             s.setTranslateX(e.getX() + s.getTranslateX());
@@ -404,7 +413,6 @@ public class Workspace extends AppWorkspaceComponent {
        parentPane.getStyleClass().add("bordered_pane");
        variablePane.getStyleClass().add("bordered_pane");
        methodPane.getStyleClass().add("bordered_pane");
-       
     }
     
     public Button initChildButton(Pane toolbar, String icon, String tooltip, boolean disabled) {
