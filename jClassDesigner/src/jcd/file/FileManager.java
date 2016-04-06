@@ -31,6 +31,8 @@ import af.components.AppDataComponent;
 import af.components.AppFileComponent;
 import af.ui.AppMessageDialogSingleton;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import jcd.data.UMLClasses;
 
 /**
@@ -62,15 +64,14 @@ public class FileManager implements AppFileComponent {
         DataManager expo = (DataManager) data;
         
         JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-        ArrayList<GridPane> test = expo.getClassList();
+        ArrayList<VBox> test = expo.getClassList();
         
-        for(GridPane sh: test){
+        for(VBox sh: test){
             JsonObjectBuilder testing = Json.createObjectBuilder();
             if(sh instanceof UMLClasses){
             testing.add("Name", ((UMLClasses) sh).getClassNametoString())
 		.add("Package", ((UMLClasses) sh).getPackageName())
-                 .add("Flag", 0).add("X", ((UMLClasses) sh).getSceneX())
-                    .add("Y", ((UMLClasses) sh).getSceneY()).add("T_X", ((UMLClasses) sh).getTranslateXer())
+                 .add("Flag", 0).add("T_X", ((UMLClasses) sh).getTranslateXer())
                     .add("T_Y", ((UMLClasses) sh).getTranslateYer());
             }
             arrayBuilder.add(testing.build());
@@ -119,7 +120,6 @@ public class FileManager implements AppFileComponent {
 	// LOAD THE JSON FILE WITH ALL THE DATA
 	JsonArray json = loadJSONFile(filePath);
         int flag;
-        Color backy;
         
         
         for(JsonValue sh: json){
@@ -127,11 +127,10 @@ public class FileManager implements AppFileComponent {
             flag = shaping.getInt("Flag");
             
             if(flag == 0){
-                UMLClasses r = new UMLClasses();
+                UMLClasses r = new UMLClasses(new Text(shaping.getString("Name")),
+                        new Text(" "), new Text(" ")); //a default constructor
                 r.setClassName(shaping.getString("Name"));
                 r.setPackageName(shaping.getString("Package"));
-                r.setSceneX(shaping.getJsonNumber("X").doubleValue());
-                r.setSceneY(shaping.getJsonNumber("Y").doubleValue());
                 r.setTranslateXer(shaping.getJsonNumber("T_X").doubleValue());
                 r.setTranslateYer(shaping.getJsonNumber("T_Y").doubleValue());
                 expo.getClassList().add(r);   
