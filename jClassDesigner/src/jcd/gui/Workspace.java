@@ -204,7 +204,7 @@ public class Workspace extends AppWorkspaceComponent {
                 prevPane = currentPane;
                 selectedButton = null;
                 selectionButton.setDisable(false);
-            } }
+            }}
         }); 
          
         resizeButton.setOnAction(eh -> {
@@ -226,14 +226,11 @@ public class Workspace extends AppWorkspaceComponent {
             createListener(sc);
             selectedButton = selectionButton;
             selectionButton.setDisable(true);
-            
-            sc.setLayoutX(0);
-            sc.setLayoutY(0);
-            
-            sc.setSceneX(0);
-            sc.setSceneY(0);
-            sc.setTranslateXer(0);
-            sc.setTranslateYer(0);
+
+            sc.setTranslateX(10);
+            sc.setTranslateY(10);
+            sc.setTranslateXer(10);
+            sc.setTranslateYer(10);
             
         if (currentPane != null){
             currentPane.setStyle("-fx-border-width: 1px");
@@ -298,15 +295,15 @@ public class Workspace extends AppWorkspaceComponent {
         parentName.setFont(Font.font("Arial", 10));
         parentPane.getChildren().add(parentName);
         
-        final ComboBox emailComboBox = new ComboBox();
-        emailComboBox.getItems().addAll(
+        final ComboBox parentComboBox = new ComboBox();
+        parentComboBox.getItems().addAll(
             "jacob.smith@example.com",
             "isabella.johnson@example.com",
             "ethan.williams@example.com",
             "emma.jones@example.com",
             "michael.brown@example.com"  
         );
-        parentPane.getChildren().add(emailComboBox);
+        parentPane.getChildren().add(parentComboBox);
         
         rightPane.getChildren().add(parentPane);
         
@@ -379,7 +376,7 @@ public class Workspace extends AppWorkspaceComponent {
     /////////////////////////////////////////////////////////////////////////////
     
                 
-    public void createListener(UMLClasses s){
+    public void createListener(VBox s){
         s.setOnMousePressed((MouseEvent e) -> {
            
         DataManager expo = (DataManager) app.getDataComponent();
@@ -408,10 +405,13 @@ public class Workspace extends AppWorkspaceComponent {
             DataManager expo = (DataManager) app.getDataComponent();
             if(selectedButton == selectionButton){
             gui.updateToolbarControls(false);
-            s.setTranslateX(e.getX() + s.getTranslateX());
-            s.setTranslateY(e.getY() + s.getTranslateY());
-            s.setTranslateXer(s.getTranslateX());
-            s.setTranslateYer(s.getTranslateY());
+            if(s instanceof UMLClasses){
+                UMLClasses lol = (UMLClasses) s;
+                lol.setTranslateX(e.getX() + s.getTranslateX());
+                lol.setTranslateY(e.getY() + s.getTranslateY());
+                lol.setTranslateXer(s.getTranslateX());
+                lol.setTranslateYer(s.getTranslateY());
+            }
             //resize: width and height //scale
             }
         });
@@ -534,8 +534,16 @@ public class Workspace extends AppWorkspaceComponent {
         DataManager expo = (DataManager) app.getDataComponent();
         leftPane.getChildren().clear();
         for(VBox s : expo.getClassList()){
-           createListener((UMLClasses) s);
-           currentPane = (UMLClasses) s;
+           createListener(s);
+           currentPane = s;
+            
+           if(currentPane instanceof UMLClasses){
+               UMLClasses lol = (UMLClasses) currentPane;
+               lol.setTranslateX(lol.getTranslateXer());
+               lol.setTranslateY(lol.getTranslateYer());
+           }
+           
+           
             leftPane.getChildren().add(s);
         }
                 
