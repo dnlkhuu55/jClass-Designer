@@ -52,6 +52,8 @@ import static af.settings.AppStartupConstants.PATH_IMAGES;
 import static af.settings.AppStartupConstants.PATH_WORK;
 import af.ui.AppMessageDialogSingleton;
 import af.ui.AppYesNoCancelDialogSingleton;
+import javafx.event.ActionEvent;
+import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
@@ -61,6 +63,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import static javafx.scene.layout.GridPane.setRowIndex;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import jcd.data.UMLClasses;
 
@@ -122,14 +125,14 @@ public class Workspace extends AppWorkspaceComponent {
     static final int BUTTON_TAG_WIDTH = 40;
     UMLClasses sc;
     
-    UMLClasses prevPane = null;
-    UMLClasses currentPane = null;
+    VBox prevPane = null;
+    VBox currentPane = null;
     FlowPane fileToolbarPane;
     FlowPane editToolbarPane;
     FlowPane viewToolbarPane;
     HBox wholePane;
-    
-    boolean canDeselect = true;
+    Line s;
+    Line l;
     
     // HERE ARE OUR DIALOGS
     AppMessageDialogSingleton messageDialog;
@@ -153,7 +156,7 @@ public class Workspace extends AppWorkspaceComponent {
        leftPane = new Pane(); 
        varPane = new Pane();
        metPane = new Pane();
-       leftPane.setPrefSize(1000, 1000);
+       leftPane.setPrefSize(1500, 1500);
        tempo = new ScrollPane();
        tempo.setContent(leftPane);
        
@@ -201,17 +204,22 @@ public class Workspace extends AppWorkspaceComponent {
                 prevPane = currentPane;
                 selectedButton = null;
                 selectionButton.setDisable(false);
-                System.out.println("LEFTPANE IS CLICKED!");
             } }
         }); 
-        
+         
+        resizeButton.setOnAction(eh -> {
+            selectionButton = resizeButton;
+        });
+               
         addClassButton.setOnAction(e -> {
             selectedButton = addClassButton; //LOAD INTO TOOLBAR BY DEFAULT
             selectionButton.setDisable(false);
+            gui.updateToolbarControls(false);
 
             sc = new UMLClasses(new Text("DEFAULT"), new Text(" "), new Text(" "));
             sc.setStyle("-fx-border-width: 10000px");
             sc.setStyle("-fx-border-color: #ffff00");
+            sc.setClassName("DEFAULT");
             sc.setClassNametoString("DEFAULT"); //currentText
             sc.setPackageName(" "); //currentText
                 
@@ -234,13 +242,16 @@ public class Workspace extends AppWorkspaceComponent {
         }
         currentPane = sc;
         leftPane.getChildren().add(sc);
-        expo.getClassList().add(sc); //ERROR?
+        expo.getClassList().add(sc);
             
         if(dummy != null)
-            dummy.setText(currentPane.getClassNametoString());
+            dummy.setText(sc.getClassNametoString());
         if(dummyData != null)
-            dummyData.setText(currentPane.getPackageName());
-
+            dummyData.setText(sc.getPackageName());
+        });
+        
+        gridBox.setOnAction(eh -> {
+            gridding(eh);
         });
         
         /////////////////////////////////////////////////////////////////////////////
@@ -253,9 +264,10 @@ public class Workspace extends AppWorkspaceComponent {
         classPane.getChildren().add(dummy);  
         
         dummy.setOnKeyReleased((KeyEvent k) -> {
-            if(currentPane != null){
-                currentPane.setClassName(dummy.getText());
-                currentPane.setClassNametoString(dummy.getText());
+            if(currentPane != null && currentPane instanceof UMLClasses){
+                UMLClasses lol = (UMLClasses) currentPane; //TRYING
+                lol.setClassName(dummy.getText());
+                lol.setClassNametoString(dummy.getText());
             }
         });
         
@@ -271,9 +283,9 @@ public class Workspace extends AppWorkspaceComponent {
         packagePane.getChildren().add(dummyData);
         
         dummyData.setOnKeyReleased((KeyEvent k) -> {
-            if(currentPane != null){
-                currentPane.setPackageName(dummyData.getText());
-                
+            if(currentPane != null && currentPane instanceof UMLClasses){
+                UMLClasses lol = (UMLClasses) currentPane; //!!!!!!!!!!
+                lol.setPackageName(dummyData.getText());
             }
         });
         
@@ -312,6 +324,7 @@ public class Workspace extends AppWorkspaceComponent {
         
       //////////////////////////////////////////////////////////////////////////
         variableTablePane = new ScrollPane();
+        variableTablePane.setMaxSize(350, 200);
         table1 = new TableView();
         table1.setEditable(true);
         
@@ -321,7 +334,6 @@ public class Workspace extends AppWorkspaceComponent {
         TableColumn AccessCol1 = new TableColumn("Access");
         
         table1.getColumns().addAll(NameCol1, TypeCol1, StaticCol1, AccessCol1);
-        //table1.autosize();
         table1.setPrefWidth(350);
         table1.setPrefHeight(200);
 
@@ -343,6 +355,7 @@ public class Workspace extends AppWorkspaceComponent {
         
         ////////////////////////////////////////////////////////////////////////
         methodTablePane = new ScrollPane();
+        methodTablePane.setMaxSize(350, 200);
         table2 = new TableView();
         table2.setEditable(true);
         
@@ -355,9 +368,7 @@ public class Workspace extends AppWorkspaceComponent {
         
         table2.getColumns().addAll(NameCol2, ReturnCol2, StaticCol2, AbstractCol2, AccessCol2,
                 Arg1);
-        table2.setPrefWidth(350);
-        table2.setPrefHeight(200);
-
+        
         metPane.getChildren().add(table2);
         methodTablePane.setContent(metPane);
         rightPane.getChildren().add(methodTablePane);
@@ -379,31 +390,78 @@ public class Workspace extends AppWorkspaceComponent {
             currentPane.setStyle("-fx-border-color: #000000");
             //prevPane = currentPane;
            }
-           System.out.println("VBOX IS CLICKED!");
            currentPane = s; 
 
            currentPane.setStyle("-fx-border-width: 1000px");
            currentPane.setStyle("-fx-border-color: #ffff00");
            
+           if (currentPane instanceof UMLClasses){
+               UMLClasses lol = (UMLClasses) currentPane; //!!!!!!!!!!!!!!!
            if(dummy != null)
-                dummy.setText(currentPane.getClassNametoString());
+                dummy.setText(lol.getClassNametoString());
            if(dummyData != null)
-                dummyData.setText(currentPane.getPackageName());
+                dummyData.setText(lol.getPackageName());
+        }
             }   
         });
         s.setOnMouseDragged(e -> {
+            DataManager expo = (DataManager) app.getDataComponent();
             if(selectedButton == selectionButton){
-            //s.setTranslateX(s.getTranslateXer() + e.getSceneX() - s.getSceneX() - 25);
-            //s.setTranslateY(s.getTranslateYer() + e.getSceneY() - s.getSceneY() - 105);
+            gui.updateToolbarControls(false);
             s.setTranslateX(e.getX() + s.getTranslateX());
             s.setTranslateY(e.getY() + s.getTranslateY());
-            canDeselect = false;
+            s.setTranslateXer(s.getTranslateX());
+            s.setTranslateYer(s.getTranslateY());
+            //resize: width and height //scale
             }
         });
         
-        s.setOnMouseReleased(eh -> {
-            canDeselect = true;
+        s.setOnMouseReleased(e -> {
+            //check x value
+            //if not 20, snap to next lowest number divisible by 20 (for loop to check)
         });
+    }
+    
+    public void gridding(ActionEvent e){
+        if(gridBox.isSelected()){   
+          for(int i = 0; i < 1500; i+=10){
+            s = new Line();
+            s.setStartY(0);
+            s.setEndY(1500); //vertical
+            s.setStartX(i);
+            s.setEndX(i);
+            s.setFill(Color.BLACK);
+            s.setStroke(Color.BLACK);
+            s.setStyle("line");
+            
+            leftPane.getChildren().add(s);
+            s.toBack();
+            }
+          
+          for(int i = 0; i < 1500; i+=10){
+              l = new Line();
+              l.setStartX(0);
+              l.setEndX(1500);
+              l.setStartY(i);
+              l.setEndY(i);
+              s.setFill(Color.BLACK);
+              s.setStroke(Color.BLACK);
+              s.setStyle("line");
+              
+              leftPane.getChildren().add(l);
+              l.toBack();
+          }
+        }
+        if(!gridBox.isSelected()){
+            for(int i = 0; i < leftPane.getChildren().size(); i++){
+                Node n = leftPane.getChildren().get(i);
+                if (n instanceof Line){
+                    
+                    leftPane.getChildren().remove(n);
+                    i--;
+                }
+            }
+        }
     }
 
     public void initStyle(){
@@ -435,8 +493,6 @@ public class Workspace extends AppWorkspaceComponent {
 	// AND RETURN THE COMPLETED BUTTON
         return button;
     }
-    
-    
       
     public void resetWorkspace(){
         
@@ -444,6 +500,7 @@ public class Workspace extends AppWorkspaceComponent {
         dummy.clear();
         dummyData.clear();
         selectionButton.setDisable(false);
+        
     }
     
     public void photoGo(){
@@ -458,7 +515,7 @@ public class Workspace extends AppWorkspaceComponent {
             File selectedFile = fc.showSaveDialog(app.getGUI().getWindow());
                 
             if (selectedFile != null) {
-                WritableImage wi = new WritableImage(1000, 700);
+                WritableImage wi = new WritableImage(1500, 1500);
                 WritableImage snapshot = (leftPane.snapshot(new SnapshotParameters(), wi));
                 ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", selectedFile);
 		}
@@ -477,7 +534,7 @@ public class Workspace extends AppWorkspaceComponent {
         DataManager expo = (DataManager) app.getDataComponent();
         leftPane.getChildren().clear();
         for(VBox s : expo.getClassList()){
-         //  createListener((UMLClasses) s);
+           createListener((UMLClasses) s);
            currentPane = (UMLClasses) s;
             leftPane.getChildren().add(s);
         }
