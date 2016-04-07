@@ -30,6 +30,9 @@ import jcd.data.DataManager;
 import af.components.AppDataComponent;
 import af.components.AppFileComponent;
 import af.ui.AppMessageDialogSingleton;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -57,6 +60,8 @@ public class FileManager implements AppFileComponent {
      * @throws IOException Thrown should there be an error writing 
      * out data to the file.
      */
+    public static final String PATH_EXPORT = "./export/";
+    
     @Override
     public void saveData(AppDataComponent data, String filePath) throws IOException {
         StringWriter sw = new StringWriter();
@@ -130,6 +135,7 @@ public class FileManager implements AppFileComponent {
                 UMLClasses r = new UMLClasses(new Text(shaping.getString("Name")),
                         new Text(" "), new Text(" ")); //a default constructor
                 r.setClassName(shaping.getString("Name"));
+                r.setClassNametoString(shaping.getString("Name"));
                 r.setPackageName(shaping.getString("Package"));
                 r.setTranslateXer(shaping.getJsonNumber("T_X").doubleValue());
                 r.setTranslateYer(shaping.getJsonNumber("T_Y").doubleValue());
@@ -189,7 +195,20 @@ public class FileManager implements AppFileComponent {
      */
     @Override
     public void exportData(AppDataComponent data, String filePath) throws IOException {
-
+        //Make a super folder
+        File file = new File(PATH_EXPORT);
+        file.mkdir();
+        
+        DataManager expo = (DataManager) data;
+        
+        for(VBox sh: expo.getClassList()){
+            if(sh instanceof UMLClasses){
+                file = new File(PATH_EXPORT + ((UMLClasses) sh).getPackageName());
+                file.mkdir();
+                //ADD THE JAVA SOURCE CODE INTO THESE FOLDERS
+                
+            }
+        }
     }
     
     /**
