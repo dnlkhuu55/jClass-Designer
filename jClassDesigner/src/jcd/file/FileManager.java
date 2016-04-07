@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import jcd.data.UMLClasses;
 
 /**
@@ -195,20 +196,20 @@ public class FileManager implements AppFileComponent {
      */
     @Override
     public void exportData(AppDataComponent data, String filePath) throws IOException {
-        //Make a super folder
-        File file = new File(PATH_EXPORT);
-        file.mkdir();
+        File file = new File(filePath);
         
         DataManager expo = (DataManager) data;
         
         for(VBox sh: expo.getClassList()){
             if(sh instanceof UMLClasses){
-                file = new File(PATH_EXPORT + ((UMLClasses) sh).getPackageName());
+                file = new File(filePath + ((UMLClasses) sh).getPackageName());
                 file.mkdir();
                 //ADD THE JAVA SOURCE CODE INTO THESE FOLDERS
-                
+                //double for loop to check all the VBoxes classes' names and create folders first
+                //then we will use printwriter to write the java source code.
             }
         }
+        
     }
     
     /**
