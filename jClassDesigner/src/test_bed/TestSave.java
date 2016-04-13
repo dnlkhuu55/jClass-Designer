@@ -95,12 +95,75 @@ public class TestSave {
            firstpart.getMethodNames().add(met10);
            firstpart.getMethodNames().add(met11);
            
+           /////
+           UMLClasses secondpart = new UMLClasses("CounterTask", " ", " ", null, "PackTest", 50, 100);
+           
+           UMLVariables vegas1 = new UMLVariables("app", "ThreadExample", false, false);
+           UMLVariables vegas2 = new UMLVariables("counter", "int", false, false);
+           secondpart.getVariableNames().add(vegas1);
+           secondpart.getVariableNames().add(vegas2);
+           
+           UMLMethods methane1 = new UMLMethods("CounterTask", " ", false, false, true);
+           methane1.getArgs().add("ThreadExample");
+           UMLMethods methane2 = new UMLMethods("call", "void", false, true, false);
+           
+           secondpart.getMethodNames().add(methane1);
+           secondpart.getMethodNames().add(methane2);
+           
+           d.getClassList().add(secondpart);
+           
+           ///  
+           UMLClasses thirdpart = new UMLClasses("DateTask", " ", " ", null, "PackTest", 75, 19);
+           
+           UMLVariables nachos1 = new UMLVariables("app", "ThreadExample", false, false);
+           UMLVariables nachos2 = new UMLVariables("now", "Date", false, false);
+           thirdpart.getVariableNames().add(nachos1);
+           thirdpart.getVariableNames().add(nachos2);
+           
+           UMLMethods pizza1 = new UMLMethods("DateTask", " ", false, false, true);
+           pizza1.getArgs().add("ThreadExample");
+           UMLMethods pizza2 = new UMLMethods("call", "void", false, true, false);
+           
+           thirdpart.getMethodNames().add(pizza1);
+           thirdpart.getMethodNames().add(pizza2);
+           
+           d.getClassList().add(thirdpart);
+           ////
+           
+           UMLClasses fourthpart = new UMLClasses("PauseHandler", " ", " ", null, "PackTest", 100, 200);
+           
+           UMLVariables phil1 = new UMLVariables("PauseHandler", "ThreadExample", false, true);
+           UMLVariables phil2 = new UMLVariables("app", "ThreadExample", false, false);
+           fourthpart.getVariableNames().add(phil1);
+           fourthpart.getVariableNames().add(phil2);
+           
+           UMLMethods tacos1 = new UMLMethods("handle", "void", false, false, true);
+           tacos1.getArgs().add("Event");
+           
+           fourthpart.getMethodNames().add(tacos1);
+           
+           d.getClassList().add(fourthpart);
+           ////
+           UMLClasses fifthpart = new UMLClasses("StartHandler", " ", " ", null, "PackTest", 5, 1);
+           
+           UMLVariables dark1 = new UMLVariables("StartHandler", "ThreadExample", false, true);
+           UMLVariables dark2 = new UMLVariables("app", "ThreadExample", false, false);
+           fifthpart.getVariableNames().add(dark1);
+           fifthpart.getVariableNames().add(dark2);
+           
+           UMLMethods nice1 = new UMLMethods("handle", "void", false, false, true);
+           nice1.getArgs().add("Event");
+           
+           fifthpart.getMethodNames().add(nice1);
+           
+           d.getClassList().add(fifthpart);
+           ////
+           
            f.saveData(d, "./export/test.json");
            
         } catch(Exception e){
             System.out.println("NOT WORKING");
         }
-        
         
     }
     
