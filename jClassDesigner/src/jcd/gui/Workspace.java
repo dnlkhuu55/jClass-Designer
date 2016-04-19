@@ -5,10 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -60,12 +56,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.GridPane;
-import static javafx.scene.layout.GridPane.setRowIndex;
-import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import jcd.data.UMLClasses;
+import jcd.data.UMLInterfaces;
+import jcd.data.UMLMethods;
+import jcd.data.UMLVariables;
 
 /**
  * This class serves as the workspace component for this application, providing
@@ -118,12 +114,16 @@ public class Workspace extends AppWorkspaceComponent {
     Button selectedButton;
     Text prevText = new Text();
     Text currentText = new Text();
+    ComboBox parentComboBox = new ComboBox();
     
     CheckBox gridBox, snapBox;
     VBox checkBox = new VBox();
     
     static final int BUTTON_TAG_WIDTH = 40;
     UMLClasses sc;
+    UMLInterfaces ie;
+    UMLVariables var;
+    UMLMethods methods;
     
     VBox prevPane = null;
     VBox currentPane = null;
@@ -133,6 +133,8 @@ public class Workspace extends AppWorkspaceComponent {
     HBox wholePane;
     Line s;
     Line l;
+    
+    boolean snapping = false;
     
     // HERE ARE OUR DIALOGS
     AppMessageDialogSingleton messageDialog;
@@ -168,15 +170,15 @@ public class Workspace extends AppWorkspaceComponent {
        tempo.setBackground(new Background(new BackgroundFill(Color.WHITE, CornerRadii.EMPTY, Insets.EMPTY)));
        leftPane.setBackground(new Background(new BackgroundFill(Color.LIGHTYELLOW, CornerRadii.EMPTY, Insets.EMPTY)));
                
-        selectionButton = initChildButton(editToolbarPane, PropertyType.SELECTION_ICON.toString(), PropertyType.SELECTION_TOOLTIP.toString(), false);
-        resizeButton = initChildButton(editToolbarPane, PropertyType.RESIZE_ICON.toString(), PropertyType.RESIZE_TOOLTIP.toString(), false);
+        selectionButton = initChildButton(editToolbarPane, PropertyType.SELECTION_ICON.toString(), PropertyType.SELECTION_TOOLTIP.toString(), true);
+        resizeButton = initChildButton(editToolbarPane, PropertyType.RESIZE_ICON.toString(), PropertyType.RESIZE_TOOLTIP.toString(), true);
         addClassButton = initChildButton(editToolbarPane, PropertyType.ADDCLASS_ICON.toString(), PropertyType.ADDCLASS_TOOLTIP.toString(), false);
         addInterfaceButton = initChildButton(editToolbarPane, PropertyType.ADDINTERFACE_ICON.toString(), PropertyType.ADDINTERFACE_TOOLTIP.toString(), false);
-        removeButton = initChildButton(editToolbarPane, PropertyType.REMOVE_ICON.toString(), PropertyType.REMOVE_TOOLTIP.toString(), false);
-        undoButton = initChildButton(editToolbarPane, PropertyType.UNDO_ICON.toString(), PropertyType.UNDO_TOOLTIP.toString(), false);
-        redoButton = initChildButton(editToolbarPane, PropertyType.REDO_ICON.toString(), PropertyType.REDO_TOOLTIP.toString(), false);
-        zoominButton = initChildButton(viewToolbarPane, PropertyType.ZOOMIN_ICON.toString(), PropertyType.ZOOMIN_TOOLTIP.toString(), false);
-        zoomoutButton = initChildButton(viewToolbarPane, PropertyType.ZOOMOUT_ICON.toString(), PropertyType.ZOOMOUT_TOOLTIP.toString(), false);
+        removeButton = initChildButton(editToolbarPane, PropertyType.REMOVE_ICON.toString(), PropertyType.REMOVE_TOOLTIP.toString(), true);
+        undoButton = initChildButton(editToolbarPane, PropertyType.UNDO_ICON.toString(), PropertyType.UNDO_TOOLTIP.toString(), true);
+        redoButton = initChildButton(editToolbarPane, PropertyType.REDO_ICON.toString(), PropertyType.REDO_TOOLTIP.toString(), true);
+        zoominButton = initChildButton(viewToolbarPane, PropertyType.ZOOMIN_ICON.toString(), PropertyType.ZOOMIN_TOOLTIP.toString(), true);
+        zoomoutButton = initChildButton(viewToolbarPane, PropertyType.ZOOMOUT_ICON.toString(), PropertyType.ZOOMOUT_TOOLTIP.toString(), true);
         
         checkBox.setSpacing(5);
         checkBox.setPadding(new Insets(5));
@@ -199,7 +201,7 @@ public class Workspace extends AppWorkspaceComponent {
             if (e.getTarget() instanceof Pane && !(e.getTarget() instanceof VBox)){
             if(currentPane != null && selectedButton == selectionButton){
                 currentPane.setStyle("-fx-border-width: 1px");
-                currentPane.setStyle("-fx-border-color: #000000");
+                currentPane.setStyle("-fx-border-color: #000000; -fx-background-color: #ffffff");
                 currentPane = null;
                 prevPane = currentPane;
                 selectedButton = null;
@@ -213,16 +215,43 @@ public class Workspace extends AppWorkspaceComponent {
                
         addClassButton.setOnAction(e -> {
             selectedButton = addClassButton; //LOAD INTO TOOLBAR BY DEFAULT
-            selectionButton.setDisable(false);
+            resizeButton.setDisable(false);
+            removeButton.setDisable(false);
+            undoButton.setDisable(false);
+            redoButton.setDisable(false);
+            zoominButton.setDisable(false);
+            zoomoutButton.setDisable(false);
             gui.updateToolbarControls(false);
+            gui.updatePhotoCodeButton();
 
-            sc = new UMLClasses(new Text("DEFAULT"), new Text(" "), new Text(" "));
-            sc.setStyle("-fx-border-width: 10000px");
-            sc.setStyle("-fx-border-color: #ffff00");
+            sc = new UMLClasses("DEFAULT");
+            sc.setStyle("-fx-border-color: #ffff00; -fx-background-color: #ffffff");
+            //sc.setIsAbstract(true);
             sc.setClassName("DEFAULT");
             sc.setClassNametoString("DEFAULT"); //currentText
-            sc.setPackageName(" "); //currentText
-                
+            sc.setPackageName(""); //currentText
+            
+
+            /*
+            var = new UMLVariables();
+            var.setName("Hello");
+            var.setParent(sc.getVariableNames.get(0));
+            var.setType("int");
+            var.setStatictype(true);
+            var.setAccesstype(false);
+            sc.setCurrentVariableName(new Text(var.toString()));
+            sc.getVariableNames.add(var);
+            */
+            /*
+            methods = new UMLMethods("Name1", "void", true, true, true);
+            methods.getArgs().add("Dummy");
+            //to fix the comma, loop until you hit n-2 elements in array. Do the last args manually.
+            sc.setCurrentMethodName(new Text(methods.toString()));
+            sc.getMethodNames().add(methods);
+            */
+            
+            
+            
             createListener(sc);
             selectedButton = selectionButton;
             selectionButton.setDisable(true);
@@ -233,7 +262,6 @@ public class Workspace extends AppWorkspaceComponent {
             sc.setTranslateYer(10);
             
         if (currentPane != null){
-            currentPane.setStyle("-fx-border-width: 1px");
             currentPane.setStyle("-fx-border-color: #000000");
             prevPane = currentPane;
         }
@@ -247,8 +275,89 @@ public class Workspace extends AppWorkspaceComponent {
             dummyData.setText(sc.getPackageName());
         });
         
+        addInterfaceButton.setOnAction(eh -> {
+            selectedButton = addClassButton; //LOAD INTO TOOLBAR BY DEFAULT
+            resizeButton.setDisable(false);
+            removeButton.setDisable(false);
+            undoButton.setDisable(false);
+            redoButton.setDisable(false);
+            zoominButton.setDisable(false);
+            zoomoutButton.setDisable(false);
+            gui.updateToolbarControls(false);
+            gui.updatePhotoCodeButton();
+
+            ie = new UMLInterfaces("<Interface> DEFAULT");
+            ie.setStyle("-fx-border-color: #ffff00; -fx-background-color: #ffffff");
+            ie.setPackageName(""); //currentText
+            
+
+            createListener(ie);
+            selectedButton = selectionButton;
+            selectionButton.setDisable(true);
+
+            ie.setTranslateX(20);
+            ie.setTranslateY(20);
+            ie.setTranslateXer(30);
+            ie.setTranslateYer(30);
+            
+        if (currentPane != null){
+            currentPane.setStyle("-fx-border-color: #000000");
+            prevPane = currentPane;
+        }
+        currentPane = ie;
+        leftPane.getChildren().add(ie);
+        expo.getClassList().add(ie);
+            
+        if(dummy != null)
+            dummy.setText(ie.getInterNametoString());
+        if(dummyData != null)
+            dummyData.setText(ie.getPackageName());
+        });
+        
+
+        removeButton.setOnAction(eh -> {
+            if(currentPane instanceof VBox){
+                leftPane.getChildren().remove(currentPane);
+                currentPane = null;
+                
+                selectionButton.setDisable(true);
+                resizeButton.setDisable(true);
+                removeButton.setDisable(true);
+                //update the text fields
+                
+            }
+        });
+        
+        resizeButton.setOnAction(eh -> {
+            selectedButton = resizeButton;
+            tempo.setCursor(Cursor.CROSSHAIR);
+            //Change this
+            selectionButton.setDisable(false);
+        });
+        
+        zoominButton.setOnAction(eh -> {
+            for(Node s: expo.getClassList()){
+                s.setScaleX(s.getScaleX() * 2);
+                s.setScaleY(s.getScaleY() * 2);
+            }
+        });
+        
+        zoomoutButton.setOnAction(eh -> {
+            for(Node s: expo.getClassList()){
+                s.setScaleX(s.getScaleX() /2);
+                s.setScaleY(s.getScaleY() / 2);
+            }
+        });
+        
         gridBox.setOnAction(eh -> {
             gridding(eh);
+        });
+        
+        snapBox.setOnAction(eh -> {
+            if(snapBox.isSelected() == true)
+                snapping = true;
+            else
+                snapping = false;
         });
         
         /////////////////////////////////////////////////////////////////////////////
@@ -265,6 +374,11 @@ public class Workspace extends AppWorkspaceComponent {
                 UMLClasses lol = (UMLClasses) currentPane; //TRYING
                 lol.setClassName(dummy.getText());
                 lol.setClassNametoString(dummy.getText());
+            }
+            if(currentPane != null && currentPane instanceof UMLInterfaces){
+                UMLInterfaces lol = (UMLInterfaces) currentPane; //TRYING
+                lol.setInterName(dummy.getText());
+                lol.setInterNametoString(dummy.getText());
             }
         });
         
@@ -284,6 +398,10 @@ public class Workspace extends AppWorkspaceComponent {
                 UMLClasses lol = (UMLClasses) currentPane; //!!!!!!!!!!
                 lol.setPackageName(dummyData.getText());
             }
+            if(currentPane != null && currentPane instanceof UMLInterfaces){
+                UMLInterfaces lol = (UMLInterfaces) currentPane; //!!!!!!!!!!
+                lol.setPackageName(dummyData.getText());
+            }
         });
         
         rightPane.getChildren().add(packagePane);
@@ -295,13 +413,13 @@ public class Workspace extends AppWorkspaceComponent {
         parentName.setFont(Font.font("Arial", 10));
         parentPane.getChildren().add(parentName);
         
-        final ComboBox parentComboBox = new ComboBox();
+        //ComboBox parentComboBox = new ComboBox();
         parentComboBox.getItems().addAll(
-            "jacob.smith@example.com",
-            "isabella.johnson@example.com",
-            "ethan.williams@example.com",
-            "emma.jones@example.com",
-            "michael.brown@example.com"  
+            "NOTHING",
+            "NOTHING",
+            "NULL",
+            "HI",
+            "COME ON"  
         );
         parentPane.getChildren().add(parentComboBox);
         
@@ -316,6 +434,11 @@ public class Workspace extends AppWorkspaceComponent {
         
         addButton = initChildButton(variablePane, PropertyType.ADD_ICON.toString(), PropertyType.ADD_TOOLTIP.toString(), false);
         minusButton = initChildButton(variablePane, PropertyType.MINUS_ICON.toString(), PropertyType.MINUS_TOOLTIP.toString(), false);
+        
+        addButton.setOnAction(eh -> {
+            UMLVariables var = new UMLVariables();
+        });
+        
         
         rightPane.getChildren().add(variablePane);
         
@@ -374,49 +497,113 @@ public class Workspace extends AppWorkspaceComponent {
     ((BorderPane) workspace).setRight(rightPane); 
     }
     /////////////////////////////////////////////////////////////////////////////
-    
-                
+          
     public void createListener(VBox s){
         s.setOnMousePressed((MouseEvent e) -> {
            
         DataManager expo = (DataManager) app.getDataComponent();
-        
+        removeButton.setDisable(false);
         if(selectedButton == selectionButton){
            if (currentPane != null){
-            currentPane.setStyle("-fx-border-width: 1px");
-            currentPane.setStyle("-fx-border-color: #000000");
+            currentPane.setStyle("-fx-border-color: #000000; -fx-background-color: #ffffff");
             //prevPane = currentPane;
            }
            currentPane = s; 
 
-           currentPane.setStyle("-fx-border-width: 1000px");
-           currentPane.setStyle("-fx-border-color: #ffff00");
+           currentPane.setStyle("-fx-border-color: #ffff00; -fx-background-color: #ffffff");
            
            if (currentPane instanceof UMLClasses){
                UMLClasses lol = (UMLClasses) currentPane; //!!!!!!!!!!!!!!!
-           if(dummy != null)
-                dummy.setText(lol.getClassNametoString());
-           if(dummyData != null)
-                dummyData.setText(lol.getPackageName());
-        }
-            }   
+                if(dummy != null)
+                    dummy.setText(lol.getClassNametoString());
+                if(dummyData != null)
+                    dummyData.setText(lol.getPackageName());
+                
+                parentComboBox.getItems().clear();
+                for(VBox sh: expo.getClassList()){
+                    if(sh instanceof UMLClasses)
+                        parentComboBox.getItems().add(((UMLClasses) sh).getClassNametoString());
+                    if(sh instanceof UMLInterfaces)
+                        parentComboBox.getItems().add(((UMLInterfaces) sh).getInterNametoString());
+                }
+                
+                
+                
+            }
+           if(currentPane instanceof UMLInterfaces){
+               UMLInterfaces st = (UMLInterfaces) currentPane;
+               if(dummy != null)
+                   dummy.setText(st.getInterNametoString());
+               if(dummy != null)
+                   dummyData.setText(st.getPackageName());
+               
+               for(VBox sh: expo.getClassList()){
+                    if(sh instanceof UMLClasses)
+                        parentComboBox.getItems().add(((UMLClasses) sh).getClassNametoString());
+                    if(sh instanceof UMLInterfaces)
+                        parentComboBox.getItems().add(((UMLInterfaces) sh).getInterNametoString());
+                }
+           }
+        }   
         });
         s.setOnMouseDragged(e -> {
             DataManager expo = (DataManager) app.getDataComponent();
             if(selectedButton == selectionButton){
             gui.updateToolbarControls(false);
+            gui.updatePhotoCodeButton();
             if(s instanceof UMLClasses){
                 UMLClasses lol = (UMLClasses) s;
                 lol.setTranslateX(e.getX() + s.getTranslateX());
                 lol.setTranslateY(e.getY() + s.getTranslateY());
-                lol.setTranslateXer(s.getTranslateX());
-                lol.setTranslateYer(s.getTranslateY());
+                lol.setTranslateXer(e.getX() + s.getTranslateX());
+                lol.setTranslateYer(e.getY() + s.getTranslateY());
             }
-            //resize: width and height //scale
+            if(s instanceof UMLInterfaces){
+                UMLInterfaces st = (UMLInterfaces) s;
+                st.setTranslateX(e.getX() + s.getTranslateX());
+                st.setTranslateY(e.getY() + s.getTranslateY());
+                st.setTranslateXer(e.getX() + s.getTranslateX());
+                st.setTranslateYer(e.getY() + s.getTranslateY());
+            }
+
+            }
+            if(selectedButton == resizeButton){
+                if(s instanceof UMLClasses){
+                    UMLClasses lol = (UMLClasses) s;
+                    lol.setMinWidth(e.getX() - lol.getTranslateX());
+                    lol.setMaxWidth(e.getX() - lol.getTranslateX());
+                    //set the setHeight(e.getY() - lol.getTranslateX()) in the UMLClasses
+                    lol.setMinHeight(e.getY() - lol.getTranslateY());
+                    lol.setMaxHeight(e.getY() - lol.getTranslateY());
+                }
+                if(s instanceof UMLInterfaces){
+                    UMLInterfaces st = (UMLInterfaces) s;
+                    st.setMinWidth(e.getX() - st.getTranslateX());
+                    st.setMaxWidth(e.getX() - st.getTranslateX());
+                    st.setMinHeight(e.getY() - st.getTranslateY());
+                    st.setMaxHeight(e.getY() - st.getTranslateY());
+                }
+                
             }
         });
         
         s.setOnMouseReleased(e -> {
+            if(snapping == true){
+                double currentpositionX = s.getTranslateX();
+                double currentpositionY = s.getTranslateY();
+                
+                if(currentpositionX % 10 != 0){
+                    while(currentpositionX % 10 != 0)
+                        currentpositionX++;
+                }
+                if(currentpositionY % 10 != 0){
+                    while(currentpositionY % 10 != 0)
+                        currentpositionY++;
+                }
+                s.setTranslateX(currentpositionX);
+                s.setTranslateY(currentpositionY);
+                //set the translatex into the specific pane.
+            }
             //check x value
             //if not 20, snap to next lowest number divisible by 20 (for loop to check)
         });
@@ -498,8 +685,15 @@ public class Workspace extends AppWorkspaceComponent {
         
         leftPane.getChildren().clear();
         dummy.clear();
-        dummyData.clear();
-        selectionButton.setDisable(false);
+        dummyData.clear();     
+        selectionButton.setDisable(true);
+        resizeButton.setDisable(true);
+        removeButton.setDisable(true);
+        undoButton.setDisable(true);
+        redoButton.setDisable(true);
+        zoominButton.setDisable(true);
+        zoomoutButton.setDisable(true);
+        gui.updateToolbarControls(true);
         
     }
     
@@ -530,25 +724,43 @@ public class Workspace extends AppWorkspaceComponent {
      */
     @Override
     public void reloadWorkspace() {
-        
         DataManager expo = (DataManager) app.getDataComponent();
         leftPane.getChildren().clear();
         for(VBox s : expo.getClassList()){
            createListener(s);
-           currentPane = s;
-            
-           if(currentPane instanceof UMLClasses){
-               UMLClasses lol = (UMLClasses) currentPane;
+           
+           if(s instanceof UMLClasses){
+               UMLClasses lol = (UMLClasses) s;
+               
                lol.setTranslateX(lol.getTranslateXer());
                lol.setTranslateY(lol.getTranslateYer());
+               leftPane.getChildren().add(lol);
+           }
+           if(s instanceof UMLInterfaces){
+               UMLInterfaces st = (UMLInterfaces) s;
+               
+               st.setTranslateX(st.getTranslateXer());
+               st.setTranslateY(st.getTranslateYer());
+               leftPane.getChildren().add(st);
            }
            
-           
-            leftPane.getChildren().add(s);
-        }
-                
+            currentPane = s;
+        }     
+        currentPane.setStyle("-fx-border-color: #ffff00");
+        
         leftPane.setCursor(Cursor.DEFAULT);
-       // selectedButton = null; //bugger
-
+        selectedButton = selectionButton; //bugger
+        selectionButton.setDisable(true);
+        
+        if(currentPane instanceof UMLClasses){
+            UMLClasses f = (UMLClasses) currentPane;
+            dummy.setText(f.getClassNametoString());
+            dummyData.setText(f.getPackageName());
+        }
+        if(currentPane instanceof UMLInterfaces){
+            UMLInterfaces f = (UMLInterfaces) currentPane;
+            dummy.setText(f.getInterNametoString());
+            dummyData.setText(f.getPackageName());
+        }
     }
 }

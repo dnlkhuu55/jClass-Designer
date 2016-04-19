@@ -19,6 +19,7 @@ public class UMLInterfaces extends VBox{
     private String interNametoString;
     private ArrayList<UMLVariables> variableNames = new ArrayList<>(); //must be capitalized and static
     private ArrayList<UMLMethods> methodNames = new ArrayList<>(); //must all be abstract
+    //variables, methods must be modified.
     
     private Text currentVariableName;
     private Text currentMethodName;
@@ -40,8 +41,8 @@ public class UMLInterfaces extends VBox{
         currentVariableName = new Text("");
         currentMethodName = new Text("");
         packageName = "";
-        translateXer = 10;
-        translateYer = 10;
+        translateXer = 20;
+        translateYer = 30;
         
         interfaces = new VBox();
         variables = new VBox();
@@ -103,8 +104,10 @@ public class UMLInterfaces extends VBox{
     /**
      * @param interName the interName to set
      */
-    public void setInterName(Text interName) {
-        this.interName = interName;
+    public void setInterName(String name) {
+        interName.setText(name);
+        interfaces.getChildren().clear();
+        interfaces.getChildren().add(interName);
     }
 
     /**
@@ -161,6 +164,7 @@ public class UMLInterfaces extends VBox{
      */
     public void setCurrentVariableName(Text currentVariableName) {
         this.currentVariableName = currentVariableName;
+        variables.getChildren().add(currentVariableName);
     }
 
     /**
@@ -175,6 +179,7 @@ public class UMLInterfaces extends VBox{
      */
     public void setCurrentMethodName(Text currentMethodName) {
         this.currentMethodName = currentMethodName;
+        method.getChildren().add(currentMethodName);
     }
 
     /**

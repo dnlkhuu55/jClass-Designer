@@ -3,35 +3,45 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package test_bed;
+package jcd.file;
 
-import af.AppTemplate;
-import static af.settings.AppPropertyType.SAVE_WORK_TITLE;
-import static af.settings.AppPropertyType.WORK_FILE_EXT;
-import static af.settings.AppPropertyType.WORK_FILE_EXT_DESC;
-import static af.settings.AppStartupConstants.PATH_WORK;
-import java.io.File;
-import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
+import af.components.AppDataComponent;
+import javafx.geometry.Point2D;
 import jcd.data.ClassLines;
 import jcd.data.DataManager;
 import jcd.data.UMLClasses;
 import jcd.data.UMLMethods;
 import jcd.data.UMLVariables;
-import jcd.file.FileManager;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static org.junit.Assert.*;
 import properties_manager.PropertiesManager;
 
 /**
  *
  * @author dnlkhuu77
  */
-public class TestSave {
-    public static void main(String[] args){
-
-        FileManager f = new FileManager();
+public class FileManagerTest {
+    static DataManager d;
+    static FileManager f;
+    static UMLClasses s;
+    static UMLVariables v;
+    static UMLMethods m;
+    static ClassLines l;
+    public FileManagerTest() {
+        
+    }
+    
+    @BeforeClass
+    public static void setUpClass() {
+        //FileManager f = new FileManager();
+        f = new FileManager();
+        
         PropertiesManager props = PropertiesManager.getPropertiesManager();
         try{
-           DataManager d = new DataManager(null);
+           //DataManager d = new DataManager(null);
+           d = new DataManager(null); //TESTING
            UMLClasses firstpart = new UMLClasses("ThreadExample", " ", " ", "", "AAA", 20, 100);
 
            //static ($), access (+/-)
@@ -157,25 +167,86 @@ public class TestSave {
            nice1.getArgs().add("Event");
            
            fifthpart.getMethodNames().add(nice1);
-           
+          
            d.getClassList().add(fifthpart);
+          // f.saveData(d, "./work/JUnitTest1.json");
            ////
+           ClassLines first_line = new ClassLines();
+           first_line.setStartX(0);
+           first_line.setStartY(0);
+           first_line.setEndX(10);
+           first_line.setEndY(10);
+           first_line.setMid_x();
+           first_line.setMid_y();
+           first_line.setStart_node("Test1");
+           first_line.setEnd_node("Test2");
            
-           ClassLines l = new ClassLines("Test1", "Test2");
-           l.setStartX(3);
-           l.setStartY(10);
-           l.setEndX(15);
-           l.setEndY(13);
-           l.setMid_x();
-           l.setMid_y();
-           d.getLineList().add(l);
-           
-           f.saveData(d, "./work/DesignSaveTest.json");
+           //d.getClassList().add(firstpart);
+           d.getLineList().add(first_line);
+           f.saveData(d, "./work/JUnitTest1.json");
            
         } catch(Exception e){
             System.out.println("NOT WORKING");
         }
+    }
+    
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    /**
+     * Test of loadData method, of class FileManager.
+     */
+    
+    
+    @Test
+    public void testLoadData() throws Exception {
+        System.out.println("loadData");
+        String filePath = "./work/JUnitTest1.json";
+        //FileManager instance = new FileManager();
+        f.loadData(d, filePath);
+        // TODO review the generated test code and remove the default call to fail.
+        s = (UMLClasses) d.getClassList().get(0);
+        l = (ClassLines) d.getLineList().get(0);
         
+        assertEquals("ThreadExample", s.getClassNametoString());
+        System.out.println("ClassName Result: " + s.getClassNametoString());
+        //fail("The test case is a prototype.");
+        
+        assertEquals("AAA", s.getPackageName());
+        System.out.println("PackageName Result: " + s.getPackageName());
+        
+        assertEquals(false, s.isAbstract());
+        System.out.println("Is is the class abstract? " + s.isAbstract());
+        
+        assertEquals("20.0", Double.toString(s.getTranslateXer()));
+        System.out.println("X location Result: " + s.getTranslateXer());
+        
+        assertEquals("100.0", Double.toString(s.getTranslateYer()));
+        System.out.println("Y location Result: " + s.getTranslateYer());
+        
+        v = s.getVariableNames().get(0);
+        
+        assertEquals("START_TEXT", v.getName());
+        System.out.println("Variable #1 Name: " + v.getName());
+        
+        assertEquals("String", v.getType());
+        System.out.println("Variable #1 Type: " + v.getType());
+        
+        assertEquals(true, v.isStatictype());
+        System.out.println("Is it static? " + v.isStatictype());
+        
+        assertEquals(true, v.isAccesstype());
+        System.out.println("Is it public? " + v.isAccesstype());
+        
+        assertEquals("5.0", Double.toString(l.getMid_x()));
+        System.out.println("Midpoint of Line: " + l.getMid_x());
+        
+        assertEquals("10.0", Double.toString(l.getEndX()));
+        System.out.println("Ending X: " + l.getEndX());
+        
+        assertEquals("0.0", Double.toString(l.getStartX()));
+        System.out.println("Starting X: " + l.getStartX());
     }
     
 }

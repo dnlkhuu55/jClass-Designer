@@ -10,12 +10,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import javafx.scene.control.TreeItem;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Ellipse;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
@@ -31,15 +25,14 @@ import af.components.AppDataComponent;
 import af.components.AppFileComponent;
 import af.ui.AppMessageDialogSingleton;
 import java.io.File;
-import static java.io.File.createTempFile;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import javafx.scene.layout.GridPane;
+import javafx.geometry.Point2D;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
-import javafx.stage.FileChooser;
+import jcd.data.ClassLines;
 import jcd.data.UMLClasses;
+import jcd.data.UMLInterfaces;
 import jcd.data.UMLMethods;
 import jcd.data.UMLVariables;
 
@@ -74,16 +67,21 @@ public class FileManager implements AppFileComponent {
         DataManager expo = (DataManager) data;
         
         JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        JsonArrayBuilder interfacesBuilder = Json.createArrayBuilder();
         JsonArrayBuilder innerBuilder = Json.createArrayBuilder();
         JsonArrayBuilder methodBuilder = Json.createArrayBuilder();
         JsonArrayBuilder argsBuilder = Json.createArrayBuilder();
         ArrayList<VBox> test = expo.getClassList();
+        ArrayList<Line> test_2 = expo.getLineList();
         ArrayList<UMLVariables> vars = new ArrayList<>();
         ArrayList<UMLMethods> mets = new ArrayList<>();
         ArrayList<String> args = new ArrayList<>();
         int counter = 0;
+        int counter2 = 0;
         
         for(VBox sh: test){ //arrayBuilder is the array while testing is the object
+            counter = 0;
+            counter2 = 0;
             JsonObjectBuilder testing = Json.createObjectBuilder();
             if(sh instanceof UMLClasses){
             testing.add("Name", ((UMLClasses) sh).getClassNametoString()).add("Abstract", ((UMLClasses) sh).isAbstract())
@@ -91,11 +89,62 @@ public class FileManager implements AppFileComponent {
                  .add("Flag", 0).add("T_X", ((UMLClasses) sh).getTranslateXer())
                     .add("T_Y", ((UMLClasses) sh).getTranslateYer());
             if(((UMLClasses) sh).getParentName() != null)
-                testing.add("Parent", ((UMLClasses) sh).getParentName().getClassNametoString());
-            //use a try-catch block to get the parent out when loading
+                testing.add("Parent", ((UMLClasses) sh).getParentName());
+            
+            for(String inters: ((UMLClasses) sh).getParentInterfaces()){
+                JsonObjectBuilder parentInters = Json.createObjectBuilder();
+                parentInters.add("Parent_Interface" + Integer.toString(counter2), inters);
+                
+                interfacesBuilder.add(parentInters.build());
+                counter2++;
+            }
+            testing.add("parentInterfaces", interfacesBuilder);
+            
             
             vars = ((UMLClasses) sh).getVariableNames(); //the inner variable class
             mets = ((UMLClasses) sh).getMethodNames();
+            ////////
+            for(UMLVariables variable: vars){ //innerBuilder is the array while innerVar is the object
+                JsonObjectBuilder innerVar = Json.createObjectBuilder();
+
+               innerVar.add("VarName", variable.getName()).add("Type", variable.getType()).add("Static", variable.isStatictype()).add("Access", variable.isAccesstype());
+               innerBuilder.add(innerVar.build());
+            }
+            ///////
+            for(UMLMethods method: mets){ //methodBuilder is the array while the innerMEthod is the object
+                counter = 0;
+                JsonObjectBuilder innerMeth = Json.createObjectBuilder();
+                
+                innerMeth.add("MethName", method.getName()).add("ReturnType", method.getReturntype())
+                .add("StaticType", method.isStatictype()).add("AbstractType", method.isAbstractype())
+                        .add("AccessType", method.isAccesstype());
+                
+                args = method.getArgs();
+                for(String arguments: args){ //argsBuilder is the array while the matrix is the object
+                    JsonObjectBuilder matrix = Json.createObjectBuilder();
+                    matrix.add("Arg" + Integer.toString(counter), arguments);
+                    
+                    argsBuilder.add(matrix.build());
+                    counter++;
+                }
+                innerMeth.add("arguments", argsBuilder);
+                methodBuilder.add(innerMeth.build());
+            }
+            
+            ///////
+            testing.add("variables", innerBuilder);
+            testing.add("methods", methodBuilder);
+            }
+            
+            
+            if(sh instanceof UMLInterfaces){
+                testing.add("Name", ((UMLInterfaces) sh).getInterNametoString())
+                 .add("Package", ((UMLInterfaces) sh).getPackageName())
+                 .add("Flag", 1).add("T_X", ((UMLInterfaces) sh).getTranslateXer())
+                    .add("T_Y", ((UMLInterfaces) sh).getTranslateYer());
+            
+            vars = ((UMLInterfaces) sh).getVariableNames(); //the inner variable class
+            mets = ((UMLInterfaces) sh).getMethodNames();
             ////////
             for(UMLVariables variable: vars){ //innerBuilder is the array while innerVar is the object
                 JsonObjectBuilder innerVar = Json.createObjectBuilder();
@@ -130,8 +179,21 @@ public class FileManager implements AppFileComponent {
             
             arrayBuilder.add(testing.build());
         }
-       JsonArray nodesArray = arrayBuilder.build();
         
+        for(Line s: test_2){
+            JsonObjectBuilder testing = Json.createObjectBuilder();
+            if(s instanceof ClassLines){
+            testing.add("Flag", 2).add("Starting_X", ((ClassLines) s).getStartX())
+		.add("Starting_Y", ((ClassLines) s).getStartY())
+                .add("Ending_X", ((ClassLines) s).getEndX()).add("Ending_Y", ((ClassLines) s).getEndY())
+                    .add("Mid_X", ((ClassLines) s).getMid_x()).add("Mid_Y", ((ClassLines) s).getMid_y())
+                    .add("Starting_Class", ((ClassLines) s).getStart_node())
+                    .add("Ending_Class", ((ClassLines) s).getEnd_node());
+            arrayBuilder.add(testing.build());
+            }
+        }
+
+       JsonArray nodesArray = arrayBuilder.build();
         
         // AND NOW OUTPUT IT TO A JSON FILE WITH PRETTY PRINTING
 	Map<String, Object> properties = new HashMap<>(1);
@@ -169,6 +231,7 @@ public class FileManager implements AppFileComponent {
         DataManager expo = (DataManager)data;
 	//expo.reset();
         expo.getClassList().clear();
+        expo.getLineList().clear();
 	
 	// LOAD THE JSON FILE WITH ALL THE DATA
 	JsonArray json = loadJSONFile(filePath);
@@ -177,9 +240,10 @@ public class FileManager implements AppFileComponent {
         ArrayList<UMLVariables> vars = new ArrayList<>();
         ArrayList<UMLMethods> mets = new ArrayList<>();
         ArrayList<String> args = new ArrayList<>();
+        ArrayList<Line> lines = new ArrayList<>();
         int counter = 0;
-        
-        
+        int counter2 = 0;
+
         
         for(JsonValue sh: json){
             JsonObject shaping = (JsonObject) sh;
@@ -189,20 +253,27 @@ public class FileManager implements AppFileComponent {
                 UMLClasses r = new UMLClasses(shaping.getString("Name"));
                 r.setClassName(shaping.getString("Name"));
                 
-                if(shaping.getBoolean("Abstract") == true)
+                if(shaping.getBoolean("Abstract") == true){
                     r.setIsAbstract(true);
-                else
+                }
+                else{
                     r.setIsAbstract(false);
+                }
                 
                 r.setClassNametoString(shaping.getString("Name"));
                 r.setPackageName(shaping.getString("Package"));
-                try{
-                    r.setPackageName(shaping.getString("Parent"));
-                } catch(Exception e){
-                    System.out.println("There is no parent");
-                }
+                r.setParentName(shaping.getString("Parent"));
                 r.setTranslateXer(shaping.getJsonNumber("T_X").doubleValue());
                 r.setTranslateYer(shaping.getJsonNumber("T_Y").doubleValue());
+                
+                counter2 = 0;
+                JsonArray parentInterfaces = shaping.getJsonArray("parentInterfaces");
+                for(JsonValue load_int: parentInterfaces){
+                    JsonObject into_parent = (JsonObject) load_int;
+                    r.getParentInterfaces().add(into_parent.getString("Parent_Interface" + Integer.toString(counter2)));
+                    counter2++;
+                }
+                
                 ////variables
                 vars = r.getVariableNames();
                 
@@ -239,6 +310,7 @@ public class FileManager implements AppFileComponent {
                     for(JsonValue load_arguments: argsLoading){
                         JsonObject into_args = (JsonObject) load_arguments;
                         args.add(into_args.getString("Arg" + Integer.toString(counter)));
+                        counter++;
                     }
                     mets.add(m);
                     r.setCurrentMethodName(new Text(m.toString()));
@@ -247,24 +319,75 @@ public class FileManager implements AppFileComponent {
                 /////
                 expo.getClassList().add(r);
             }
-            /*
-            else if(flag==1){ //ellipse
-                Ellipse s = new Ellipse();
-                s.setFill(Paint.valueOf(shaping.getString("Fill")));
-                s.setStroke(Paint.valueOf(shaping.getString("Stroke")));
-                s.strokeWidthProperty().set(shaping.getJsonNumber("StrokeWidth").doubleValue());
-                s.setCenterX(shaping.getJsonNumber("CenterX").doubleValue());
-                s.setCenterY(shaping.getJsonNumber("CenterY").doubleValue());
-                s.setRadiusX(shaping.getJsonNumber("RadiusX").doubleValue());
-                s.setRadiusY(shaping.getJsonNumber("RadiusY").doubleValue());
-                expo.getShapeList().add(s);
-            }
             
-            else{
-                backy = Color.valueOf(shaping.getString("Backy"));
-                expo.setBackgroundColor(backy);
+            if(flag ==1){ //Interfaces
+                
+                UMLInterfaces s = new UMLInterfaces(shaping.getString("Name"));
+                s.setInterName(shaping.getString("Name"));
+                
+                s.setInterNametoString(shaping.getString("Name"));
+                s.setPackageName(shaping.getString("Package"));
+
+                s.setTranslateXer(shaping.getJsonNumber("T_X").doubleValue());
+                s.setTranslateYer(shaping.getJsonNumber("T_Y").doubleValue());
+                ////variables
+                vars = s.getVariableNames();
+                
+                JsonArray varLoading = shaping.getJsonArray("variables");
+                for(JsonValue load_var: varLoading){
+                    JsonObject into_var = (JsonObject) load_var;
+                    UMLVariables v = new UMLVariables();
+                    
+                    v.setName(into_var.getString("VarName"));
+                    v.setType(into_var.getString("Type"));
+                    v.setStatictype(into_var.getBoolean("Static"));
+                    v.setAccesstype(into_var.getBoolean("Access"));
+                    vars.add(v);
+                    s.setCurrentVariableName(new Text(v.toString()));
+                }
+                
+                mets = s.getMethodNames();
+                
+                JsonArray metLoading = shaping.getJsonArray("methods");
+                for(JsonValue load_methods: metLoading){
+                    counter = 0;
+                    JsonObject into_met = (JsonObject) load_methods;
+                    UMLMethods m = new UMLMethods();
+                    
+                    m.setName(into_met.getString("MethName"));
+                    m.setReturntype(into_met.getString("ReturnType"));
+                    m.setStatictype(into_met.getBoolean("StaticType"));
+                    m.setAbstractype(into_met.getBoolean("AbstractType"));
+                    m.setAccesstype(into_met.getBoolean("AccessType"));
+                    
+                    args = m.getArgs();
+                    //args
+                    JsonArray argsLoading = into_met.getJsonArray("arguments");
+                    for(JsonValue load_arguments: argsLoading){
+                        JsonObject into_args = (JsonObject) load_arguments;
+                        args.add(into_args.getString("Arg" + Integer.toString(counter)));
+                    }
+                    mets.add(m);
+                    s.setCurrentMethodName(new Text(m.toString()));
+                }
+                
+                /////
+                expo.getClassList().add(s);
+            
             }
-            */
+        if(flag == 2){
+            ClassLines l = new ClassLines();
+            l.setStartX(shaping.getJsonNumber("Starting_X").doubleValue());
+            l.setStartY(shaping.getJsonNumber("Starting_Y").doubleValue());
+            l.setEndX(shaping.getJsonNumber("Ending_X").doubleValue());
+            l.setEndY(shaping.getJsonNumber("Ending_Y").doubleValue());
+            l.setStart_node(shaping.getString("Starting_Class"));
+            l.setEnd_node(shaping.getString("Ending_Class"));
+            l.setMid_x();
+            l.setMid_y();
+            expo.getLineList().add(l);
+        }
+        
         }
         }catch(IOException ex){
             System.out.println("This file cannot be loaded. Try again!");
@@ -302,6 +425,11 @@ public class FileManager implements AppFileComponent {
     @Override
     public void exportData(AppDataComponent data, String filePath) throws IOException {
         try{
+            int last_slash = filePath.lastIndexOf('/');
+            String getting_package = filePath.substring(last_slash + 1, filePath.length());
+        
+        filePath = filePath + "/";
+            
         File file = new File(filePath);
         String updateString = new String();
         String finalString = new String();
@@ -310,7 +438,6 @@ public class FileManager implements AppFileComponent {
         String finalInnerString = new String();
         
         DataManager expo = (DataManager) data;
-        //String java_source = "public class ";
         
         for(VBox sh: expo.getClassList()){
             if(sh instanceof UMLClasses){
@@ -318,7 +445,6 @@ public class FileManager implements AppFileComponent {
                 updateString = ((UMLClasses) sh).getPackageName().replace('.', '/');
                 finalString = filePath + updateString;
                 file = new File(finalString);
-                //file = new File(filePath + ((UMLClasses) sh).getPackageName());
                 file.mkdir();
                 //ADD THE JAVA SOURCE CODE INTO THESE FOLDERS
                 //double for loop to check all the VBoxes classes' names and create folders first
@@ -327,39 +453,101 @@ public class FileManager implements AppFileComponent {
                 
                 for(VBox ll: expo.getClassList()){
                     String java_source = new String();
+                    
                     if(ll instanceof UMLClasses){
                         
                         innerString = ((UMLClasses) ll).getPackageName().replace('.', '/');
                         
-                        //if(((UMLClasses) ll).getPackageName().equals((((UMLClasses) sh).getPackageName()))){
-                         if(innerString.equals(updateString)){ 
+                        if(innerString.equals(updateString)){ 
                             //make the java source file
-                            //OutputStream os = new FileOutputStream(filePath + ((UMLClasses) ll).getPackageName() + "/" + 
-                            //        ((UMLClasses) ll).getClassNametoString() + ".java");
                             finalInnerString = filePath + innerString + "/" +
                                     ((UMLClasses) ll).getClassNametoString() + ".java";
                             OutputStream os = new FileOutputStream(finalInnerString);
-                            
-                            
-                            try{
-                                Class l = Class.forName( ((UMLClasses) ll).getPackageName() );
-                                //Class l = Class.forName("java.lang.Thread");
-                                java_source = "import " + ((UMLClasses) ll).getPackageName() + "; \n";
-                            }catch (ClassNotFoundException e){
-                                System.out.println("API NOT WORKING");
-                            }
 
+                            java_source = java_source + "package " + 
+                                    getting_package + "." + ((UMLClasses) ll).getPackageName() + "; \n";
+                            
+                            java_source = java_source + "import javafx.concurrent.Task; \n";
+                            java_source = java_source + "import javafx.scene.text.Text; \n";
+                            java_source = java_source + "import javafx.event.Event; \n";
+                           
+                            for(VBox h: expo.getClassList()){ 
+                                if(h instanceof UMLClasses){            
+                                    try{
+                                        String s = getting_package + "." + ((UMLClasses) h).getPackageName() +
+                                                "." + ((UMLClasses) h).getClassNametoString();
+                                        java_source = java_source + "import " + s + "; \n";
+                                    }catch (Exception e){
+                                        System.out.println("NOT IMPORTING PACKAGES AS IMPORT");
+                                    }
+                                                
+                                }
+                            }
+                            
+                            for(UMLVariables impo: ((UMLClasses) ll).getVariableNames()){ //importing
+                                Package[] pack = Package.getPackages();
+                                
+                                for(int i = 0; i < pack.length; i++){
+                                    try{
+                                        if(!impo.getType().equals("Text")){
+                                            if(!impo.getType().equals("Event")){
+                                                String s = pack[i].getName() + "." + impo.getType();
+                                                Class.forName(s);
+                                                java_source = java_source + "import " + pack[i].getName() + "." + impo.getType() + "; \n";
+                                            }
+                                        }
+                                    }catch (Exception e){
+                                        System.out.println("The api doesn't match");
+                                    }
+                                }      
+                            }
+                            
+                            ArrayList<UMLMethods> ml = ((UMLClasses) ll).getMethodNames(); 
+                            for(int i = 0; i < ml.size(); i++){ //for every method in ArrayList<Methods>, look at one method
+                                UMLMethods sz = ml.get(i);
+                                Package[] hello = Package.getPackages();
+                                
+                                for(int j = 0; j < sz.getArgs().size(); j++){ //for every argument in that method, look at the arguments
+                                    
+                                    String l = sz.getArgs().get(j);
+                                    for(int k = 0; k < hello.length; k++){
+                                        String mt = hello[k].getName() + "." + l;
+                                        try{
+                                            if(!l.equals("Event")){
+                                                if(!l.equals("Text")){
+                                                Class.forName(mt);
+                                                java_source = java_source + "import " + hello[k].getName() + "." + l + "; \n";
+                                                }
+                                            }
+                                        }catch (Exception e){
+                                        System.out.println("Arguments API not matched");
+                                        }
+                                    }
+                                }
+                            }
+                            
                             //method to printwriter
-                             java_source = java_source + "public class ";
+                            if(((UMLClasses) ll).isAbstract() == false)
+                                java_source = java_source + "public class " + ((UMLClasses) ll).getClassNametoString() + " ";
+                            else
+                                java_source = java_source + "public abstract class " + ((UMLClasses) ll).getClassNametoString() + " ";
                              
                              //is there a parent???
+                            if(((UMLClasses) ll).getParentName().equals("") == false){
+                                 java_source = java_source + "extends " + ((UMLClasses) ll).getParentName();
+                            }
                              
-                            java_source = java_source + ((UMLClasses) ll).getClassNametoString() + "{ \n";
+                            if(!((UMLClasses) ll).getParentInterfaces().isEmpty()){
+                                java_source = java_source + "implements ";
+                                for(int i = 0; i < ((UMLClasses) ll).getParentInterfaces().size() - 1; i++){
+                                    java_source = java_source + ((UMLClasses) ll).getParentInterfaces().get(i) + ", ";
+                                }
+                                java_source = java_source + ((UMLClasses) ll).getParentInterfaces().get(((UMLClasses) ll).getParentInterfaces().size() -1);
+                            }
+                         
+                            java_source = java_source + "{ \n";
                             
                             for(UMLVariables k: ((UMLClasses) ll).getVariableNames()){
-                                //sc = ((UMLClasses) ll).getVariableNames();
-                                //k has name, type, static?, access?
-                                
                                 if(k.isAccesstype() == true)
                                    java_source = java_source + "public ";
                                 else
@@ -368,7 +556,7 @@ public class FileManager implements AppFileComponent {
                                 if(k.isStatictype() == true)
                                     java_source = java_source + "static ";
                                 
-                                java_source = java_source + k.getType() + " " + k.getName() + "\n";
+                                java_source = java_source + k.getType() + " " + k.getName() + "; \n";
                                 
                             }
                             
@@ -391,42 +579,51 @@ public class FileManager implements AppFileComponent {
                                 if(!m.getArgs().isEmpty()){
                                     
                                 for(int i = 0; i < m.getArgs().size()-1; i++){ //except the last method
-                                    java_source = java_source + m.getArgs().get(i) + " arg" + Integer.toString(i + 1) + ", ";     
+                                    java_source = java_source + m.getArgs().get(i) + " arg" + Integer.toString(i) + ", ";     
                                 }
                                 
                                 //for the last argument
                                     java_source = java_source + m.getArgs().get(m.getArgs().size() - 1) + " arg" +
-                                        Integer.toString(m.getArgs().size() - 1);
-                                    
+                                        Integer.toString(m.getArgs().size() - 1);                             
                                 }
-                                java_source = java_source + "){ \n"; //opening a method
+                                java_source = java_source + ")"; //opening a method
                                 
-                                if(m.getReturntype().equalsIgnoreCase("void")){
+                                if(((UMLClasses) ll).isAbstract() == false){
+                                java_source = java_source + "{ \n";
+                                
+                                if(!m.getReturntype().equalsIgnoreCase("void")){
                                     
-                                    if(m.getReturntype().equalsIgnoreCase("int"))
+                                    if(m.getReturntype().equals("int"))
                                         java_source = java_source + "return 0; \n";
                                     else if(m.getReturntype().equals("double"))
                                         java_source = java_source + "return 1.0; \n";
+                                    else if(m.getReturntype().equals("byte"))
+                                        java_source = java_source + "return 1; \n";
+                                    else if(m.getReturntype().equals("short"))
+                                        java_source = java_source + "return 1; \n";
+                                    else if(m.getReturntype().equals("long"))
+                                        java_source = java_source + "return 1; \n";
+                                    else if(m.getReturntype().equals("float"))
+                                        java_source = java_source + "return 1; \n";
+                                    else if(m.getReturntype().equals("char"))
+                                        java_source = java_source + "return 'c'; \n";
                                     else if(m.getReturntype().equals("String"))
                                         java_source = java_source + "return 'Example String '; \n";
                                     else if(m.getReturntype().equals("boolean"))
                                         java_source = java_source + "return false; \n";
-                                    //else if(m.getReturntype().equals("byte"))
-                                        
-                                
-                                
-                                
+                                    else if (m.getReturntype().equals(" ") || m.getReturntype().equals(""))
+                                        java_source = java_source; //constructor
+                                    else
+                                        java_source = java_source + "return null; \n";
                                 }
-                                
                                 java_source = java_source + "} \n"; //closing a method
                             }
-                            
-                            
+                            else{
+                                   java_source = java_source + "; \n"; 
+                                }
+                            }
                             
                             java_source = java_source + "}";
-                            
-                            
-                            
                             
                             PrintWriter out = new PrintWriter(filePath + innerString + "/" + 
                                     ((UMLClasses) ll).getClassNametoString() + ".java");
@@ -435,11 +632,146 @@ public class FileManager implements AppFileComponent {
                             out.close();
                         }
                     }
+                }        
+            }                    
+                if(sh instanceof UMLInterfaces) {
+                    updateString = ((UMLInterfaces) sh).getPackageName().replace('.', '/');
+                    finalString = filePath + updateString;
+                    file = new File(finalString);
+                    //file = new File(filePath + ((UMLInterfaces) sh).getPackageName());
+                    file.mkdir();
+                        
+                    for(VBox ll: expo.getClassList()){
+                        String java_source = new String();
+                    
+                    if(ll instanceof UMLInterfaces){
+                        innerString = ((UMLInterfaces) sh).getPackageName().replace('.', '/');
+                        
+                         if(innerString.equals(updateString)){ 
+                            //make the java source file
+                            finalInnerString = filePath + innerString + "/" +
+                                    ((UMLInterfaces) sh).getInterNametoString() + ".java";
+                            OutputStream os = new FileOutputStream(finalInnerString);
+
+                            java_source = java_source + "package " + 
+                                    getting_package + "." + ((UMLInterfaces) ll).getPackageName() + "; \n";
+                            //INTO ANY PACKAGE
+                            
+                            java_source = java_source + "import javafx.concurrent.Task; \n";
+                            java_source = java_source + "import javafx.scene.text.Text; \n";
+                            java_source = java_source + "import javafx.event.Event; \n";
+                           
+                            for(VBox h: expo.getClassList()){ 
+                                if(h instanceof UMLClasses){            
+                                    try{
+                                        String s = getting_package + "." + ((UMLClasses) h).getPackageName() +
+                                                "." + ((UMLClasses) h).getClassNametoString();
+                                        System.out.println(s);
+                                        
+                                        //Class.forName(((UMLClasses) h).getClassNametoString());
+                                        java_source = java_source + "import " + s + "; \n";
+                                    }catch (Exception e){
+                                        System.out.println("NOT IMPORTING PACKAGES AS IMPORT");
+                                    }           
+                                }
+                            }
+                            
+                            for(UMLVariables impo: ((UMLInterfaces) ll).getVariableNames()){ //importing
+                                Package[] pack = Package.getPackages();
+                                
+                                for(int i = 0; i < pack.length; i++){
+                                    try{
+                                        if(!impo.getType().equals("Text")){
+                                            if(!impo.getType().equals("Event")){
+                                                String s = pack[i].getName() + "." + impo.getType();
+                                                Class.forName(s);
+                                                java_source = java_source + "import " + pack[i].getName() + "." + impo.getType() + "; \n";
+                                            }
+                                        }
+                                        
+                                    }catch (Exception e){
+                                        System.out.println("The api doesn't match");
+                                    }
+                                }      
+                            }
+                            
+                            ArrayList<UMLMethods> ml = ((UMLInterfaces) ll).getMethodNames(); 
+                            for(int i = 0; i < ml.size(); i++){ //for every method in ArrayList<Methods>, look at one method
+                                UMLMethods sz = ml.get(i);
+                                Package[] hello = Package.getPackages();
+                                
+                                for(int j = 0; j < sz.getArgs().size(); j++){ //for every argument in that method, look at the arguments
+                                    
+                                    String l = sz.getArgs().get(j);
+                                    for(int k = 0; k < hello.length; k++){
+                                    String mt = hello[k].getName() + "." + l;
+                                    try{
+                                        if(!l.equals("Event")){
+                                            if(!l.equals("Text")){
+                                                Class.forName(mt);
+                                                java_source = java_source + "import " + hello[k].getName() + "." + l + "; \n";
+                                            }
+                                        }
+                                    }catch (Exception e){
+                                        System.out.println("Arguments API not matched");
+                                    }
+                                    }
+                                }
+                            }
+                            
+                            
+                            
+                            //method to printwriter
+                            java_source = java_source + "public interface " + ((UMLInterfaces) ll).getInterNametoString() + " { \n";
+                             
+                            for(UMLVariables k: ((UMLInterfaces) ll).getVariableNames()){
+                                //sc = ((UMLClasses) ll).getVariableNames();
+                                //k has name, type, static?, access?
+                                java_source = java_source + "public final ";
+                                java_source = java_source + k.getType() + " " + k.getName() + " ";
+                                
+                                //expand on this
+                                if(k.getType().equals("int") || k.getType().equals("double") ||
+                                        k.getType().equals("short") || k.getType().equals("float")
+                                        || k.getType().equals("byte") || k.getType().equals("long"))
+                                    java_source = java_source + "= 0";
+                                else if(k.getType().equals("boolean"))
+                                    java_source = java_source + "= false";
+                                else if(k.getType().equals("char"))
+                                    java_source = java_source + "'c'";
+                                else
+                                    java_source = java_source + "= null";
+                                
+                                java_source = java_source + "; \n";
+                            }
+                            
+                            for(UMLMethods m: ((UMLInterfaces) ll).getMethodNames()){
+                                //name, returntype, statictype, abstracttype, accesstype, args
+
+                                java_source = java_source + "public void ";
+                                java_source = java_source + m.getName() + "( ";
+                                
+                                if(!m.getArgs().isEmpty()){
+                                    for(int i = 0; i < m.getArgs().size()-1; i++){ //except the last method
+                                        java_source = java_source + m.getArgs().get(i) + " arg" + Integer.toString(i) + ", ";     
+                                    }
+                                
+                                //for the last argument
+                                    java_source = java_source + m.getArgs().get(m.getArgs().size() - 1) + " arg" +
+                                        Integer.toString(m.getArgs().size() - 1);
+                                }
+                                java_source = java_source + "); \n"; 
+                            }
+                            java_source = java_source + "}";
+                          PrintWriter out = new PrintWriter(filePath + innerString + "/" + 
+                          ((UMLInterfaces) ll).getInterNametoString() + ".java");
+                            
+                          out.print(java_source);
+                          out.close();  
+                         }
+                    } 
                 }
-                
-                
-                
-            }
+            } 
         }
         }catch(Exception e){
             System.out.println("FILE EXPORT ERROR");

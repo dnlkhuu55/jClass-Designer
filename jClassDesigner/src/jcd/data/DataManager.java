@@ -6,6 +6,8 @@ import javafx.scene.shape.Shape;
 import af.components.AppDataComponent;
 import af.AppTemplate;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Line;
 import jcd.gui.Workspace;
 
 /**
@@ -18,10 +20,14 @@ import jcd.gui.Workspace;
 public class DataManager implements AppDataComponent {
     // THIS IS A SHARED REFERENCE TO THE APPLICATION
     AppTemplate app;
-    ArrayList<GridPane> classList = new ArrayList<GridPane>();
+    ArrayList<VBox> classList = new ArrayList<>();
+    ArrayList<Line> lineList = new ArrayList<>();
     
-    public ArrayList<GridPane> getClassList(){
+    public ArrayList<VBox> getClassList(){
         return classList;
+    }
+    public ArrayList<Line> getLineList(){
+        return lineList;
     }
 
     /**
