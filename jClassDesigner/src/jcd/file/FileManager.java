@@ -446,9 +446,6 @@ public class FileManager implements AppFileComponent {
                 finalString = filePath + updateString;
                 file = new File(finalString);
                 file.mkdir();
-                //ADD THE JAVA SOURCE CODE INTO THESE FOLDERS
-                //double for loop to check all the VBoxes classes' names and create folders first
-                //then we will use printwriter to write the java source code.
                 
                 
                 for(VBox ll: expo.getClassList()){
@@ -479,8 +476,16 @@ public class FileManager implements AppFileComponent {
                                         java_source = java_source + "import " + s + "; \n";
                                     }catch (Exception e){
                                         System.out.println("NOT IMPORTING PACKAGES AS IMPORT");
+                                    }                                          
+                                }
+                                if(h instanceof UMLInterfaces){
+                                    try{
+                                        String s = getting_package + "." + ((UMLInterfaces) h).getPackageName() +
+                                                "." + ((UMLInterfaces) h).getInterNametoString();
+                                        java_source = java_source + "import "+ s + "; \n";
+                                    }catch (Exception e){
+                                        System.out.println("NO IMPORTING INTERFACES");
                                     }
-                                                
                                 }
                             }
                             
@@ -526,12 +531,87 @@ public class FileManager implements AppFileComponent {
                                 }
                             }
                             
-                            //method to printwriter
-                            if(((UMLClasses) ll).isAbstract() == false)
-                                java_source = java_source + "public class " + ((UMLClasses) ll).getClassNametoString() + " ";
-                            else
+                            //importing api from the abstract inferfaces
+                            for(String i: ((UMLClasses) ll).getParentInterfaces()){{
+                                for(VBox sl: expo.getClassList()){
+                                    if(sl instanceof UMLInterfaces){
+                                        if(i.equals(((UMLInterfaces) sl).getInterNametoString())){
+                                            //now add UMLInterface methods
+                                            
+                                            
+                                        for(UMLMethods m: ((UMLInterfaces) sl).getMethodNames()){
+                                
+                                        Package[] hello = Package.getPackages();
+                                
+                                        for(int j = 0; j < m.getArgs().size(); j++){ //for every argument in that method, look at the arguments
+                                    
+                                            String l = m.getArgs().get(j);
+                                                for(int k = 0; k < hello.length; k++){
+                                                    String mt = hello[k].getName() + "." + l;
+                                                    try{
+                                                    if(!l.equals("Event")){
+                                                        if(!l.equals("Text")){
+                                                            Class.forName(mt);
+                                                        java_source = java_source + "import " + hello[k].getName() + "." + l + "; \n";
+                                                        }
+                                                    }
+                                                    }catch (Exception e){
+                                                        System.out.println("Arguments API not matched");
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }  
+                                } 
+                                }
+                            }} 
+                                for(VBox sl: expo.getClassList()){
+                                    if(sl instanceof UMLClasses){
+                                        if(((UMLClasses) ll).getParentName().equals(((UMLClasses) sl).getClassNametoString())){
+                                            //now add UMLInterface methods
+                                            
+                                            
+                                            for(UMLMethods m: ((UMLClasses) sl).getMethodNames()){
+                                
+                                            Package[] hello = Package.getPackages();
+                                
+                                            for(int j = 0; j < m.getArgs().size(); j++){ //for every argument in that method, look at the arguments
+                                    
+                                                String l = m.getArgs().get(j);
+                                                    for(int k = 0; k < hello.length; k++){
+                                                        String mt = hello[k].getName() + "." + l;
+                                                        try{
+                                                        if(!l.equals("Event")){
+                                                        if(!l.equals("Text")){
+                                                        Class.forName(mt);
+                                                        java_source = java_source + "import " + hello[k].getName() + "." + l + "; \n";
+                                                        }
+                                                        }
+                                                        }catch (Exception e){
+                                                            System.out.println("Arguments API not matched");
+                                                        }
+                                                    }
+                                            }
+                                            }
+                                            }  
+                                        } 
+                                    }
+
+                            boolean isthereAbstractMethods = false;
+                            for(UMLMethods kl: ((UMLClasses) ll).getMethodNames()){
+                                if(kl.isAbstractype() == true)
+                                    isthereAbstractMethods = true;
+                            }
+                            
+                            if(isthereAbstractMethods == true){
                                 java_source = java_source + "public abstract class " + ((UMLClasses) ll).getClassNametoString() + " ";
-                             
+                                ((UMLClasses) ll).setIsAbstract(true);
+                            }
+                            else if (((UMLClasses) ll).isAbstract() == true)
+                             java_source = java_source + "public abstract class " + ((UMLClasses) ll).getClassNametoString() + " ";
+                            else
+                                java_source = java_source + "public class " + ((UMLClasses) ll).getClassNametoString() + " ";
+
                              //is there a parent???
                             if(((UMLClasses) ll).getParentName().equals("") == false){
                                  java_source = java_source + "extends " + ((UMLClasses) ll).getParentName();
@@ -577,9 +657,8 @@ public class FileManager implements AppFileComponent {
                                 java_source = java_source + " " + m.getReturntype()+ " " + m.getName() + "( ";
                                 
                                 if(!m.getArgs().isEmpty()){
-                                    
-                                for(int i = 0; i < m.getArgs().size()-1; i++){ //except the last method
-                                    java_source = java_source + m.getArgs().get(i) + " arg" + Integer.toString(i) + ", ";     
+                                    for(int i = 0; i < m.getArgs().size()-1; i++){ //except the last method
+                                        java_source = java_source + m.getArgs().get(i) + " arg" + Integer.toString(i) + ", ";     
                                 }
                                 
                                 //for the last argument
@@ -623,6 +702,121 @@ public class FileManager implements AppFileComponent {
                                 }
                             }
                             
+                            for(String i: ((UMLClasses) ll).getParentInterfaces()){
+                                for(VBox sl: expo.getClassList()){
+                                    if(sl instanceof UMLInterfaces){
+                                        if(i.equals(((UMLInterfaces) sl).getInterNametoString())){
+                                            //now add UMLInterface methods
+
+                                        for(UMLMethods m: ((UMLInterfaces) sl).getMethodNames()){
+                                        //name, returntype, statictype, abstracttype, accesstype, args
+                                            java_source = java_source + "@Override \n";
+                                            java_source = java_source + "public " + m.getReturntype() + " ";
+                                            java_source = java_source + m.getName() + "( ";
+                                
+                                            if(!m.getArgs().isEmpty()){
+                                                for(int k = 0; k < m.getArgs().size()-1; k++){ //except the last method
+                                                java_source = java_source + m.getArgs().get(k) + " arg" + Integer.toString(k) + ", ";     
+                                            }
+                                
+                                            //for the last argument
+                                            java_source = java_source + m.getArgs().get(m.getArgs().size() - 1) + " arg" +
+                                                Integer.toString(m.getArgs().size() - 1);
+                                            }
+                                            java_source = java_source + "){ \n"; 
+                                            
+                                            if(!m.getReturntype().equalsIgnoreCase("void")){
+                                                if(m.getReturntype().equals("int"))
+                                                    java_source = java_source + "return 0; \n";
+                                                else if(m.getReturntype().equals("double"))
+                                                    java_source = java_source + "return 1.0; \n";
+                                                else if(m.getReturntype().equals("byte"))
+                                                    java_source = java_source + "return 1; \n";
+                                                else if(m.getReturntype().equals("short"))
+                                                    java_source = java_source + "return 1; \n";
+                                                else if(m.getReturntype().equals("long"))
+                                                    java_source = java_source + "return 1; \n";
+                                                else if(m.getReturntype().equals("float"))
+                                                    java_source = java_source + "return 1; \n";
+                                                else if(m.getReturntype().equals("char"))
+                                                    java_source = java_source + "return 'c'; \n";
+                                                else if(m.getReturntype().equals("String"))
+                                                    java_source = java_source + "return 'Example String '; \n";
+                                                else if(m.getReturntype().equals("boolean"))
+                                                    java_source = java_source + "return false; \n";
+                                                else if (m.getReturntype().equals(" ") || m.getReturntype().equals(""))
+                                                    java_source = java_source; //constructor
+                                                else
+                                                    java_source = java_source + "return null; \n";
+                                            }
+                                            else{
+                                                //throw new UnsupportedOperationException("Not supported yet.");
+                                                java_source = java_source + "throw new UnsupportedOperationException(\"Not supported yet.\");";
+                                            }
+                                            java_source = java_source + "}; \n";
+                                            }  
+                                        } 
+                                    }
+                                }
+                            } 
+                            
+                            //asbtract methods inheirted
+                            for(VBox sl: expo.getClassList()){
+                                if(sl instanceof UMLClasses){
+                                    if(((UMLClasses) ll).getParentName().equals(((UMLClasses) sl).getClassNametoString())){
+                                       if(((UMLClasses) sl).isAbstract()){ 
+                                        
+                                    for(UMLMethods m: ((UMLClasses) sl).getMethodNames()){
+                                        //name, returntype, statictype, abstracttype, accesstype, args
+                                        java_source = java_source + "@Override \n";
+                                        java_source = java_source + "public " + m.getReturntype() + " ";
+                                        java_source = java_source + m.getName() + "( ";
+                                
+                                        if(!m.getArgs().isEmpty()){
+                                            for(int k = 0; k < m.getArgs().size()-1; k++){ //except the last method
+                                            java_source = java_source + m.getArgs().get(k) + " arg" + Integer.toString(k) + ", ";     
+                                        }
+                                
+                                        //for the last argument
+                                        java_source = java_source + m.getArgs().get(m.getArgs().size() - 1) + " arg" +
+                                            Integer.toString(m.getArgs().size() - 1);
+                                        }
+                                        java_source = java_source + "){ \n"; 
+                                        
+                                        if(!m.getReturntype().equalsIgnoreCase("void")){
+                                            if(m.getReturntype().equals("int"))
+                                                java_source = java_source + "return 0; \n";
+                                            else if(m.getReturntype().equals("double"))
+                                                java_source = java_source + "return 1.0; \n";
+                                            else if(m.getReturntype().equals("byte"))
+                                                java_source = java_source + "return 1; \n";
+                                            else if(m.getReturntype().equals("short"))
+                                                java_source = java_source + "return 1; \n";
+                                            else if(m.getReturntype().equals("long"))
+                                                java_source = java_source + "return 1; \n";
+                                            else if(m.getReturntype().equals("float"))
+                                                java_source = java_source + "return 1; \n";
+                                            else if(m.getReturntype().equals("char"))
+                                                java_source = java_source + "return 'c'; \n";
+                                            else if(m.getReturntype().equals("String"))
+                                                java_source = java_source + "return 'Example String '; \n";
+                                            else if(m.getReturntype().equals("boolean"))
+                                                java_source = java_source + "return false; \n";
+                                            else if (m.getReturntype().equals(" ") || m.getReturntype().equals(""))
+                                                java_source = java_source; //constructor
+                                            else
+                                                java_source = java_source + "return null; \n";
+                                        }
+                                        else{
+                                            java_source = java_source + "throw new UnsupportedOperationException(\"Not supported yet.\");";
+                                        }
+                                            java_source = java_source + "} \n"; //closing a method
+                                    }  
+                                    
+                                    }
+                                    } 
+                                }
+                            }                         
                             java_source = java_source + "}";
                             
                             PrintWriter out = new PrintWriter(filePath + innerString + "/" + 
@@ -718,9 +912,6 @@ public class FileManager implements AppFileComponent {
                                     }
                                 }
                             }
-                            
-                            
-                            
                             //method to printwriter
                             java_source = java_source + "public interface " + ((UMLInterfaces) ll).getInterNametoString() + " { \n";
                              
@@ -748,7 +939,7 @@ public class FileManager implements AppFileComponent {
                             for(UMLMethods m: ((UMLInterfaces) ll).getMethodNames()){
                                 //name, returntype, statictype, abstracttype, accesstype, args
 
-                                java_source = java_source + "public void ";
+                                java_source = java_source + "public " + m.getReturntype() + " ";
                                 java_source = java_source + m.getName() + "( ";
                                 
                                 if(!m.getArgs().isEmpty()){
