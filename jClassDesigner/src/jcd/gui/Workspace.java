@@ -109,7 +109,7 @@ public class Workspace extends AppWorkspaceComponent {
     Button minusMButton = new Button();
     TextField dummy = new TextField();
     TextField dummyData = new TextField();
-    TableView table1;
+    VBox table1;
     TableView table2;
     Button selectedButton;
     Text prevText = new Text();
@@ -192,7 +192,7 @@ public class Workspace extends AppWorkspaceComponent {
         viewToolbarPane.setHgap(10);
         
         selectionButton.setOnAction(e -> {
-	    tempo.setCursor(Cursor.DEFAULT);
+	    leftPane.setCursor(Cursor.DEFAULT);
             selectedButton = selectionButton;
             selectionButton.setDisable(true);
         });
@@ -210,6 +210,7 @@ public class Workspace extends AppWorkspaceComponent {
         }); 
          
         resizeButton.setOnAction(eh -> {
+            leftPane.setCursor(Cursor.CROSSHAIR);
             selectionButton = resizeButton;
         });
                
@@ -223,6 +224,7 @@ public class Workspace extends AppWorkspaceComponent {
             zoomoutButton.setDisable(false);
             gui.updateToolbarControls(false);
             gui.updatePhotoCodeButton();
+            leftPane.setCursor(Cursor.DEFAULT);
 
             sc = new UMLClasses("DEFAULT");
             sc.setStyle("-fx-border-color: #ffff00; -fx-background-color: #ffffff");
@@ -285,6 +287,7 @@ public class Workspace extends AppWorkspaceComponent {
             zoomoutButton.setDisable(false);
             gui.updateToolbarControls(false);
             gui.updatePhotoCodeButton();
+            leftPane.setCursor(Cursor.DEFAULT);
 
             ie = new UMLInterfaces("<Interface> DEFAULT");
             ie.setStyle("-fx-border-color: #ffff00; -fx-background-color: #ffffff");
@@ -316,6 +319,7 @@ public class Workspace extends AppWorkspaceComponent {
         
 
         removeButton.setOnAction(eh -> {
+            leftPane.setCursor(Cursor.DEFAULT);
             if(currentPane instanceof VBox){
                 leftPane.getChildren().remove(currentPane);
                 currentPane = null;
@@ -437,6 +441,7 @@ public class Workspace extends AppWorkspaceComponent {
         
         addButton.setOnAction(eh -> {
             UMLVariables var = new UMLVariables();
+            table1.getChildren().add(var.settingStuff());
         });
         
         
@@ -445,6 +450,7 @@ public class Workspace extends AppWorkspaceComponent {
       //////////////////////////////////////////////////////////////////////////
         variableTablePane = new ScrollPane();
         variableTablePane.setMaxSize(350, 200);
+        /*
         table1 = new TableView();
         table1.setEditable(true);
         
@@ -457,6 +463,37 @@ public class Workspace extends AppWorkspaceComponent {
         table1.setPrefWidth(350);
         table1.setPrefHeight(200);
 
+        varPane.getChildren().add(table1);
+        */
+        table1 = new VBox(); //try gridpane later
+        table1.setMinHeight(400);
+        
+        //Header
+        HBox header = new HBox();
+        
+        //Column Headers
+        HBox namecol1 = new HBox();
+        Text n = new Text("Name");
+        namecol1.getChildren().add(n);
+        namecol1.setPrefWidth(100);
+        
+        HBox typecol1 = new HBox();
+        Text t = new Text("Type");
+        typecol1.getChildren().add(t);
+        typecol1.setPrefWidth(100);
+        
+        HBox staticcol1 = new HBox();
+        Text s = new Text("Static");
+        staticcol1.getChildren().add(s);
+        staticcol1.setPrefWidth(100);
+        
+        HBox accesscol1 = new HBox();
+        Text a = new Text("Access");
+        accesscol1.getChildren().add(a);
+        accesscol1.setPrefWidth(100);
+        
+        header.getChildren().addAll(namecol1, typecol1, staticcol1, accesscol1);
+        table1.getChildren().add(header);
         varPane.getChildren().add(table1);
         variableTablePane.setContent(varPane);
         rightPane.getChildren().add(variableTablePane);
@@ -503,7 +540,8 @@ public class Workspace extends AppWorkspaceComponent {
            
         DataManager expo = (DataManager) app.getDataComponent();
         removeButton.setDisable(false);
-        if(selectedButton == selectionButton){
+        resizeButton.setDisable(false);
+        if(selectedButton == selectionButton || selectedButton == resizeButton){
            if (currentPane != null){
             currentPane.setStyle("-fx-border-color: #000000; -fx-background-color: #ffffff");
             //prevPane = currentPane;
@@ -525,10 +563,7 @@ public class Workspace extends AppWorkspaceComponent {
                         parentComboBox.getItems().add(((UMLClasses) sh).getClassNametoString());
                     if(sh instanceof UMLInterfaces)
                         parentComboBox.getItems().add(((UMLInterfaces) sh).getInterNametoString());
-                }
-                
-                
-                
+                }  
             }
            if(currentPane instanceof UMLInterfaces){
                UMLInterfaces st = (UMLInterfaces) currentPane;
@@ -545,10 +580,11 @@ public class Workspace extends AppWorkspaceComponent {
                 }
            }
         }   
+        
         });
         s.setOnMouseDragged(e -> {
             DataManager expo = (DataManager) app.getDataComponent();
-            if(selectedButton == selectionButton){
+            if(selectedButton == selectionButton){ //dragging
             gui.updateToolbarControls(false);
             gui.updatePhotoCodeButton();
             if(s instanceof UMLClasses){
@@ -565,23 +601,22 @@ public class Workspace extends AppWorkspaceComponent {
                 st.setTranslateXer(e.getX() + s.getTranslateX());
                 st.setTranslateYer(e.getY() + s.getTranslateY());
             }
-
             }
-            if(selectedButton == resizeButton){
+            if(selectedButton == resizeButton && tempo.getCursor() == Cursor.CROSSHAIR){ //resizing
                 if(s instanceof UMLClasses){
                     UMLClasses lol = (UMLClasses) s;
-                    lol.setMinWidth(e.getX() - lol.getTranslateX());
-                    lol.setMaxWidth(e.getX() - lol.getTranslateX());
+                    lol.setMinWidth(e.getSceneX() - lol.getTranslateX());
+                    lol.setMaxWidth(e.getSceneX() - lol.getTranslateX());
                     //set the setHeight(e.getY() - lol.getTranslateX()) in the UMLClasses
-                    lol.setMinHeight(e.getY() - lol.getTranslateY());
-                    lol.setMaxHeight(e.getY() - lol.getTranslateY());
+                    lol.setMinHeight(e.getSceneY() - lol.getTranslateY());
+                    lol.setMaxHeight(e.getSceneY() - lol.getTranslateY());
                 }
                 if(s instanceof UMLInterfaces){
                     UMLInterfaces st = (UMLInterfaces) s;
-                    st.setMinWidth(e.getX() - st.getTranslateX());
-                    st.setMaxWidth(e.getX() - st.getTranslateX());
-                    st.setMinHeight(e.getY() - st.getTranslateY());
-                    st.setMaxHeight(e.getY() - st.getTranslateY());
+                    st.setMinWidth(e.getSceneX() - st.getTranslateX());
+                    st.setMaxWidth(e.getSceneX() - st.getTranslateX());
+                    st.setMinHeight(e.getSceneY() - st.getTranslateY());
+                    st.setMaxHeight(e.getSceneY() - st.getTranslateY());
                 }
                 
             }

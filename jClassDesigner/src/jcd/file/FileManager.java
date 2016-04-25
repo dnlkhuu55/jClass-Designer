@@ -107,7 +107,7 @@ public class FileManager implements AppFileComponent {
             for(UMLVariables variable: vars){ //innerBuilder is the array while innerVar is the object
                 JsonObjectBuilder innerVar = Json.createObjectBuilder();
 
-               innerVar.add("VarName", variable.getName()).add("Type", variable.getType()).add("Static", variable.isStatictype()).add("Access", variable.isAccesstype());
+               innerVar.add("VarName", variable.getName()).add("Type", variable.getType()).add("Static", variable.isStatictype()).add("Access", variable.getAccesstype());
                innerBuilder.add(innerVar.build());
             }
             ///////
@@ -117,7 +117,7 @@ public class FileManager implements AppFileComponent {
                 
                 innerMeth.add("MethName", method.getName()).add("ReturnType", method.getReturntype())
                 .add("StaticType", method.isStatictype()).add("AbstractType", method.isAbstractype())
-                        .add("AccessType", method.isAccesstype());
+                        .add("AccessType", method.getAccesstype());
                 
                 args = method.getArgs();
                 for(String arguments: args){ //argsBuilder is the array while the matrix is the object
@@ -130,12 +130,10 @@ public class FileManager implements AppFileComponent {
                 innerMeth.add("arguments", argsBuilder);
                 methodBuilder.add(innerMeth.build());
             }
-            
             ///////
             testing.add("variables", innerBuilder);
             testing.add("methods", methodBuilder);
             }
-            
             
             if(sh instanceof UMLInterfaces){
                 testing.add("Name", ((UMLInterfaces) sh).getInterNametoString())
@@ -149,7 +147,7 @@ public class FileManager implements AppFileComponent {
             for(UMLVariables variable: vars){ //innerBuilder is the array while innerVar is the object
                 JsonObjectBuilder innerVar = Json.createObjectBuilder();
 
-               innerVar.add("VarName", variable.getName()).add("Type", variable.getType()).add("Static", variable.isStatictype()).add("Access", variable.isAccesstype());
+               innerVar.add("VarName", variable.getName()).add("Type", variable.getType()).add("Static", variable.isStatictype()).add("Access", variable.getAccesstype());
                innerBuilder.add(innerVar.build());
             }
             ///////
@@ -158,7 +156,7 @@ public class FileManager implements AppFileComponent {
                 
                 innerMeth.add("MethName", method.getName()).add("ReturnType", method.getReturntype())
                 .add("StaticType", method.isStatictype()).add("AbstractType", method.isAbstractype())
-                        .add("AccessType", method.isAccesstype());
+                        .add("AccessType", method.getAccesstype());
                 
                 args = method.getArgs();
                 for(String arguments: args){ //argsBuilder is the array while the matrix is the object
@@ -285,7 +283,7 @@ public class FileManager implements AppFileComponent {
                     v.setName(into_var.getString("VarName"));
                     v.setType(into_var.getString("Type"));
                     v.setStatictype(into_var.getBoolean("Static"));
-                    v.setAccesstype(into_var.getBoolean("Access"));
+                    v.setAccesstype(into_var.getString("Access"));
                     vars.add(v);
                     r.setCurrentVariableName(new Text(v.toString()));
                 }
@@ -302,7 +300,7 @@ public class FileManager implements AppFileComponent {
                     m.setReturntype(into_met.getString("ReturnType"));
                     m.setStatictype(into_met.getBoolean("StaticType"));
                     m.setAbstractype(into_met.getBoolean("AbstractType"));
-                    m.setAccesstype(into_met.getBoolean("AccessType"));
+                    m.setAccesstype(into_met.getString("AccessType"));
                     
                     args = m.getArgs();
                     //args
@@ -341,7 +339,7 @@ public class FileManager implements AppFileComponent {
                     v.setName(into_var.getString("VarName"));
                     v.setType(into_var.getString("Type"));
                     v.setStatictype(into_var.getBoolean("Static"));
-                    v.setAccesstype(into_var.getBoolean("Access"));
+                    v.setAccesstype(into_var.getString("Access"));
                     vars.add(v);
                     s.setCurrentVariableName(new Text(v.toString()));
                 }
@@ -358,7 +356,7 @@ public class FileManager implements AppFileComponent {
                     m.setReturntype(into_met.getString("ReturnType"));
                     m.setStatictype(into_met.getBoolean("StaticType"));
                     m.setAbstractype(into_met.getBoolean("AbstractType"));
-                    m.setAccesstype(into_met.getBoolean("AccessType"));
+                    m.setAccesstype(into_met.getString("AccessType"));
                     
                     args = m.getArgs();
                     //args
@@ -488,7 +486,7 @@ public class FileManager implements AppFileComponent {
                                     }
                                 }
                             }
-                            
+                            ///!!!!!!!!!!
                             for(UMLVariables impo: ((UMLClasses) ll).getVariableNames()){ //importing
                                 Package[] pack = Package.getPackages();
                                 
@@ -537,8 +535,7 @@ public class FileManager implements AppFileComponent {
                                     if(sl instanceof UMLInterfaces){
                                         if(i.equals(((UMLInterfaces) sl).getInterNametoString())){
                                             //now add UMLInterface methods
-                                            
-                                            
+
                                         for(UMLMethods m: ((UMLInterfaces) sl).getMethodNames()){
                                 
                                         Package[] hello = Package.getPackages();
@@ -591,7 +588,7 @@ public class FileManager implements AppFileComponent {
                                                             System.out.println("Arguments API not matched");
                                                         }
                                                     }
-                                            }
+                                                }
                                             }
                                             }  
                                         } 
@@ -628,13 +625,18 @@ public class FileManager implements AppFileComponent {
                             java_source = java_source + "{ \n";
                             
                             for(UMLVariables k: ((UMLClasses) ll).getVariableNames()){
-                                if(k.isAccesstype() == true)
+                                if(k.getAccesstype().equals("public") || ((UMLClasses) ll).isAbstract() == true)
                                    java_source = java_source + "public ";
-                                else
+                                else if (k.getAccesstype().equals("private"))
                                     java_source = java_source + "private ";
+                                else
+                                    java_source = java_source + "protected ";
                                 
-                                if(k.isStatictype() == true)
-                                    java_source = java_source + "static ";
+                                if(k.isStatictype() == true){
+                                    if(((UMLClasses) ll).isAbstract() == false){
+                                        java_source = java_source + "static ";
+                                    }
+                                }
                                 
                                 java_source = java_source + k.getType() + " " + k.getName() + "; \n";
                                 
@@ -643,15 +645,19 @@ public class FileManager implements AppFileComponent {
                             for(UMLMethods m: ((UMLClasses) ll).getMethodNames()){
                                 //name, returntype, statictype, abstracttype, accesstype, args
                                 
-                                if(m.isAccesstype() == true)
+                                if(m.getAccesstype().equals("public") || ((UMLClasses) ll).isAbstract() == true)
                                     java_source = java_source + "public ";
-                                else
+                                else if(m.getAccesstype().equals("private"))
                                     java_source = java_source + "private ";
+                                else
+                                    java_source = java_source + "protected ";
                                 
-                                if(m.isStatictype() == true)
-                                    java_source = java_source + "static ";
+                                if(m.isStatictype() == true){
+                                    if(((UMLClasses) ll).isAbstract() == false)
+                                        java_source = java_source + "static ";
+                                }
                                 
-                                if(m.isAbstractype() == true)
+                                if(((UMLClasses) ll).isAbstract() == true)
                                     java_source = java_source + "abstract ";
                                 
                                 java_source = java_source + " " + m.getReturntype()+ " " + m.getName() + "( ";
@@ -811,8 +817,7 @@ public class FileManager implements AppFileComponent {
                                             java_source = java_source + "throw new UnsupportedOperationException(\"Not supported yet.\");";
                                         }
                                             java_source = java_source + "} \n"; //closing a method
-                                    }  
-                                    
+                                    }   
                                     }
                                     } 
                                 }

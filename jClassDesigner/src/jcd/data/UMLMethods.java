@@ -13,7 +13,7 @@ public class UMLMethods extends Text{
     private String returntype;
     private boolean statictype;
     private boolean abstractype;
-    private boolean accesstype;
+    private String accesstype;
     private ArrayList<String> args = new ArrayList<>();
     
     public UMLMethods(){
@@ -21,10 +21,10 @@ public class UMLMethods extends Text{
         returntype = "void";
         statictype = false;
         abstractype = false;
-        accesstype = false;
+        accesstype = "public";
     }
     
-    public UMLMethods(String n, String r, boolean s, boolean a, boolean at){
+    public UMLMethods(String n, String r, boolean s, boolean a, String at){
         name = n;
         returntype = r;
         statictype = s;
@@ -91,14 +91,14 @@ public class UMLMethods extends Text{
     /**
      * @return the accesstype
      */
-    public boolean isAccesstype() {
+    public String getAccesstype() {
         return accesstype;
     }
 
     /**
      * @param accesstype the accesstype to set
      */
-    public void setAccesstype(boolean accesstype) {
+    public void setAccesstype(String accesstype) {
         this.accesstype = accesstype;
     }
 
@@ -117,10 +117,13 @@ public class UMLMethods extends Text{
     }
     public String toString(){
         String s = new String();
-        if(accesstype == true)
+        if(accesstype.equals("public"))
             s = s + "+";
-        else
+        else if (accesstype.equals("private"))
             s = s + "-";
+        else
+            s = s + "#";
+        
         if(abstractype == true)
             s = s + "{abstract}";
         

@@ -48,13 +48,13 @@ public class FileManagerFinalTest {
            UMLInterfaces firstpart = new UMLInterfaces("Interface_Test", " ", " ", "PackageA", 55, 110);
            
            //static ($), access (+/-)
-           UMLVariables var1 = new UMLVariables("LOOKING", "int", false, true);
+           UMLVariables var1 = new UMLVariables("LOOKING", "int", false, "public");
            firstpart.getVariableNames().add(var1);
            
            //name, returntype, statictype($), abstractype(#), accesstype(+/-)
            // (ABSTRACT METHODS ARE NEVEN STATIC)
-           UMLMethods met1 = new UMLMethods("TestMethod1", "void", false, true, true);
-           UMLMethods met2 = new UMLMethods("TestMethod2", "int", false, true, true);
+           UMLMethods met1 = new UMLMethods("TestMethod1", "void", false, true, "public");
+           UMLMethods met2 = new UMLMethods("TestMethod2", "int", false, true, "public");
            met1.getArgs().add("String");
            met1.getArgs().add("double");
            met2.getArgs().add("int");
@@ -65,11 +65,13 @@ public class FileManagerFinalTest {
            
            UMLClasses secondpart = new UMLClasses("CounterTask", " ", " ", "", "BBB", 50, 100);
            
-           UMLVariables vegas2 = new UMLVariables("counter", "int", false, false);
+           secondpart.getParentInterfaces().add("Interface_Test");
+           
+           UMLVariables vegas2 = new UMLVariables("counter", "int", false, "private");
            secondpart.getVariableNames().add(vegas2);
            
-           UMLMethods methane1 = new UMLMethods("CounterTask", " ", false, false, true);
-           UMLMethods methane2 = new UMLMethods("call", "void", false, false, false);
+           UMLMethods methane1 = new UMLMethods("CounterTask", " ", false, false, "private");
+           UMLMethods methane2 = new UMLMethods("call", "void", false, false, "private");
            
            secondpart.getMethodNames().add(methane1);
            secondpart.getMethodNames().add(methane2);
@@ -79,42 +81,48 @@ public class FileManagerFinalTest {
            ///  
            UMLClasses thirdpart = new UMLClasses("DateTask", " ", " ", "", "CCC", 75, 19);
            
-           UMLVariables nachos2 = new UMLVariables("now", "Date", false, false);
+           UMLVariables nachos2 = new UMLVariables("now", "Date", false, "private");
            thirdpart.getVariableNames().add(nachos2);
            
-           UMLMethods pizza1 = new UMLMethods("DateTask", " ", false, false, true);
-           UMLMethods pizza2 = new UMLMethods("call", "void", false, false, false);
+           UMLMethods pizza1 = new UMLMethods("DateTask", " ", false, false, "private");
+           UMLMethods pizza2 = new UMLMethods("call", "void", false, false, "private");
            
            thirdpart.getMethodNames().add(pizza1);
            thirdpart.getMethodNames().add(pizza2);
+           
+           thirdpart.getParentInterfaces().add("Interface_Test");
            
            d.getClassList().add(thirdpart);
            ////
            
            UMLClasses fourthpart = new UMLClasses("PauseHandler", " ", " ", "", "PackTest", 100, 200);
            
-           UMLVariables phil2 = new UMLVariables("app", "float", false, false);
+           UMLVariables phil2 = new UMLVariables("app", "float", false, "private");
            fourthpart.getVariableNames().add(phil2);
            
-           UMLMethods tacos1 = new UMLMethods("handle", "void", false, false, true);
+           UMLMethods tacos1 = new UMLMethods("handle", "void", false, false, "public");
            tacos1.getArgs().add("Event");
            
            fourthpart.getMethodNames().add(tacos1);
+           
+           fourthpart.getParentInterfaces().add("Interface_Test");
            
            d.getClassList().add(fourthpart);
            ////
            UMLClasses fifthpart = new UMLClasses("StartHandler", " ", " ", "", "PackTest", 5, 1);
            
-           UMLVariables dark2 = new UMLVariables("app", "long", false, false);
+           UMLVariables dark2 = new UMLVariables("app", "long", false, "private");
            fifthpart.getVariableNames().add(dark2);
            
-           UMLMethods nice1 = new UMLMethods("handle", "void", false, false, true);
-           UMLMethods met11 = new UMLMethods("main", "void", true, false, true); 
+           UMLMethods nice1 = new UMLMethods("handle", "void", false, false, "public");
+           UMLMethods met11 = new UMLMethods("main", "void", true, false, "public"); 
            met11.getArgs().add("String[] ");
            nice1.getArgs().add("Event");
            
            fifthpart.getMethodNames().add(nice1);
            fifthpart.getMethodNames().add(met11);
+           
+           fifthpart.getParentInterfaces().add("Interface_Test");
           
            d.getClassList().add(fifthpart);
           // f.saveData(d, "./work/JUnitTest1.json");
