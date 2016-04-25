@@ -55,6 +55,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
@@ -133,6 +134,9 @@ public class Workspace extends AppWorkspaceComponent {
     HBox wholePane;
     Line s;
     Line l;
+    UMLVariables currentVariable = null;
+    HBox currentTableVar = null;
+    UMLVariables vari;
     
     boolean snapping = false;
     
@@ -440,8 +444,34 @@ public class Workspace extends AppWorkspaceComponent {
         minusButton = initChildButton(variablePane, PropertyType.MINUS_ICON.toString(), PropertyType.MINUS_TOOLTIP.toString(), false);
         
         addButton.setOnAction(eh -> {
-            UMLVariables var = new UMLVariables();
-            table1.getChildren().add(var.settingStuff());
+            vari = new UMLVariables();
+            currentVariable = vari;
+            currentVariable.settingStuff();
+            //currentTableVar = var.gettingStuff();
+            createListener2(currentVariable);
+            table1.getChildren().add(currentVariable.gettingStuff());
+            /*
+            if(currentPane instanceof UMLClasses){
+                UMLClasses s = (UMLClasses) currentPane;
+                s.getVariableNames().add(currentVariable);
+                s.setCurrentVariableName(new Text(currentVariable.toString()));
+            }
+            */
+        });
+        
+        minusButton.setOnAction( e -> {
+            if(currentVariable != null){
+                table1.getChildren().remove(currentVariable.gettingStuff());
+                currentVariable = null;
+                currentTableVar = null;
+                
+                if(currentPane instanceof UMLClasses){
+                    UMLClasses s = (UMLClasses) currentPane;
+                    s.getVariableNames().remove(currentVariable);
+                }
+                
+                
+            }
         });
         
         
@@ -643,6 +673,33 @@ public class Workspace extends AppWorkspaceComponent {
             //if not 20, snap to next lowest number divisible by 20 (for loop to check)
         });
     }
+    
+    public void createListener2(UMLVariables s){
+        TextField n = s.getNaming();
+        
+        n.setOnKeyPressed(e -> {
+            if(e.getCode() == KeyCode.ENTER){
+            s.setName(n.getText()); //s is the modified UMLVariable name
+            System.out.println("TEXTFIELD IS WORKING");
+            
+            if(currentPane instanceof UMLClasses){
+                UMLClasses l = (UMLClasses) currentPane;
+                
+                //l.getVariableNames().remove(currentVariable); //!!!!!    
+                l.getVariableNames().add(s);
+                currentVariable = s;
+                
+                
+                l.setCurrentVariableName(new Text(s.toString()));
+            }
+            
+            }
+        });
+        
+        
+    }
+    
+    
     
     public void gridding(ActionEvent e){
         if(gridBox.isSelected()){   
