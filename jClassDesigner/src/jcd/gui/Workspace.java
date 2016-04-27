@@ -139,6 +139,7 @@ public class Workspace extends AppWorkspaceComponent {
     VBox prevPane = null;
     VBox currentPane = null;
     UMLVariables currentVariable;
+    UMLMethods currentMethod;
     FlowPane fileToolbarPane;
     FlowPane editToolbarPane;
     FlowPane viewToolbarPane;
@@ -154,6 +155,7 @@ public class Workspace extends AppWorkspaceComponent {
     AppMessageDialogSingleton messageDialog;
     AppYesNoCancelDialogSingleton yesNoCancelDialog;
     VariablesDialog vy;
+    MethodsDialog my;
 
     /**
      * Constructor for initializing the workspace, note that this constructor
@@ -169,6 +171,7 @@ public class Workspace extends AppWorkspaceComponent {
        gui = app.getGUI();
        DataManager expo = (DataManager) app.getDataComponent();
        vy = new VariablesDialog(null);
+       my = new MethodsDialog(null);
 
        workspace = new BorderPane();
        leftPane = new Pane(); 
@@ -211,6 +214,7 @@ public class Workspace extends AppWorkspaceComponent {
 	    leftPane.setCursor(Cursor.DEFAULT);
             selectedButton = selectionButton;
             selectionButton.setDisable(true);
+            currentPane.setCursor(Cursor.DEFAULT);
         });
        
         leftPane.setOnMousePressed(e -> {
@@ -223,15 +227,14 @@ public class Workspace extends AppWorkspaceComponent {
                 prevPane = currentPane;
                 selectedButton = null;
                 selectionButton.setDisable(false);
+                addButton.setDisable(true);
+                minusButton.setDisable(true);
                 //resizeButton.setDisable(true); //always need on despite being selected or not
+                if (currentPane != null)
+                    currentPane.setCursor(Cursor.DEFAULT);
             }}
             
         }); 
-         
-        resizeButton.setOnAction(eh -> {
-            leftPane.setCursor(Cursor.CROSSHAIR);
-            selectionButton = resizeButton;
-        });
                
         addClassButton.setOnAction(e -> {
             selectedButton = addClassButton; //LOAD INTO TOOLBAR BY DEFAULT
@@ -241,9 +244,12 @@ public class Workspace extends AppWorkspaceComponent {
             redoButton.setDisable(false);
             zoominButton.setDisable(false);
             zoomoutButton.setDisable(false);
+            addButton.setDisable(false);
+            minusButton.setDisable(false);
             gui.updateToolbarControls(false);
             gui.updatePhotoCodeButton();
-            leftPane.setCursor(Cursor.DEFAULT);
+            if (currentPane != null)
+                currentPane.setCursor(Cursor.DEFAULT);
 
             sc = new UMLClasses("DEFAULT");
             sc.setStyle("-fx-border-color: #ffff00; -fx-background-color: #ffffff");
@@ -285,9 +291,12 @@ public class Workspace extends AppWorkspaceComponent {
             redoButton.setDisable(false);
             zoominButton.setDisable(false);
             zoomoutButton.setDisable(false);
+            addButton.setDisable(false);
+            minusButton.setDisable(false);
             gui.updateToolbarControls(false);
             gui.updatePhotoCodeButton();
-            leftPane.setCursor(Cursor.DEFAULT);
+            if (currentPane != null)
+                currentPane.setCursor(Cursor.DEFAULT);
 
             ie = new UMLInterfaces("<Interface> DEFAULT");
             ie.setStyle("-fx-border-color: #ffff00; -fx-background-color: #ffffff");
@@ -323,14 +332,15 @@ public class Workspace extends AppWorkspaceComponent {
         removeButton.setOnAction(eh -> {
             leftPane.setCursor(Cursor.DEFAULT);
             if(currentPane instanceof VBox){
+                if(currentPane != null)
+                    currentPane.setCursor(Cursor.DEFAULT);
                 leftPane.getChildren().remove(currentPane);
+                expo.getClassList().remove(currentPane);
                 currentPane = null;
                 
-                selectionButton.setDisable(true);
+                selectionButton.setDisable(false);
                 resizeButton.setDisable(true);
                 removeButton.setDisable(true);
-                //update the text fields
-                
             }
         });
         
@@ -343,6 +353,9 @@ public class Workspace extends AppWorkspaceComponent {
         });
         
         zoominButton.setOnAction(eh -> {
+            if(currentPane != null)
+                currentPane.setCursor(Cursor.DEFAULT);
+            
             for(Node s: expo.getClassList()){
                 s.setScaleX(s.getScaleX() * 2);
                 s.setScaleY(s.getScaleY() * 2);
@@ -350,6 +363,9 @@ public class Workspace extends AppWorkspaceComponent {
         });
         
         zoomoutButton.setOnAction(eh -> {
+            if(currentPane != null)
+                currentPane.setCursor(Cursor.DEFAULT);
+            
             for(Node s: expo.getClassList()){
                 s.setScaleX(s.getScaleX() /2);
                 s.setScaleY(s.getScaleY() / 2);
@@ -436,10 +452,13 @@ public class Workspace extends AppWorkspaceComponent {
         variableName.setFont(Font.font("Arial", 10));
         variablePane.getChildren().add(variableName);
         
-        addButton = initChildButton(variablePane, PropertyType.ADD_ICON.toString(), PropertyType.ADD_TOOLTIP.toString(), false);
-        minusButton = initChildButton(variablePane, PropertyType.MINUS_ICON.toString(), PropertyType.MINUS_TOOLTIP.toString(), false);
+        addButton = initChildButton(variablePane, PropertyType.ADD_ICON.toString(), PropertyType.ADD_TOOLTIP.toString(), true);
+        minusButton = initChildButton(variablePane, PropertyType.MINUS_ICON.toString(), PropertyType.MINUS_TOOLTIP.toString(), true);
         
         addButton.setOnAction(eh -> {
+            if(currentPane != null)
+                currentPane.setCursor(Cursor.DEFAULT);
+            
             vy.showAddVariableDialog();
             
             if (vy.wasCompleteSelected()) {
@@ -472,13 +491,15 @@ public class Workspace extends AppWorkspaceComponent {
                 
                 k.setCurrentVariableName(textTemp.get(tmp1));
             }
-            
         }
         else {
         }    
         });
         
         minusButton.setOnAction( e -> {
+            if(currentPane != null)
+                currentPane.setCursor(Cursor.DEFAULT);
+            
             if(currentVariable != null){
                 if(currentPane instanceof UMLClasses){
                     UMLClasses j = (UMLClasses) currentPane;
@@ -529,6 +550,8 @@ public class Workspace extends AppWorkspaceComponent {
         rightPane.getChildren().add(variableTablePane);
         
          table1.setOnMouseClicked(e -> {
+             if(currentPane != null)
+                currentPane.setCursor(Cursor.DEFAULT);
              
             if(e.getClickCount() == 1 ){ //need for remove rows
                 currentVariable = (UMLVariables) table1.getSelectionModel().getSelectedItem();
@@ -542,17 +565,18 @@ public class Workspace extends AppWorkspaceComponent {
                 // OPEN UP THE SCHEDULE ITEM EDITOR
                 UMLVariables temps = currentVariable;
                 UMLVariables k = (UMLVariables) table1.getSelectionModel().getSelectedItem();
-                System.out.println("Variable before change: " + k.toString());
                 vy.showEditVariableDialog(k);
                 
                 if (vy.wasCompleteSelected()) {
                     // UPDATE THE SCHEDULE ITEM
-                    System.out.println("Variable after change: " + k.toString());
                     UMLVariables si = vy.getVariable();
                     k.setName(si.getName()); //this will update the variable in the array automatically
                     k.setType(si.getType());
                     k.setAccesstype(si.getAccesstype());
+                    System.out.print(si.getAccesstype());
+                    
                     k.setStatictype(si.isStatictype());
+                    System.out.println(si.isStatictype());
                     
                     if(currentPane instanceof UMLClasses){
                         currentVariable = temps;
@@ -588,19 +612,12 @@ public class Workspace extends AppWorkspaceComponent {
                         i.setCurrentVariableName(textTemp.get(tmp1));
                         
                     }
-            
-                    // THE COURSE IS NOW DIRTY, MEANING IT'S BEEN 
-                    // CHANGED SINCE IT WAS LAST SAVED, SO MAKE SURE
-                    // THE SAVE BUTTON IS ENABLED
                     gui.updateToolbarControls(false);
                     gui.updatePhotoCodeButton();
                 }
         else {
-            // THE USER MUST HAVE PRESSED CANCEL, SO
-            // WE DO NOTHING
-        } 
-                
-            }
+        }   
+        }
         });
         
         ////////////////////////////////////////////////////////////////////////
@@ -615,6 +632,76 @@ public class Workspace extends AppWorkspaceComponent {
         
         rightPane.getChildren().add(methodPane);
         
+        //ADDING AND REMOVING METHODS!!!!!!!
+        addMButton.setOnAction(eh -> {
+            if(currentPane != null)
+                currentPane.setCursor(Cursor.DEFAULT);
+            
+            my.showAddMethodDialog();
+            
+            if (my.wasCompleteSelected()) {
+            // GET THE SCHEDULE ITEM
+            UMLMethods me = my.getMethods();
+            currentMethod = me;
+            table2.getItems().add(currentMethod);
+            
+            if(currentPane instanceof UMLClasses){
+                UMLClasses j = (UMLClasses) currentPane;
+                
+                j.getMethodNames().add(currentMethod);
+                
+                String tmp2 = currentMethod.toString();
+                Text temp2 = new Text(tmp2);
+                
+                textTemp.put(tmp2, temp2);
+                
+                j.setCurrentMethodName(textTemp.get(tmp2));
+            }
+            if(currentPane instanceof UMLInterfaces){
+                UMLInterfaces k = (UMLInterfaces) currentPane;
+                
+                k.getMethodNames().add(currentMethod);
+                
+                String tmp2 = currentMethod.toString();
+                Text temp2 = new Text(tmp2);
+                
+                textTemp.put(tmp2, temp2);
+                
+                k.setCurrentVariableName(textTemp.get(tmp2));
+            }
+        }
+        else {
+        }    
+        });
+        
+        minusMButton.setOnAction( e -> {
+            if(currentPane != null)
+                currentPane.setCursor(Cursor.DEFAULT);
+            
+            if(currentMethod != null){
+                if(currentPane instanceof UMLClasses){
+                    UMLClasses j = (UMLClasses) currentPane;
+                    j.getMethodNames().remove(currentMethod);
+                    
+                    j.removeCurrentMethodName(textTemp.get(currentMethod.toString()));
+                    table2.getItems().remove(currentMethod);
+                    
+                }
+                if(currentPane instanceof UMLInterfaces){
+                    UMLInterfaces j = (UMLInterfaces) currentPane;
+                    j.getMethodNames().remove(currentMethod);
+                    
+                    j.removeCurrentMethodName(textTemp.get(currentMethod.toString()));
+                    table2.getItems().remove(currentMethod);
+                }
+                gui.updateToolbarControls(false);
+                gui.updatePhotoCodeButton();
+            }
+        });
+        
+        
+        
+        
         ////////////////////////////////////////////////////////////////////////
         methodTablePane = new ScrollPane();
         methodTablePane.setMaxSize(350, 200);
@@ -626,10 +713,16 @@ public class Workspace extends AppWorkspaceComponent {
         TableColumn StaticCol2 = new TableColumn("Static");
         TableColumn AbstractCol2 = new TableColumn("Abstract");
         TableColumn AccessCol2 = new TableColumn("Access");
-        TableColumn Arg1 = new TableColumn("Arg1");
+        TableColumn Arg0 = new TableColumn("Arg0");
+        
+        NameCol2.setCellValueFactory(new PropertyValueFactory<UMLMethods, String>("name"));
+        ReturnCol2.setCellValueFactory(new PropertyValueFactory<UMLMethods, String>("returntype"));
+        StaticCol2.setCellValueFactory(new PropertyValueFactory<UMLMethods, Boolean>("statictype"));
+        AbstractCol2.setCellValueFactory(new PropertyValueFactory<UMLMethods, Boolean>("abstractype"));
+        AccessCol2.setCellValueFactory(new PropertyValueFactory<UMLMethods, String>("accesstype"));
         
         table2.getColumns().addAll(NameCol2, ReturnCol2, StaticCol2, AbstractCol2, AccessCol2,
-                Arg1);
+                Arg0);
         
         metPane.getChildren().add(table2);
         methodTablePane.setContent(metPane);
@@ -638,6 +731,83 @@ public class Workspace extends AppWorkspaceComponent {
     
     ((BorderPane) workspace).setCenter(tempo); //set the leftPane to the left of the BorderPane
     ((BorderPane) workspace).setRight(rightPane); 
+    
+    
+    
+   
+    
+    //METHOD DIALOG AND EDITING!!!!!!!!!!!!
+    table2.setOnMouseClicked(e -> {
+             if(currentPane != null)
+                currentPane.setCursor(Cursor.DEFAULT);
+             
+            if(e.getClickCount() == 1 ){ //need for remove rows
+                currentMethod = (UMLMethods) table2.getSelectionModel().getSelectedItem();
+                System.out.println("Variable currently selected on one click: " +
+                        currentVariable.toString());
+                        temp00 = currentVariable.toString();
+             }
+             
+             
+            if (e.getClickCount() == 2) {
+                // OPEN UP THE SCHEDULE ITEM EDITOR
+                UMLVariables temps = currentVariable;
+                UMLVariables k = (UMLVariables) table1.getSelectionModel().getSelectedItem();
+                vy.showEditVariableDialog(k);
+                
+                if (vy.wasCompleteSelected()) {
+                    // UPDATE THE SCHEDULE ITEM
+                    UMLVariables si = vy.getVariable();
+                    k.setName(si.getName()); //this will update the variable in the array automatically
+                    k.setType(si.getType());
+                    k.setAccesstype(si.getAccesstype());
+                    System.out.print(si.getAccesstype());
+                    
+                    k.setStatictype(si.isStatictype());
+                    System.out.println(si.isStatictype());
+                    
+                    if(currentPane instanceof UMLClasses){
+                        currentVariable = temps;
+                        
+                        UMLClasses l = (UMLClasses) currentPane;
+                        
+                        l.removeCurrentVariableName(textTemp.get(temp00));
+                        currentVariable = k;
+                
+                        String tmp1 = currentVariable.toString();
+                        Text temp = new Text(tmp1);
+                
+                        textTemp.put(tmp1, temp);
+                
+                        l.setCurrentVariableName(textTemp.get(tmp1));
+                        
+                    }
+                    
+                    if(currentPane instanceof UMLInterfaces){
+                        //Do something for interfaces
+                        currentVariable = temps;
+                        
+                        UMLInterfaces i = (UMLInterfaces) currentPane;
+                        
+                        i.removeCurrentVariableName(textTemp.get(temp00));
+                        currentVariable = k;
+                        
+                        String tmp1 = currentVariable.toString();
+                        Text temp = new Text(tmp1);
+                        
+                        textTemp.put(tmp1, temp);
+                        
+                        i.setCurrentVariableName(textTemp.get(tmp1));
+                        
+                    }
+                    gui.updateToolbarControls(false);
+                    gui.updatePhotoCodeButton();
+                }
+        else {
+        }   
+        }
+        });
+    
     }
     /////////////////////////////////////////////////////////////////////////////
           
@@ -647,6 +817,8 @@ public class Workspace extends AppWorkspaceComponent {
         DataManager expo = (DataManager) app.getDataComponent();
         removeButton.setDisable(false);
         resizeButton.setDisable(false);
+        addButton.setDisable(false);
+        minusButton.setDisable(false);
         if(selectedButton == selectionButton || selectedButton == resizeButton){
            if (currentPane != null){
             currentPane.setStyle("-fx-border-color: #000000; -fx-background-color: #ffffff");
@@ -721,16 +893,20 @@ public class Workspace extends AppWorkspaceComponent {
                     UMLClasses lol = (UMLClasses) s;
                     lol.setMinWidth(e.getSceneX() - lol.getTranslateX());
                     lol.setMaxWidth(e.getSceneX() - lol.getTranslateX());
+                    lol.setWidthy(lol.getWidth());
                     //set the setHeight(e.getY() - lol.getTranslateX()) in the UMLClasses
                     lol.setMinHeight(e.getSceneY() - lol.getTranslateY());
                     lol.setMaxHeight(e.getSceneY() - lol.getTranslateY());
+                    lol.setHeighty(lol.getHeight());
                 }
                 if(s instanceof UMLInterfaces){
                     UMLInterfaces st = (UMLInterfaces) s;
                     st.setMinWidth(e.getSceneX() - st.getTranslateX());
                     st.setMaxWidth(e.getSceneX() - st.getTranslateX());
+                    st.setWidthy(st.getWidth());
                     st.setMinHeight(e.getSceneY() - st.getTranslateY());
                     st.setMaxHeight(e.getSceneY() - st.getTranslateY());
+                    st.setHeighty(st.getHeight());
                 }
                 
             }
@@ -843,6 +1019,8 @@ public class Workspace extends AppWorkspaceComponent {
         redoButton.setDisable(true);
         zoominButton.setDisable(true);
         zoomoutButton.setDisable(true);
+        addButton.setDisable(true);
+        minusButton.setDisable(true);
         gui.updateToolbarControls(true);
         
     }
@@ -884,6 +1062,8 @@ public class Workspace extends AppWorkspaceComponent {
                
                lol.setTranslateX(lol.getTranslateXer());
                lol.setTranslateY(lol.getTranslateYer());
+               lol.setPrefWidth(lol.getWidthy());
+               lol.setPrefHeight(lol.getHeighty());
                leftPane.getChildren().add(lol);
            }
            if(s instanceof UMLInterfaces){
@@ -891,10 +1071,14 @@ public class Workspace extends AppWorkspaceComponent {
                
                st.setTranslateX(st.getTranslateXer());
                st.setTranslateY(st.getTranslateYer());
+               st.setPrefWidth(st.getWidthy());
+               st.setPrefHeight(st.getHeighty());
                leftPane.getChildren().add(st);
            }
            
             currentPane = s;
+            addButton.setDisable(false);
+            minusButton.setDisable(false);
         }     
         currentPane.setStyle("-fx-border-color: #ffff00");
         
