@@ -48,6 +48,7 @@ import static af.settings.AppStartupConstants.PATH_IMAGES;
 import static af.settings.AppStartupConstants.PATH_WORK;
 import af.ui.AppMessageDialogSingleton;
 import af.ui.AppYesNoCancelDialogSingleton;
+import java.util.HashMap;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
@@ -133,6 +134,7 @@ public class Workspace extends AppWorkspaceComponent {
     UMLInterfaces ie;
     UMLVariables var;
     UMLMethods methods;
+    String temp00;
     
     VBox prevPane = null;
     VBox currentPane = null;
@@ -143,6 +145,8 @@ public class Workspace extends AppWorkspaceComponent {
     HBox wholePane;
     Line s;
     Line l;
+    
+    HashMap<String,Text> textTemp = new HashMap<>(); 
     
     boolean snapping = false;
     
@@ -215,6 +219,7 @@ public class Workspace extends AppWorkspaceComponent {
                 currentPane.setStyle("-fx-border-width: 1px");
                 currentPane.setStyle("-fx-border-color: #000000; -fx-background-color: #ffffff");
                 currentPane = null;
+                table1.getItems().clear();
                 prevPane = currentPane;
                 selectedButton = null;
                 selectionButton.setDisable(false);
@@ -268,6 +273,8 @@ public class Workspace extends AppWorkspaceComponent {
             dummy.setText(sc.getClassNametoString());
         if(dummyData != null)
             dummyData.setText(sc.getPackageName());
+        table1.getItems().clear();
+        table2.getItems().clear();
         });
         
         addInterfaceButton.setOnAction(eh -> {
@@ -308,6 +315,8 @@ public class Workspace extends AppWorkspaceComponent {
             dummy.setText(ie.getInterNametoString());
         if(dummyData != null)
             dummyData.setText(ie.getPackageName());
+        table1.getItems().clear();
+        table2.getItems().clear();
         });
         
 
@@ -327,7 +336,8 @@ public class Workspace extends AppWorkspaceComponent {
         
         resizeButton.setOnAction(eh -> {
             selectedButton = resizeButton;
-            leftPane.setCursor(Cursor.CROSSHAIR);
+            
+            currentPane.setCursor(Cursor.CROSSHAIR);
             //Change this
             selectionButton.setDisable(false);
         });
@@ -430,27 +440,41 @@ public class Workspace extends AppWorkspaceComponent {
         minusButton = initChildButton(variablePane, PropertyType.MINUS_ICON.toString(), PropertyType.MINUS_TOOLTIP.toString(), false);
         
         addButton.setOnAction(eh -> {
-            vy.showAddAssignmentDialog();
-            System.out.print(vy.wasCompleteSelected());
+            vy.showAddVariableDialog();
+            
             if (vy.wasCompleteSelected()) {
             // GET THE SCHEDULE ITEM
-            UMLVariables si = vy.getAssignment();
-            table1.getItems().add(si);
+            UMLVariables si = vy.getVariable();
+            currentVariable = si;
+            table1.getItems().add(currentVariable);
             
             if(currentPane instanceof UMLClasses){
                 UMLClasses j = (UMLClasses) currentPane;
-                j.getVariableNames().add(si);
-                currentVariable = si;
-                j.setCurrentVariableName(new Text(si.toString()));
+                
+                j.getVariableNames().add(currentVariable);
+                
+                String tmp1 = currentVariable.toString();
+                Text temp = new Text(tmp1);
+                
+                textTemp.put(tmp1, temp);
+                
+                j.setCurrentVariableName(textTemp.get(tmp1));
             }
-            // THE COURSE IS NOW DIRTY, MEANING IT'S BEEN 
-            // CHANGED SINCE IT WAS LAST SAVED, SO MAKE SURE
-            // THE SAVE BUTTON IS ENABLED
-            //gui.getFileController().markAsEdited(gui);
+            if(currentPane instanceof UMLInterfaces){
+                UMLInterfaces k = (UMLInterfaces) currentPane;
+                
+                k.getVariableNames().add(currentVariable);
+                
+                String tmp1 = currentVariable.toString();
+                Text temp = new Text(tmp1);
+                
+                textTemp.put(tmp1, temp);
+                
+                k.setCurrentVariableName(textTemp.get(tmp1));
+            }
+            
         }
         else {
-            // THE USER MUST HAVE PRESSED CANCEL, SO
-            // WE DO NOTHING
         }    
         });
         
@@ -459,9 +483,17 @@ public class Workspace extends AppWorkspaceComponent {
                 if(currentPane instanceof UMLClasses){
                     UMLClasses j = (UMLClasses) currentPane;
                     j.getVariableNames().remove(currentVariable);
-                    j.removeCurrentVariableName(new Text(currentVariable.toString()));
+                    
+                    j.removeCurrentVariableName(textTemp.get(currentVariable.toString()));
                     table1.getItems().remove(currentVariable);
                     
+                }
+                if(currentPane instanceof UMLInterfaces){
+                    UMLInterfaces j = (UMLInterfaces) currentPane;
+                    j.getVariableNames().remove(currentVariable);
+                    
+                    j.removeCurrentVariableName(textTemp.get(currentVariable.toString()));
+                    table1.getItems().remove(currentVariable);
                 }
                 gui.updateToolbarControls(false);
                 gui.updatePhotoCodeButton();
@@ -497,35 +529,72 @@ public class Workspace extends AppWorkspaceComponent {
         rightPane.getChildren().add(variableTablePane);
         
          table1.setOnMouseClicked(e -> {
-             if(e.getClickCount() == 1 ){
-                 currentVariable = (UMLVariables) table1.getSelectionModel().getSelectedItem();
+             
+            if(e.getClickCount() == 1 ){ //need for remove rows
+                currentVariable = (UMLVariables) table1.getSelectionModel().getSelectedItem();
+                System.out.println("Variable currently selected on one click: " +
+                        currentVariable.toString());
+                        temp00 = currentVariable.toString();
              }
              
              
             if (e.getClickCount() == 2) {
                 // OPEN UP THE SCHEDULE ITEM EDITOR
+                UMLVariables temps = currentVariable;
                 UMLVariables k = (UMLVariables) table1.getSelectionModel().getSelectedItem();
-                vy.showEditAssignmentDialog(k);
+                System.out.println("Variable before change: " + k.toString());
+                vy.showEditVariableDialog(k);
                 
                 if (vy.wasCompleteSelected()) {
                     // UPDATE THE SCHEDULE ITEM
-                    UMLVariables si = vy.getAssignment();
-                    k.setName(si.getName());
+                    System.out.println("Variable after change: " + k.toString());
+                    UMLVariables si = vy.getVariable();
+                    k.setName(si.getName()); //this will update the variable in the array automatically
                     k.setType(si.getType());
                     k.setAccesstype(si.getAccesstype());
+                    k.setStatictype(si.isStatictype());
                     
                     if(currentPane instanceof UMLClasses){
+                        currentVariable = temps;
+                        
                         UMLClasses l = (UMLClasses) currentPane;
-                        l.removeCurrentVariableName(new Text(currentVariable.toString()));
-                        l.setCurrentVariableName(new Text(k.toString()));
+                        
+                        l.removeCurrentVariableName(textTemp.get(temp00));
                         currentVariable = k;
+                
+                        String tmp1 = currentVariable.toString();
+                        Text temp = new Text(tmp1);
+                
+                        textTemp.put(tmp1, temp);
+                
+                        l.setCurrentVariableName(textTemp.get(tmp1));
+                        
+                    }
+                    
+                    if(currentPane instanceof UMLInterfaces){
+                        //Do something for interfaces
+                        currentVariable = temps;
+                        
+                        UMLInterfaces i = (UMLInterfaces) currentPane;
+                        
+                        i.removeCurrentVariableName(textTemp.get(temp00));
+                        currentVariable = k;
+                        
+                        String tmp1 = currentVariable.toString();
+                        Text temp = new Text(tmp1);
+                        
+                        textTemp.put(tmp1, temp);
+                        
+                        i.setCurrentVariableName(textTemp.get(tmp1));
+                        
                     }
             
                     // THE COURSE IS NOW DIRTY, MEANING IT'S BEEN 
                     // CHANGED SINCE IT WAS LAST SAVED, SO MAKE SURE
                     // THE SAVE BUTTON IS ENABLED
-                    //gui.getFileController().markAsEdited(gui);
-        }
+                    gui.updateToolbarControls(false);
+                    gui.updatePhotoCodeButton();
+                }
         else {
             // THE USER MUST HAVE PRESSED CANCEL, SO
             // WE DO NOTHING
@@ -593,6 +662,10 @@ public class Workspace extends AppWorkspaceComponent {
                     dummy.setText(lol.getClassNametoString());
                 if(dummyData != null)
                     dummyData.setText(lol.getPackageName());
+                table1.getItems().clear();
+                table1.getItems().addAll(lol.getVariableNames());
+                table2.getItems().clear();
+                table2.getItems().addAll(lol.getMethodNames());
                 
                 parentComboBox.getItems().clear();
                 for(VBox sh: expo.getClassList()){
@@ -608,6 +681,10 @@ public class Workspace extends AppWorkspaceComponent {
                    dummy.setText(st.getInterNametoString());
                if(dummy != null)
                    dummyData.setText(st.getPackageName());
+                table1.getItems().clear();
+                table1.getItems().addAll(st.getVariableNames());
+                table2.getItems().clear();
+                table2.getItems().addAll(st.getMethodNames());
                
                for(VBox sh: expo.getClassList()){
                     if(sh instanceof UMLClasses)
@@ -639,7 +716,7 @@ public class Workspace extends AppWorkspaceComponent {
                 st.setTranslateYer(e.getY() + s.getTranslateY());
             }
             }
-            if(selectedButton == resizeButton && leftPane.getCursor() == Cursor.CROSSHAIR){ //resizing
+            if(selectedButton == resizeButton && currentPane.getCursor() == Cursor.CROSSHAIR){ //resizing
                 if(s instanceof UMLClasses){
                     UMLClasses lol = (UMLClasses) s;
                     lol.setMinWidth(e.getSceneX() - lol.getTranslateX());
@@ -757,6 +834,8 @@ public class Workspace extends AppWorkspaceComponent {
         leftPane.getChildren().clear();
         dummy.clear();
         dummyData.clear();     
+        table1.getItems().clear();
+        table2.getItems().clear();
         selectionButton.setDisable(true);
         resizeButton.setDisable(true);
         removeButton.setDisable(true);
