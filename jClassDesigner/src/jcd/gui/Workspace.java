@@ -135,6 +135,7 @@ public class Workspace extends AppWorkspaceComponent {
     UMLVariables var;
     UMLMethods methods;
     String temp00;
+    String temp01;
     
     VBox prevPane = null;
     VBox currentPane = null;
@@ -355,21 +356,39 @@ public class Workspace extends AppWorkspaceComponent {
         zoominButton.setOnAction(eh -> {
             if(currentPane != null)
                 currentPane.setCursor(Cursor.DEFAULT);
-            
-            for(Node s: expo.getClassList()){
+            /*
+            for(VBox s: expo.getClassList()){
                 s.setScaleX(s.getScaleX() * 2);
                 s.setScaleY(s.getScaleY() * 2);
             }
+            */
+            /*
+            for(Node s: leftPane.getChildren()){
+                s.setScaleX(s.getScaleX() * 2);
+                s.setScaleY(s.getScaleY() * 2);
+            }
+            */
+            leftPane.setScaleX(leftPane.getScaleX() * 2);
+            leftPane.setScaleY(leftPane.getScaleY() * 2);
         });
         
         zoomoutButton.setOnAction(eh -> {
             if(currentPane != null)
                 currentPane.setCursor(Cursor.DEFAULT);
-            
-            for(Node s: expo.getClassList()){
+            leftPane.setScaleX(leftPane.getScaleX() / 2);
+            leftPane.setScaleY(leftPane.getScaleY() / 2);
+            /*
+            for(VBox s: expo.getClassList()){
                 s.setScaleX(s.getScaleX() /2);
                 s.setScaleY(s.getScaleY() / 2);
             }
+            */
+            /*
+            for(Node s: leftPane.getChildren()){
+                s.setScaleX(s.getScaleX() / 2);
+                s.setScaleY(s.getScaleY() / 2);
+            }
+            */
         });
         
         gridBox.setOnAction(eh -> {
@@ -555,9 +574,7 @@ public class Workspace extends AppWorkspaceComponent {
              
             if(e.getClickCount() == 1 ){ //need for remove rows
                 currentVariable = (UMLVariables) table1.getSelectionModel().getSelectedItem();
-                System.out.println("Variable currently selected on one click: " +
-                        currentVariable.toString());
-                        temp00 = currentVariable.toString();
+                temp00 = currentVariable.toString();
              }
              
              
@@ -573,10 +590,8 @@ public class Workspace extends AppWorkspaceComponent {
                     k.setName(si.getName()); //this will update the variable in the array automatically
                     k.setType(si.getType());
                     k.setAccesstype(si.getAccesstype());
-                    System.out.print(si.getAccesstype());
                     
                     k.setStatictype(si.isStatictype());
-                    System.out.println(si.isStatictype());
                     
                     if(currentPane instanceof UMLClasses){
                         currentVariable = temps;
@@ -699,9 +714,6 @@ public class Workspace extends AppWorkspaceComponent {
             }
         });
         
-        
-        
-        
         ////////////////////////////////////////////////////////////////////////
         methodTablePane = new ScrollPane();
         methodTablePane.setMaxSize(350, 200);
@@ -732,10 +744,7 @@ public class Workspace extends AppWorkspaceComponent {
     ((BorderPane) workspace).setCenter(tempo); //set the leftPane to the left of the BorderPane
     ((BorderPane) workspace).setRight(rightPane); 
     
-    
-    
-   
-    
+
     //METHOD DIALOG AND EDITING!!!!!!!!!!!!
     table2.setOnMouseClicked(e -> {
              if(currentPane != null)
@@ -743,61 +752,57 @@ public class Workspace extends AppWorkspaceComponent {
              
             if(e.getClickCount() == 1 ){ //need for remove rows
                 currentMethod = (UMLMethods) table2.getSelectionModel().getSelectedItem();
-                System.out.println("Variable currently selected on one click: " +
-                        currentVariable.toString());
-                        temp00 = currentVariable.toString();
+                temp01 = currentMethod.toString();
              }
              
              
             if (e.getClickCount() == 2) {
                 // OPEN UP THE SCHEDULE ITEM EDITOR
-                UMLVariables temps = currentVariable;
-                UMLVariables k = (UMLVariables) table1.getSelectionModel().getSelectedItem();
-                vy.showEditVariableDialog(k);
+                UMLMethods temps = currentMethod;
+                UMLMethods me = (UMLMethods) table2.getSelectionModel().getSelectedItem();
+                my.showEditVariableDialog(me);
                 
-                if (vy.wasCompleteSelected()) {
+                if (my.wasCompleteSelected()) {
                     // UPDATE THE SCHEDULE ITEM
-                    UMLVariables si = vy.getVariable();
-                    k.setName(si.getName()); //this will update the variable in the array automatically
-                    k.setType(si.getType());
-                    k.setAccesstype(si.getAccesstype());
-                    System.out.print(si.getAccesstype());
-                    
-                    k.setStatictype(si.isStatictype());
-                    System.out.println(si.isStatictype());
+                    UMLMethods jul = my.getMethods();
+                    me.setName(jul.getName()); //this will update the variable in the array automatically
+                    me.setReturntype(jul.getReturntype());
+                    me.setAccesstype(jul.getAccesstype());
+                    me.setStatictype(jul.isStatictype());
+                    me.setAbstractype(jul.isAbstractype());
                     
                     if(currentPane instanceof UMLClasses){
-                        currentVariable = temps;
+                        currentMethod = temps;
                         
                         UMLClasses l = (UMLClasses) currentPane;
                         
-                        l.removeCurrentVariableName(textTemp.get(temp00));
-                        currentVariable = k;
+                        l.removeCurrentMethodName(textTemp.get(temp01));
+                        currentMethod = me;
                 
-                        String tmp1 = currentVariable.toString();
-                        Text temp = new Text(tmp1);
+                        String tmp2 = currentMethod.toString();
+                        Text temp2 = new Text(tmp2);
                 
-                        textTemp.put(tmp1, temp);
+                        textTemp.put(tmp2, temp2);
                 
-                        l.setCurrentVariableName(textTemp.get(tmp1));
+                        l.setCurrentMethodName(textTemp.get(tmp2));
                         
                     }
                     
                     if(currentPane instanceof UMLInterfaces){
                         //Do something for interfaces
-                        currentVariable = temps;
+                        currentMethod = temps;
                         
                         UMLInterfaces i = (UMLInterfaces) currentPane;
                         
-                        i.removeCurrentVariableName(textTemp.get(temp00));
-                        currentVariable = k;
+                        i.removeCurrentMethodName(textTemp.get(temp01));
+                        currentMethod = me;
                         
-                        String tmp1 = currentVariable.toString();
-                        Text temp = new Text(tmp1);
+                        String tmp2 = currentMethod.toString();
+                        Text temp2 = new Text(tmp2);
                         
-                        textTemp.put(tmp1, temp);
+                        textTemp.put(tmp2, temp2);
                         
-                        i.setCurrentVariableName(textTemp.get(tmp1));
+                        i.setCurrentMethodName(textTemp.get(tmp2));
                         
                     }
                     gui.updateToolbarControls(false);
@@ -918,24 +923,29 @@ public class Workspace extends AppWorkspaceComponent {
                 double currentpositionY = s.getTranslateY();
                 
                 if(currentpositionX % 10 != 0){
-                    while(currentpositionX % 10 != 0)
+                    while(currentpositionX % 10 != 0){
                         currentpositionX++;
+                        currentpositionX = (int) Math.round(currentpositionX);
+                    }
                 }
                 if(currentpositionY % 10 != 0){
-                    while(currentpositionY % 10 != 0)
+                    while(currentpositionY % 10 != 0){
                         currentpositionY++;
+                        currentpositionY = (int) Math.round(currentpositionY);
+                    }
                 }
+                
                 s.setTranslateX(currentpositionX);
                 s.setTranslateY(currentpositionY);
                 //set the translatex into the specific pane.
             }
-            //check x value
-            //if not 20, snap to next lowest number divisible by 20 (for loop to check)
         });
     }
     
     public void gridding(ActionEvent e){
         if(gridBox.isSelected()){   
+            
+          
           for(int i = 0; i < 1500; i+=10){
             s = new Line();
             s.setStartY(0);
@@ -963,8 +973,13 @@ public class Workspace extends AppWorkspaceComponent {
               leftPane.getChildren().add(l);
               l.toBack();
           }
+          
+          //leftPane.getStyleClass().add("grid_lines");
+          
         }
         if(!gridBox.isSelected()){
+            //leftPane.getStyleClass().remove("grid_lines");
+            
             for(int i = 0; i < leftPane.getChildren().size(); i++){
                 Node n = leftPane.getChildren().get(i);
                 if (n instanceof Line){
@@ -973,6 +988,7 @@ public class Workspace extends AppWorkspaceComponent {
                     i--;
                 }
             }
+            
         }
     }
 
