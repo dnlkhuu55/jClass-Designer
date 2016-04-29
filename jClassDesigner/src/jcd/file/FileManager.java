@@ -27,12 +27,14 @@ import af.ui.AppMessageDialogSingleton;
 import java.io.File;
 import java.math.BigDecimal;
 import javafx.geometry.Point2D;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import jcd.data.ClassLines;
 import jcd.data.UMLClasses;
 import jcd.data.UMLInterfaces;
+import jcd.data.UMLMArgs;
 import jcd.data.UMLMethods;
 import jcd.data.UMLVariables;
 
@@ -75,9 +77,14 @@ public class FileManager implements AppFileComponent {
         ArrayList<Line> test_2 = expo.getLineList();
         ArrayList<UMLVariables> vars = new ArrayList<>();
         ArrayList<UMLMethods> mets = new ArrayList<>();
-        ArrayList<String> args = new ArrayList<>();
+        ArrayList<UMLMArgs> args = new ArrayList<>();
+        Pane leftPane = expo.getLeftPane();
         int counter = 0;
         int counter2 = 0;
+        
+        //JsonObjectBuilder ll = Json.createObjectBuilder();
+        //ll.add("LeftPaneX", leftPane.getScaleX()).add("LeftPaneY", leftPane.getScaleY());
+        //arrayBuilder.add(ll.build());
         
         for(VBox sh: test){ //arrayBuilder is the array while testing is the object
             counter = 0;
@@ -87,7 +94,8 @@ public class FileManager implements AppFileComponent {
             testing.add("Name", ((UMLClasses) sh).getClassNametoString()).add("Abstract", ((UMLClasses) sh).isAbstract())
 		.add("Package", ((UMLClasses) sh).getPackageName())
                  .add("Flag", 0).add("T_X", ((UMLClasses) sh).getTranslateXer())
-                    .add("T_Y", ((UMLClasses) sh).getTranslateYer());
+                    .add("T_Y", ((UMLClasses) sh).getTranslateYer()).add("Width", sh.getWidth())
+                    .add("Height", sh.getHeight());
             if(((UMLClasses) sh).getParentName() != null)
                 testing.add("Parent", ((UMLClasses) sh).getParentName());
             
@@ -120,9 +128,9 @@ public class FileManager implements AppFileComponent {
                         .add("AccessType", method.getAccesstype());
                 
                 args = method.getArgs();
-                for(String arguments: args){ //argsBuilder is the array while the matrix is the object
+                for(UMLMArgs arguments: args){ //argsBuilder is the array while the matrix is the object
                     JsonObjectBuilder matrix = Json.createObjectBuilder();
-                    matrix.add("Arg" + Integer.toString(counter), arguments);
+                    matrix.add("Arg" + Integer.toString(counter), arguments.getArgstype());
                     
                     argsBuilder.add(matrix.build());
                     counter++;
@@ -139,7 +147,8 @@ public class FileManager implements AppFileComponent {
                 testing.add("Name", ((UMLInterfaces) sh).getInterNametoString())
                  .add("Package", ((UMLInterfaces) sh).getPackageName())
                  .add("Flag", 1).add("T_X", ((UMLInterfaces) sh).getTranslateXer())
-                    .add("T_Y", ((UMLInterfaces) sh).getTranslateYer());
+                    .add("T_Y", ((UMLInterfaces) sh).getTranslateYer()).add("Width", sh.getWidth())
+                    .add("Height", sh.getHeight());
             
             vars = ((UMLInterfaces) sh).getVariableNames(); //the inner variable class
             mets = ((UMLInterfaces) sh).getMethodNames();
@@ -159,9 +168,9 @@ public class FileManager implements AppFileComponent {
                         .add("AccessType", method.getAccesstype());
                 
                 args = method.getArgs();
-                for(String arguments: args){ //argsBuilder is the array while the matrix is the object
+                for(UMLMArgs arguments: args){ //argsBuilder is the array while the matrix is the object
                     JsonObjectBuilder matrix = Json.createObjectBuilder();
-                    matrix.add("Arg" + Integer.toString(counter), arguments);
+                    matrix.add("Arg" + Integer.toString(counter), arguments.getArgstype());
                     
                     argsBuilder.add(matrix.build());
                     
@@ -237,11 +246,13 @@ public class FileManager implements AppFileComponent {
         
         ArrayList<UMLVariables> vars = new ArrayList<>();
         ArrayList<UMLMethods> mets = new ArrayList<>();
-        ArrayList<String> args = new ArrayList<>();
+        ArrayList<UMLMArgs> args = new ArrayList<>();
         ArrayList<Line> lines = new ArrayList<>();
+        Pane ll = new Pane();
         int counter = 0;
         int counter2 = 0;
 
+        //load that leftPane
         
         for(JsonValue sh: json){
             JsonObject shaping = (JsonObject) sh;
@@ -263,6 +274,8 @@ public class FileManager implements AppFileComponent {
                 r.setParentName(shaping.getString("Parent"));
                 r.setTranslateXer(shaping.getJsonNumber("T_X").doubleValue());
                 r.setTranslateYer(shaping.getJsonNumber("T_Y").doubleValue());
+                r.setWidthy(shaping.getJsonNumber("Width").doubleValue());
+                r.setHeighty(shaping.getJsonNumber("Height").doubleValue());
                 
                 counter2 = 0;
                 JsonArray parentInterfaces = shaping.getJsonArray("parentInterfaces");
@@ -307,7 +320,9 @@ public class FileManager implements AppFileComponent {
                     JsonArray argsLoading = into_met.getJsonArray("arguments");
                     for(JsonValue load_arguments: argsLoading){
                         JsonObject into_args = (JsonObject) load_arguments;
-                        args.add(into_args.getString("Arg" + Integer.toString(counter)));
+                        //args.add(into_args.getString("Arg" + Integer.toString(counter)));
+                        UMLMArgs a = new UMLMArgs(into_args.getString("Arg" + Integer.toString(counter)));
+                        args.add(a);
                         counter++;
                     }
                     mets.add(m);
@@ -321,6 +336,8 @@ public class FileManager implements AppFileComponent {
             if(flag ==1){ //Interfaces
                 
                 UMLInterfaces s = new UMLInterfaces(shaping.getString("Name"));
+                s.setWidthy(shaping.getJsonNumber("Width").doubleValue());
+                s.setHeighty(shaping.getJsonNumber("Height").doubleValue());
                 s.setInterName(shaping.getString("Name"));
                 
                 s.setInterNametoString(shaping.getString("Name"));
@@ -363,7 +380,9 @@ public class FileManager implements AppFileComponent {
                     JsonArray argsLoading = into_met.getJsonArray("arguments");
                     for(JsonValue load_arguments: argsLoading){
                         JsonObject into_args = (JsonObject) load_arguments;
-                        args.add(into_args.getString("Arg" + Integer.toString(counter)));
+                        //args.add(into_args.getString("Arg" + Integer.toString(counter)));
+                        UMLMArgs a = new UMLMArgs(into_args.getString("Arg" + Integer.toString(counter)));
+                        args.add(a);
                     }
                     mets.add(m);
                     s.setCurrentMethodName(new Text(m.toString()));
@@ -512,14 +531,14 @@ public class FileManager implements AppFileComponent {
                                 
                                 for(int j = 0; j < sz.getArgs().size(); j++){ //for every argument in that method, look at the arguments
                                     
-                                    String l = sz.getArgs().get(j);
+                                    UMLMArgs l = sz.getArgs().get(j);
                                     for(int k = 0; k < hello.length; k++){
-                                        String mt = hello[k].getName() + "." + l;
+                                        String mt = hello[k].getName() + "." + l.getArgstype();
                                         try{
-                                            if(!l.equals("Event")){
-                                                if(!l.equals("Text")){
+                                            if(!l.getArgstype().equals("Event")){
+                                                if(!l.getArgstype().equals("Text")){
                                                 Class.forName(mt);
-                                                java_source = java_source + "import " + hello[k].getName() + "." + l + "; \n";
+                                                java_source = java_source + "import " + hello[k].getName() + "." + l.getArgstype() + "; \n";
                                                 }
                                             }
                                         }catch (Exception e){
@@ -542,14 +561,14 @@ public class FileManager implements AppFileComponent {
                                 
                                         for(int j = 0; j < m.getArgs().size(); j++){ //for every argument in that method, look at the arguments
                                     
-                                            String l = m.getArgs().get(j);
+                                            UMLMArgs l = m.getArgs().get(j);
                                                 for(int k = 0; k < hello.length; k++){
-                                                    String mt = hello[k].getName() + "." + l;
+                                                    String mt = hello[k].getName() + "." + l.getArgstype();
                                                     try{
-                                                    if(!l.equals("Event")){
-                                                        if(!l.equals("Text")){
+                                                    if(!l.getArgstype().equals("Event")){
+                                                        if(!l.getArgstype().equals("Text")){
                                                             Class.forName(mt);
-                                                        java_source = java_source + "import " + hello[k].getName() + "." + l + "; \n";
+                                                        java_source = java_source + "import " + hello[k].getName() + "." + l.getArgstype() + "; \n";
                                                         }
                                                     }
                                                     }catch (Exception e){
@@ -574,14 +593,14 @@ public class FileManager implements AppFileComponent {
                                 
                                             for(int j = 0; j < m.getArgs().size(); j++){ //for every argument in that method, look at the arguments
                                     
-                                                String l = m.getArgs().get(j);
+                                                UMLMArgs l = m.getArgs().get(j);
                                                     for(int k = 0; k < hello.length; k++){
-                                                        String mt = hello[k].getName() + "." + l;
+                                                        String mt = hello[k].getName() + "." + l.getArgstype();
                                                         try{
-                                                        if(!l.equals("Event")){
-                                                        if(!l.equals("Text")){
+                                                        if(!l.getArgstype().equals("Event")){
+                                                        if(!l.getArgstype().equals("Text")){
                                                         Class.forName(mt);
-                                                        java_source = java_source + "import " + hello[k].getName() + "." + l + "; \n";
+                                                        java_source = java_source + "import " + hello[k].getName() + "." + l.getArgstype() + "; \n";
                                                         }
                                                         }
                                                         }catch (Exception e){
@@ -664,11 +683,11 @@ public class FileManager implements AppFileComponent {
                                 
                                 if(!m.getArgs().isEmpty()){
                                     for(int i = 0; i < m.getArgs().size()-1; i++){ //except the last method
-                                        java_source = java_source + m.getArgs().get(i) + " arg" + Integer.toString(i) + ", ";     
+                                        java_source = java_source + m.getArgs().get(i).getArgstype() + " arg" + Integer.toString(i) + ", ";     
                                 }
                                 
                                 //for the last argument
-                                    java_source = java_source + m.getArgs().get(m.getArgs().size() - 1) + " arg" +
+                                    java_source = java_source + m.getArgs().get(m.getArgs().size() -1).getArgstype() + " arg" +
                                         Integer.toString(m.getArgs().size() - 1);                             
                                 }
                                 java_source = java_source + ")"; //opening a method
@@ -722,11 +741,11 @@ public class FileManager implements AppFileComponent {
                                 
                                             if(!m.getArgs().isEmpty()){
                                                 for(int k = 0; k < m.getArgs().size()-1; k++){ //except the last method
-                                                java_source = java_source + m.getArgs().get(k) + " arg" + Integer.toString(k) + ", ";     
+                                                java_source = java_source + m.getArgs().get(k).getArgstype() + " arg" + Integer.toString(k) + ", ";     
                                             }
                                 
                                             //for the last argument
-                                            java_source = java_source + m.getArgs().get(m.getArgs().size() - 1) + " arg" +
+                                            java_source = java_source + m.getArgs().get(m.getArgs().size()-1).getArgstype() + " arg" +
                                                 Integer.toString(m.getArgs().size() - 1);
                                             }
                                             java_source = java_source + "){ \n"; 
@@ -780,11 +799,11 @@ public class FileManager implements AppFileComponent {
                                 
                                         if(!m.getArgs().isEmpty()){
                                             for(int k = 0; k < m.getArgs().size()-1; k++){ //except the last method
-                                            java_source = java_source + m.getArgs().get(k) + " arg" + Integer.toString(k) + ", ";     
+                                            java_source = java_source + m.getArgs().get(k).getArgstype() + " arg" + Integer.toString(k) + ", ";     
                                         }
                                 
                                         //for the last argument
-                                        java_source = java_source + m.getArgs().get(m.getArgs().size() - 1) + " arg" +
+                                        java_source = java_source + m.getArgs().get(m.getArgs().size() - 1).getArgstype() + " arg" +
                                             Integer.toString(m.getArgs().size() - 1);
                                         }
                                         java_source = java_source + "){ \n"; 
@@ -901,14 +920,14 @@ public class FileManager implements AppFileComponent {
                                 
                                 for(int j = 0; j < sz.getArgs().size(); j++){ //for every argument in that method, look at the arguments
                                     
-                                    String l = sz.getArgs().get(j);
+                                    UMLMArgs l = sz.getArgs().get(j);
                                     for(int k = 0; k < hello.length; k++){
-                                    String mt = hello[k].getName() + "." + l;
+                                    String mt = hello[k].getName() + "." + l.getArgstype();
                                     try{
-                                        if(!l.equals("Event")){
-                                            if(!l.equals("Text")){
+                                        if(!l.getArgstype().equals("Event")){
+                                            if(!l.getArgstype().equals("Text")){
                                                 Class.forName(mt);
-                                                java_source = java_source + "import " + hello[k].getName() + "." + l + "; \n";
+                                                java_source = java_source + "import " + hello[k].getName() + "." + l.getArgstype() + "; \n";
                                             }
                                         }
                                     }catch (Exception e){
