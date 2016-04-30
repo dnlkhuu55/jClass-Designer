@@ -49,6 +49,8 @@ import static af.settings.AppStartupConstants.PATH_WORK;
 import af.ui.AppMessageDialogSingleton;
 import af.ui.AppYesNoCancelDialogSingleton;
 import java.util.HashMap;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
@@ -85,19 +87,10 @@ public class Workspace extends AppWorkspaceComponent {
     // IT KNOWS THE GUI IT IS PLACED INSIDE
     AppGUI gui;
 
-    ScrollPane tempo;
-    Pane leftPane;
-    Pane varPane;
-    Pane metPane;
-    Pane argPane;
+    ScrollPane tempo, variableTablePane, methodTablePane;
+    Pane leftPane, varPane, metPane, argPane;
     VBox rightPane;
-    HBox classPane;
-    HBox packagePane;
-    HBox parentPane;
-    HBox variablePane;
-    ScrollPane variableTablePane;
-    HBox methodPane;
-    ScrollPane methodTablePane;
+    HBox classPane, packagePane, parentPane, variablePane, methodPane, wholePane;
     Button photoButton = new Button();
     Button codeButton = new Button();
     Button selectionButton = new Button();
@@ -115,15 +108,11 @@ public class Workspace extends AppWorkspaceComponent {
     Button minusMButton = new Button();
     Button addAButton = new Button();
     Button minusAButton = new Button();
+    Button removeParentButton = new Button();
     TextField dummy = new TextField();
     TextField dummyData = new TextField();
-    TableView table1;
-    TableColumn NameCol1;
-    TableColumn TypeCol1;
-    TableColumn StaticCol1;
-    TableColumn AccessCol1;
-    TableView table2;
-    TableView table3;
+    TableView table1, table2, table3;
+    TableColumn NameCol1, TypeCol1, StaticCol1, AccessCol1;
     Button selectedButton;
     Text prevText = new Text();
     Text currentText = new Text();
@@ -137,20 +126,15 @@ public class Workspace extends AppWorkspaceComponent {
     UMLInterfaces ie;
     UMLVariables var;
     UMLMethods methods;
-    String temp00;
-    String temp01;
+    String temp00, temp01;
     
     VBox prevPane = null;
     VBox currentPane = null;
     UMLVariables currentVariable;
     UMLMethods currentMethod;
     UMLMArgs currentArg;
-    FlowPane fileToolbarPane;
-    FlowPane editToolbarPane;
-    FlowPane viewToolbarPane;
-    HBox wholePane;
-    Line s;
-    Line l;
+    FlowPane fileToolbarPane, editToolbarPane, viewToolbarPane;
+    Line s, l;
     
     HashMap<String,Text> textTemp = new HashMap<>(); 
     
@@ -234,6 +218,8 @@ public class Workspace extends AppWorkspaceComponent {
                 currentPane.setStyle("-fx-border-color: #000000; -fx-background-color: #ffffff");
                 currentPane = null;
                 table1.getItems().clear();
+                table2.getItems().clear();
+                table3.getItems().clear();
                 prevPane = currentPane;
                 selectedButton = null;
                 selectionButton.setDisable(false);
@@ -245,7 +231,6 @@ public class Workspace extends AppWorkspaceComponent {
                 if (currentPane != null)
                     currentPane.setCursor(Cursor.DEFAULT);
             }}
-            
         }); 
                
         addClassButton.setOnAction(e -> {
@@ -295,6 +280,7 @@ public class Workspace extends AppWorkspaceComponent {
             dummyData.setText(sc.getPackageName());
         table1.getItems().clear();
         table2.getItems().clear();
+        table3.getItems().clear();
         });
         
         addInterfaceButton.setOnAction(eh -> {
@@ -342,9 +328,9 @@ public class Workspace extends AppWorkspaceComponent {
             dummyData.setText(ie.getPackageName());
         table1.getItems().clear();
         table2.getItems().clear();
+        table3.getItems().clear();
         });
         
-
         removeButton.setOnAction(eh -> {
             leftPane.setCursor(Cursor.DEFAULT);
             if(currentPane instanceof VBox){
@@ -451,14 +437,33 @@ public class Workspace extends AppWorkspaceComponent {
         
         //ComboBox parentComboBox = new ComboBox();
         parentComboBox.getItems().addAll(
-            "NOTHING",
             "NULL" 
         );
         
         parentComboBox.setEditable(true);
         parentPane.getChildren().add(parentComboBox);
-        
+        removeParentButton = initChildButton(parentPane, PropertyType.REMOVE_ICON.toString(), PropertyType.REMOVE_TOOLTIP.toString(), true);
         rightPane.getChildren().add(parentPane);
+        
+        parentComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+            @Override
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                String acessy = newValue.toString();
+                for(VBox h: expo.getClassList()){ //we need to check if the string is a class or interface
+                    
+                }
+                
+                
+                if (currentPane instanceof UMLClasses){
+                    int flag = 0; //0 means you must add the interface parent
+                    UMLClasses now = (UMLClasses) currentPane; //interfaces doesn't have parents
+                    for(String h : now.getParentInterfaces()){
+                        if(acessy.equals(h))
+                            flag = 1; //1 means you already added it
+                    }
+                } 
+            }
+        });
         
        //////////////////////////////////////////////////////////////////////////
         variablePane = new HBox();
@@ -522,7 +527,6 @@ public class Workspace extends AppWorkspaceComponent {
                     
                     j.removeCurrentVariableName(textTemp.get(currentVariable.toString()));
                     table1.getItems().remove(currentVariable);
-                    
                 }
                 if(currentPane instanceof UMLInterfaces){
                     UMLInterfaces j = (UMLInterfaces) currentPane;
@@ -535,8 +539,6 @@ public class Workspace extends AppWorkspaceComponent {
                 gui.updatePhotoCodeButton();
             }
         });
-        
-        
         rightPane.getChildren().add(variablePane);
         
       //////////////////////////////////////////////////////////////////////////
@@ -564,8 +566,8 @@ public class Workspace extends AppWorkspaceComponent {
         variableTablePane.setContent(varPane);
         rightPane.getChildren().add(variableTablePane);
         
-         table1.setOnMouseClicked(e -> {
-             if(currentPane != null)
+        table1.setOnMouseClicked(e -> {
+            if(currentPane != null)
                 currentPane.setCursor(Cursor.DEFAULT);
              
             if(e.getClickCount() == 1 ){ //need for remove rows
@@ -651,6 +653,7 @@ public class Workspace extends AppWorkspaceComponent {
             UMLMethods me = my.getMethods();
             currentMethod = me;
             table2.getItems().add(currentMethod);
+            table3.getItems().clear();
             
             if(currentPane instanceof UMLClasses){
                 UMLClasses j = (UMLClasses) currentPane;
@@ -703,6 +706,7 @@ public class Workspace extends AppWorkspaceComponent {
                 }
                 gui.updateToolbarControls(false);
                 gui.updatePhotoCodeButton();
+                currentMethod = null;
             }
         });
         
@@ -718,8 +722,7 @@ public class Workspace extends AppWorkspaceComponent {
         TableColumn AbstractCol2 = new TableColumn("Abstract");
         TableColumn AccessCol2 = new TableColumn("Access");
         TableColumn Arg0 = new TableColumn("Arg0");
-        
-        
+
         NameCol2.setCellValueFactory(new PropertyValueFactory<UMLMethods, String>("name"));
         ReturnCol2.setCellValueFactory(new PropertyValueFactory<UMLMethods, String>("returntype"));
         StaticCol2.setCellValueFactory(new PropertyValueFactory<UMLMethods, Boolean>("statictype"));
@@ -741,6 +744,8 @@ public class Workspace extends AppWorkspaceComponent {
             if(e.getClickCount() == 1 ){ //need for remove rows
                 currentMethod = (UMLMethods) table2.getSelectionModel().getSelectedItem();
                 temp01 = currentMethod.toString();
+                table3.getItems().clear();
+                table3.getItems().addAll(currentMethod.getArgs()); 
              }
 
             if (e.getClickCount() == 2) {
@@ -826,8 +831,7 @@ public class Workspace extends AppWorkspaceComponent {
                     j.getMethodNames().remove(currentMethod);
                     
                     j.removeCurrentMethodName(textTemp.get(currentMethod.toString()));
-                    
-                    
+
                     currentMethod.addUMLMArgs(currentArg);
                     j.getMethodNames().add(currentMethod);
                 
@@ -849,8 +853,7 @@ public class Workspace extends AppWorkspaceComponent {
                 gui.updateToolbarControls(false);
                 gui.updatePhotoCodeButton();
             }          
-        }
-            //remove the current method and add the new method    
+        } 
         else {
         }    
         });
@@ -1023,6 +1026,11 @@ public class Workspace extends AppWorkspaceComponent {
                 table1.getItems().addAll(lol.getVariableNames());
                 table2.getItems().clear();
                 table2.getItems().addAll(lol.getMethodNames());
+                table3.getItems().clear();
+                if(!lol.getMethodNames().isEmpty()){
+                    if(!lol.getMethodNames().get(0).getArgs().isEmpty())
+                        table3.getItems().addAll(lol.getMethodNames().get(0).getArgs());
+                }
                 
                 parentComboBox.getItems().clear();
                 for(VBox sh: expo.getClassList()){
@@ -1042,6 +1050,11 @@ public class Workspace extends AppWorkspaceComponent {
                 table1.getItems().addAll(st.getVariableNames());
                 table2.getItems().clear();
                 table2.getItems().addAll(st.getMethodNames());
+                table3.getItems().clear();
+                if(!st.getMethodNames().isEmpty()){
+                    if(!st.getMethodNames().get(0).getArgs().isEmpty())
+                        table3.getItems().addAll(st.getMethodNames().get(0).getArgs());
+                }
                
                for(VBox sh: expo.getClassList()){
                     if(sh instanceof UMLClasses)
@@ -1198,6 +1211,7 @@ public class Workspace extends AppWorkspaceComponent {
         dummyData.clear();     
         table1.getItems().clear();
         table2.getItems().clear();
+        table3.getItems().clear();
         selectionButton.setDisable(true);
         resizeButton.setDisable(true);
         removeButton.setDisable(true);
