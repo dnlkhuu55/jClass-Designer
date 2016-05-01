@@ -116,7 +116,7 @@ public class Workspace extends AppWorkspaceComponent {
     Button selectedButton;
     Text prevText = new Text();
     Text currentText = new Text();
-    ComboBox parentComboBox = new ComboBox();
+    ComboBox parentComboBox;
     
     CheckBox gridBox, snapBox;
     VBox checkBox = new VBox();
@@ -430,38 +430,74 @@ public class Workspace extends AppWorkspaceComponent {
         
         ////////////////////////////////////////////////////////////////////////
         parentPane = new HBox();
-        
+        parentComboBox = new ComboBox();
         Label parentName = new Label("Parent: ");
         parentName.setFont(Font.font("Arial", 10));
         parentPane.getChildren().add(parentName);
         
-        //ComboBox parentComboBox = new ComboBox();
-        parentComboBox.getItems().addAll(
-            "NULL" 
-        );
-        
         parentComboBox.setEditable(true);
         parentPane.getChildren().add(parentComboBox);
-        removeParentButton = initChildButton(parentPane, PropertyType.REMOVE_ICON.toString(), PropertyType.REMOVE_TOOLTIP.toString(), true);
+        removeParentButton = initChildButton(parentPane, PropertyType.REMOVE_ICON.toString(), PropertyType.REMOVE_TOOLTIP.toString(), false);
         rightPane.getChildren().add(parentPane);
-        
+
         parentComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                try{
                 String acessy = newValue.toString();
+                int flag_0 = 0; //custom external class 
                 for(VBox h: expo.getClassList()){ //we need to check if the string is a class or interface
-                    
+                    if(h instanceof UMLClasses){
+                        if(acessy.equals(((UMLClasses) h).getClassNametoString()))
+                            flag_0 = 1;
+                    }
+                    if (h instanceof UMLInterfaces){
+                        if(acessy.equals(((UMLInterfaces) h).getInterNametoString()))
+                            flag_0 = 2;
+                    }
                 }
-                
-                
                 if (currentPane instanceof UMLClasses){
                     int flag = 0; //0 means you must add the interface parent
                     UMLClasses now = (UMLClasses) currentPane; //interfaces doesn't have parents
-                    for(String h : now.getParentInterfaces()){
-                        if(acessy.equals(h))
+                    if(flag_0 == 2){
+                        for(String h : now.getParentInterfaces()){
+                            if(acessy.equals(h))
                             flag = 1; //1 means you already added it
+                        }
+                        if(flag == 0){
+                            now.getParentInterfaces().add(acessy);
+                        }
+                    }
+                    if(flag_0 == 1){
+                        now.setParentName(acessy);
+                    }
+                    if(flag_0 == 0){
+                        now.setParentName(acessy);
+                        
+                        UMLClasses ex = new UMLClasses(acessy, null, null, null, null, 150, 150);
+                        createListener(ex);
+                        leftPane.getChildren().add(ex);
                     }
                 } 
+            }catch(Exception e){
+                        System.out.println("Clicking error");
+                    }
+            }
+        });
+        
+        removeParentButton.setOnAction(e -> {
+            String lol = (String) parentComboBox.getSelectionModel().getSelectedItem();
+            
+            if(currentPane != null){
+                if(currentPane instanceof UMLClasses){
+                    UMLClasses no = (UMLClasses) currentPane;
+                    if(lol.equals(no.getParentName()))
+                        no.setParentName("");
+                    else{
+                        no.getParentInterfaces().remove(lol);
+                    }
+                }
+                parentComboBox.getSelectionModel().clearSelection();
             }
         });
         
@@ -1039,6 +1075,14 @@ public class Workspace extends AppWorkspaceComponent {
                     if(sh instanceof UMLInterfaces)
                         parentComboBox.getItems().add(((UMLInterfaces) sh).getInterNametoString());
                 }  
+                if(!lol.getPackageName().equals(""))
+                    parentComboBox.getSelectionModel().select(lol.getClassNametoString());
+                else if (!lol.getParentInterfaces().isEmpty()){
+                    parentComboBox.setValue(lol.getParentInterfaces().get(0));
+                }
+                else{
+                    //DO NOTHING
+                }
             }
            if(currentPane instanceof UMLInterfaces){
                UMLInterfaces st = (UMLInterfaces) currentPane;
@@ -1056,12 +1100,7 @@ public class Workspace extends AppWorkspaceComponent {
                         table3.getItems().addAll(st.getMethodNames().get(0).getArgs());
                 }
                
-               for(VBox sh: expo.getClassList()){
-                    if(sh instanceof UMLClasses)
-                        parentComboBox.getItems().add(((UMLClasses) sh).getClassNametoString());
-                    if(sh instanceof UMLInterfaces)
-                        parentComboBox.getItems().add(((UMLInterfaces) sh).getInterNametoString());
-                }
+               parentComboBox.getItems().clear(); //interfaces could have parent interfaces, but too lazy
            }
         }   
         
