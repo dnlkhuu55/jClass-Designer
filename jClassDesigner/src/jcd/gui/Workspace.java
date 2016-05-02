@@ -125,7 +125,7 @@ public class Workspace extends AppWorkspaceComponent {
     
     static final int BUTTON_TAG_WIDTH = 40;
     UMLClasses sc, toLine;
-    UMLInterfaces ie;
+    UMLInterfaces ie, toInterface;
     UMLVariables var;
     UMLMethods methods;
     String temp00, temp01;
@@ -148,6 +148,7 @@ public class Workspace extends AppWorkspaceComponent {
     VariablesDialog vy;
     MethodsDialog my;
     ArgsDialog ay;
+    ClassLines ba;
     
     //UndoRedoManager doing = new UndoRedoManager();
     URManager urtest = new URManager();
@@ -493,6 +494,7 @@ public class Workspace extends AppWorkspaceComponent {
                     if (h instanceof UMLInterfaces){
                         if(acessy.equals(((UMLInterfaces) h).getInterNametoString())){
                             flag_0 = 2;
+                            toInterface = (UMLInterfaces) h;
                         }
                     }
                 }
@@ -506,23 +508,39 @@ public class Workspace extends AppWorkspaceComponent {
                         }
                         if(flag == 0){
                             now.getParentInterfaces().add(acessy);
+                            ba = new ClassLines();
+                            ba.setStartX(currentPane.getTranslateX());
+                            ba.setStartY(currentPane.getTranslateY());
+                            ba.setEndX(toInterface.getTranslateX());
+                            ba.setEndY(toInterface.getTranslateY());
+                            ba.startXProperty().bind(currentPane.translateXProperty());
+                            ba.startYProperty().bind(currentPane.translateYProperty());
+                            ba.endXProperty().bind(toInterface.translateXProperty());
+                            ba.endYProperty().bind(toInterface.translateYProperty());
+                            ba.setStart_node(now.getClassNametoString());
+                            ba.setEnd_node(toInterface.getInterNametoString());
+                            leftPane.getChildren().add(ba);
+                            expo.getLineList().add(ba);
                         }
                     }
                     if(flag_0 == 1){
                         now.setParentName(acessy);
-                        ClassLines s = new ClassLines();
+                        ba = new ClassLines();
                         //add the line here
                         //Line s = new Line();
-                        s.setStartX(currentPane.getTranslateX() + 5);
-                        s.setStartY(currentPane.getTranslateY());
-                        s.setEndX(toLine.getTranslateX());
-                        s.setEndY(toLine.getTranslateY());
+                        ba.setStartX(currentPane.getTranslateX());
+                        ba.setStartY(currentPane.getTranslateY());
+                        ba.setEndX(toLine.getTranslateX());
+                        ba.setEndY(toLine.getTranslateY());
                         //s.setEndY(100);
-                        s.startXProperty().bind(currentPane.translateXProperty());
-                        s.startYProperty().bind(currentPane.translateYProperty());
-                        s.endXProperty().bind(toLine.translateXProperty());
-                        s.endYProperty().bind(toLine.translateYProperty());
-                        leftPane.getChildren().add(s); //test
+                        ba.startXProperty().bind(currentPane.translateXProperty());
+                        ba.startYProperty().bind(currentPane.translateYProperty());
+                        ba.endXProperty().bind(toLine.translateXProperty());
+                        ba.endYProperty().bind(toLine.translateYProperty());
+                        ba.setStart_node(now.getClassNametoString());
+                        ba.setEnd_node(toLine.getClassNametoString());
+                        leftPane.getChildren().add(ba); //test
+                        expo.getLineList().add(ba);
                     }
                     if(flag_0 == 0){
                         now.setParentName(acessy);
@@ -530,6 +548,20 @@ public class Workspace extends AppWorkspaceComponent {
                         UMLClasses ex = new UMLClasses(acessy, null, null, null, null, 150, 150);
                         createListener(ex);
                         leftPane.getChildren().add(ex);
+                        
+                        ba = new ClassLines();
+                        ba.setStartX(currentPane.getTranslateX());
+                        ba.setStartY(currentPane.getTranslateY());
+                        ba.setEndX(ex.getTranslateX());
+                        ba.setEndY(ex.getTranslateY());
+                        ba.startXProperty().bind(currentPane.translateXProperty());
+                        ba.startYProperty().bind(currentPane.translateYProperty());
+                        ba.endXProperty().bind(ex.translateXProperty());
+                        ba.endYProperty().bind(ex.translateYProperty());
+                        ba.setStart_node(now.getClassNametoString());
+                        ba.setEnd_node(ex.getClassNametoString());
+                        leftPane.getChildren().add(ba);
+                        expo.getLineList().add(ba);
                     }
                 } 
                 expo.undoing(); //!!!!!!!!!!!!!!!
@@ -1152,8 +1184,8 @@ public class Workspace extends AppWorkspaceComponent {
                     if(sh instanceof UMLInterfaces)
                         parentComboBox.getItems().add(((UMLInterfaces) sh).getInterNametoString());
                 }  
-                if(!lol.getPackageName().equals(""))
-                    parentComboBox.getSelectionModel().select(lol.getClassNametoString());
+                if(!lol.getParentName().equals(""))
+                    parentComboBox.getSelectionModel().select(lol.getParentName());
                 else if (!lol.getParentInterfaces().isEmpty()){
                     parentComboBox.setValue(lol.getParentInterfaces().get(0));
                 }
@@ -1405,13 +1437,17 @@ public class Workspace extends AppWorkspaceComponent {
                st.setPrefHeight(st.getHeighty());
                leftPane.getChildren().add(st);
            }
-           
             currentPane = s;
             addButton.setDisable(false);
             minusButton.setDisable(false);
             addMButton.setDisable(false);
             minusMButton.setDisable(false);
         }     
+        
+                   
+        for(ClassLines cl: expo.getLineList()){
+               leftPane.getChildren().add(cl);
+        }
         currentPane.setStyle("-fx-border-color: #ffff00");
         
         leftPane.setCursor(Cursor.DEFAULT);
