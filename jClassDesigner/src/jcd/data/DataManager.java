@@ -5,7 +5,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
 import af.components.AppDataComponent;
 import af.AppTemplate;
+import java.util.Stack;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import jcd.gui.Workspace;
@@ -21,13 +23,40 @@ public class DataManager implements AppDataComponent {
     // THIS IS A SHARED REFERENCE TO THE APPLICATION
     AppTemplate app;
     ArrayList<VBox> classList = new ArrayList<>();
-    ArrayList<Line> lineList = new ArrayList<>();
+    ArrayList<ClassLines> lineList = new ArrayList<>();
+    Pane leftPane = new Pane(); //save the leftPane (zoom in and out)
+    Stack undoStack = new Stack();
+    Stack redoStack = new Stack();
     
     public ArrayList<VBox> getClassList(){
         return classList;
     }
-    public ArrayList<Line> getLineList(){
+    public void setClassList(ArrayList<VBox> s){
+        this.classList = s;
+    }
+    public ArrayList<ClassLines> getLineList(){
         return lineList;
+    }
+    public void setLineList(ArrayList<ClassLines> l){
+        this.lineList = l;
+    }
+    
+    public void setLeftPane(Pane l){
+        leftPane = l;
+    }
+    public Pane getLeftPane(){
+        return leftPane;
+    }
+    public void undoing(){
+        undoStack.push(this);
+    }
+    public void loadUndo(){
+        DataManager s = (DataManager) undoStack.pop();
+        this.setClassList(s.getClassList());
+        this.setLineList(s.getLineList());
+        this.setLeftPane(s.getLeftPane());
+        reload();
+        redoStack.push(s);
     }
 
     /**
@@ -55,5 +84,11 @@ public class DataManager implements AppDataComponent {
     public void photo(){
         Workspace expo = (Workspace) app.getWorkspaceComponent();
         expo.photoGo();
+    }
+
+    public void reload() {
+        Workspace expo = (Workspace) app.getWorkspaceComponent();
+        expo.reloadWorkspace();
+        expo.activateWorkspace(app.getGUI().getAppPane());
     }
 }

@@ -357,6 +357,7 @@ public class Workspace extends AppWorkspaceComponent {
             if(currentPane instanceof VBox){
                 if(currentPane != null)
                     currentPane.setCursor(Cursor.DEFAULT);
+
                 leftPane.getChildren().remove(currentPane);
                 expo.getClassList().remove(currentPane);
                 currentPane = null;
@@ -578,12 +579,16 @@ public class Workspace extends AppWorkspaceComponent {
             if(currentPane != null){
                 if(currentPane instanceof UMLClasses){
                     UMLClasses no = (UMLClasses) currentPane;
-                    if(lol.equals(no.getParentName()))
+                    if(lol.equals(no.getParentName())){
                         no.setParentName("");
+                    }
                     else{
                         no.getParentInterfaces().remove(lol);
                     }
                 }
+                trying(lol);
+                
+                
                 parentComboBox.getSelectionModel().clearSelection();
                 expo.undoing(); //!!!!!!!!!!!!!!
             }
@@ -1319,12 +1324,22 @@ public class Workspace extends AppWorkspaceComponent {
             for(int i = 0; i < leftPane.getChildren().size(); i++){
                 Node n = leftPane.getChildren().get(i);
                 if (n instanceof Line){
-                    
+                    if(!(n instanceof ClassLines)){
                     leftPane.getChildren().remove(n);
                     i--;
+                    }
                 }
             }
         }
+    }
+    public void trying(String lol){
+        DataManager expo = (DataManager) app.getDataComponent();
+        for(ClassLines sc: expo.getLineList()){
+                    if(sc.getEnd_node().equals(lol)){
+                        leftPane.getChildren().remove(sc);
+                        expo.getLineList().remove(sc);
+                    }
+                }
     }
 
     public void initStyle(){

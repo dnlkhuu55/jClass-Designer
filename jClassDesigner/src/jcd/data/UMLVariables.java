@@ -1,132 +1,123 @@
 
 package jcd.data;
 
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.text.Text;
 
 /**
  *
  * @author dnlkhuu77
  */
-public class UMLVariables extends Text {
-    private String name;
-    private String type; //change this to the combobox
-    private boolean statictype;
-    private String accesstype; //false means private
-    //use an int flag to tell if variable is private, public, or protected
-    private TextField naming;
-    private TextField typing;
-    private CheckBox staticing;
-    private ComboBox accessing;
-    private HBox table1;
+public class UMLVariables{
     
+    final StringProperty name;
+    final StringProperty type;
+    final BooleanProperty statictype;
+    final StringProperty accesstype;
     
     public UMLVariables(){
-        name = " ";
-        type = "int";
-        statictype = false;
-        accesstype = "public";
+        this.name = new SimpleStringProperty("");
+        this.type = new SimpleStringProperty("int");
+        this.statictype = new SimpleBooleanProperty(false);
+        this.accesstype = new SimpleStringProperty("public");
     }
     
     public UMLVariables(String n, String t, boolean st, String at){
-        name = n;
-        type = t;
-        statictype = st;
-        accesstype = at;
+        this.name = new SimpleStringProperty(n);
+        this.type = new SimpleStringProperty(t);
+        this.statictype = new SimpleBooleanProperty(st);
+        this.accesstype = new SimpleStringProperty(at);
     }
 
     /**
      * @return the name
      */
     public String getName() {
-        return name;
+        return name.get();
     }
 
     /**
      * @param name the name to set
      */
     public void setName(String name) {
-        this.name = name;
+        this.name.set(name);
+    }
+    
+    public StringProperty nameProperty() {
+        return name;
     }
 
     /**
      * @return the type
      */
     public String getType() {
-        return type;
+        return type.get();
     }
 
     /**
      * @param type the type to set
      */
     public void setType(String type) {
-        this.type = type;
+        this.type.set(type);
+    }
+    
+    public StringProperty typeProperty() {
+        return type;
     }
 
     /**
      * @return the isAbstract
      */
     public boolean isStatictype() {
-        return statictype;
+        return statictype.get();
     }
 
     /**
      * @param isStatic the isAbstract to set
      */
     public void setStatictype(boolean statictype) {
-        this.statictype = statictype;
+        this.statictype.set(statictype);
+    }
+    
+    public BooleanProperty statictypeProperty() {
+        return statictype;
     }
 
     /**
      * @return the access
      */
     public String getAccesstype() {
-        return accesstype;
+        return accesstype.get();
     }
 
     /**
      * @param access the access to set
      */
     public void setAccesstype(String accesstype) {
-        this.accesstype = accesstype;
+        this.accesstype.set(accesstype);
     }
     
-    public HBox settingStuff(){
-        table1 = new HBox();
-        naming = new TextField();
-        naming.setPrefWidth(100);
-        typing = new TextField();
-        typing.setPrefWidth(100);
-        staticing = new CheckBox();
-        staticing.setPrefWidth(100);
-        
-        accessing = new ComboBox();
-        accessing.getItems().addAll("public", "private", "protected");
-        accessing.setPrefWidth(100);
-        
-        table1.getChildren().addAll(naming, typing, staticing, accessing);
-        
-        return table1;
+    public StringProperty accesstypeProperty() {
+        return accesstype;
     }
     
     @Override
     public String toString(){
         String s = new String();
-        if(accesstype.equals("public"))
+        if(getAccesstype().equals("public"))
             s = s + "+ ";
-        else if(accesstype.equals("private"))
+        else if(getAccesstype().equals("private"))
             s = s + "- ";
         else
             s = s + "# ";
         
-        if(statictype == true)
+        if(isStatictype() == true)
             s = s + "$ ";
         
-        s = s + name + ": " + type;
+        s = s + getName() + ": " + getType();
         return s;
     }
 }

@@ -74,3 +74,26 @@
     -fx-border-color: #000000;
     
 }
+// CSS CLASS FOR LABELS HEADING LARGE SECTIONS IN THE GUI
+.heading_label {
+    -fx-font-size: 20pt;
+    -fx-font-weight: bold;
+}
+
+// CSS CLASS FOR LABELS HEADING SUBSECTIONS IN THE GUI
+.subheading_label {
+    -fx-font-size: 14pt;
+    -fx-font-weight: bold;
+}
+
+// CSS CLASS FOR LABELS SERVING AS PROMPTS IN THE GUI
+.prompt_label {
+    -fx-font-size: 10pt;
+    -fx-font-weight: bold;
+}
+
+.grid_lines{
+    -fx-background-color: #ffffe0,
+        linear-gradient(from 0.2px 0px to 10.5px 0px, repeat, black 5%, transparent 5%),
+        linear-gradient(from 0px 0.2px to 0px 10.5px, repeat, black 5%, transparent 5%);
+}

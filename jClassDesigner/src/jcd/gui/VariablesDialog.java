@@ -58,8 +58,6 @@ public class VariablesDialog extends Stage{
     public static final String EDIT_VARIABLE_TITLE = "Edit Variable";
     
     public VariablesDialog(Stage initStage) {
-        
-        //vars = new UMLVariables();
 
         initModality(Modality.WINDOW_MODAL);
         initOwner(initStage);

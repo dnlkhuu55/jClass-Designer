@@ -5,6 +5,7 @@
  */
 package jcd.file;
 
+import af.AppTemplate;
 import af.components.AppDataComponent;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -33,6 +34,8 @@ import jcd.data.UMLVariables;
  * @author dnlkhuu77
  */
 public class UndoRedoManager {
+    AppTemplate app;
+    
     Stack undoStack = new Stack();
     Stack redoStack = new Stack();
     
@@ -43,7 +46,7 @@ public class UndoRedoManager {
         redoStack.empty();
     }
     
-    public void undoData(AppDataComponent data) throws IOException {
+    public void undoData(AppDataComponent data){
         StringWriter sw = new StringWriter();
         
         DataManager expo = (DataManager) data;
@@ -185,7 +188,7 @@ public class UndoRedoManager {
        undoStack.push(nodesArray);
     }
     
-     public void loadundoData(AppDataComponent data) throws IOException {
+     public void loadundoData(AppDataComponent data) throws Exception {
         try{
             JsonArray json = (JsonArray) undoStack.pop();
             redoStack.push(json); //if error, put this at the end
@@ -371,7 +374,7 @@ public class UndoRedoManager {
         }
     }
      
-      public void loadredoData(AppDataComponent data) throws IOException {
+      public void loadredoData(AppDataComponent data) throws Exception {
         try{
         DataManager expo = (DataManager)data;
 	//expo.reset();

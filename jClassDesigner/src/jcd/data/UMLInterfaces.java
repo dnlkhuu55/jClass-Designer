@@ -166,6 +166,10 @@ public class UMLInterfaces extends VBox{
         this.currentVariableName = currentVariableName;
         variables.getChildren().add(currentVariableName);
     }
+    
+    public void removeCurrentVariableName(Text t){
+        variables.getChildren().remove(t);
+    }
 
     /**
      * @return the currentMethodName
@@ -180,6 +184,10 @@ public class UMLInterfaces extends VBox{
     public void setCurrentMethodName(Text currentMethodName) {
         this.currentMethodName = currentMethodName;
         method.getChildren().add(currentMethodName);
+    }
+    
+    public void removeCurrentMethodName(Text t){
+        method.getChildren().remove(t);
     }
 
     /**

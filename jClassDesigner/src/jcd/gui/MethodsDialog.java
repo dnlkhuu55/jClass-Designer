@@ -27,10 +27,9 @@ import properties_manager.PropertiesManager;
  *
  * @author dnlkhuu77
  */
-public class MethodsDialog extends Stage{
-    UMLMethods meths = new UMLMethods();
+public class MethodsDialog extends Stage {
+    UMLMethods meths;
     
-    // GUI CONTROLS FOR OUR DIALOG
     GridPane gridPane;
     Scene dialogScene;
     Label headingLabel;
@@ -45,17 +44,11 @@ public class MethodsDialog extends Stage{
     CheckBox staticCheckBox;
     Label abstractLabel;
     CheckBox abstractCheckBox;
-    
-    //Multiple Arguments
-    Label arg0;
-    TextField arg0TextField;
-    
     Button completeButton;
     Button cancelButton;
     
     String selection;
     
-    // CONSTANTS FOR OUR UI
     public static final String COMPLETE = "Complete";
     public static final String CANCEL = "Cancel";
     public static final String NAME_PROMPT = "Name: ";
@@ -63,16 +56,18 @@ public class MethodsDialog extends Stage{
     public static final String ACCESS_PROMPT = "Access: ";
     public static final String STATIC_PROMPT = "Static: ";
     public static final String ABSTRACT_PROMPT = "Abstract: ";
-    public static final String METHOD_ARGS_PROMPT = "Argument #0: ";
+    public static final String METHOD_ARGS0_PROMPT = "Argument: ";
+    public static final String METHOD_ARGS1_PROMPT = "Argument: ";
+    public static final String METHOD_ARGS2_PROMPT = "Argument: ";
+    public static final String METHOD_ARGS3_PROMPT = "Argument: ";
     public static final String METHODS_HEADING = "Method Details";
     public static final String ADD_METHOD_TITLE = "Add New Method";
-    public static final String EDIT_VARIABLE_TITLE = "Edit Method";
+    public static final String EDIT_METHOD_TITLE = "Edit Method";
     
-    public MethodsDialog(Stage initStage) {
-        
+    public MethodsDialog(Stage m) {
 
         initModality(Modality.WINDOW_MODAL);
-        initOwner(initStage);
+        initOwner(m);
         
         gridPane = new GridPane();
         gridPane.setPadding(new Insets(10, 20, 20, 20));
@@ -122,13 +117,6 @@ public class MethodsDialog extends Stage{
         abstractCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
             meths.setAbstractype(newValue);
         });
-        
-        arg0 = new Label(METHOD_ARGS_PROMPT);
-        arg0.getStyleClass().add("subheading_label");
-        arg0TextField = new TextField();
-        arg0TextField.textProperty().addListener((observable, oldValue, newValue) -> {
-            meths.getArgs().add(newValue);
-        });
 
         completeButton = new Button(COMPLETE);
         cancelButton = new Button(CANCEL);
@@ -144,14 +132,16 @@ public class MethodsDialog extends Stage{
         gridPane.add(headingLabel, 0, 0, 2, 1);
         gridPane.add(nameLabel, 0, 1, 1, 1);
         gridPane.add(nameTextField, 1, 1, 1, 1);
-        gridPane.add(typeLabel, 0, 2, 1, 1);
-        gridPane.add(typeTextField, 1, 2, 1, 1);
+        gridPane.add(returnLabel, 0, 2, 1, 1);
+        gridPane.add(returnTextField, 1, 2, 1, 1);
         gridPane.add(accessLabel, 0, 3, 1, 1);
         gridPane.add(accessComboBox, 1, 3, 1, 1);
         gridPane.add(staticLabel, 0, 4, 1, 1);
         gridPane.add(staticCheckBox, 1, 4, 1, 1);
-        gridPane.add(completeButton, 0, 5, 1, 1);
-        gridPane.add(cancelButton, 1, 5, 1, 1);
+        gridPane.add(abstractLabel, 0, 5, 1, 1);
+        gridPane.add(abstractCheckBox, 1, 5, 1, 1);
+        gridPane.add(completeButton, 0, 6, 1, 1);
+        gridPane.add(cancelButton, 1, 6, 1, 1);
 
         // AND PUT THE GRID PANE IN THE WINDOW
         dialogScene = new Scene(gridPane);
@@ -192,7 +182,6 @@ public class MethodsDialog extends Stage{
         accessComboBox.getSelectionModel().select(0);
         staticCheckBox.setSelected(meths.isStatictype());
         abstractCheckBox.setSelected(meths.isAbstractype());
-        arg0.setText(meths.getArgs().get(0));
         
         // AND OPEN IT UP
         this.showAndWait();
@@ -207,7 +196,6 @@ public class MethodsDialog extends Stage{
         accessComboBox.getSelectionModel().select(meths.getAccesstype());
         staticCheckBox.setSelected(meths.isStatictype());
         abstractCheckBox.setSelected(meths.isAbstractype());
-        arg0.setText(meths.getArgs().get(0));
     }
     
     public boolean wasCompleteSelected() {
@@ -216,15 +204,15 @@ public class MethodsDialog extends Stage{
     
     public void showEditVariableDialog(UMLMethods methodsToEdit) {
         // SET THE DIALOG TITLE
-        setTitle(EDIT_VARIABLE_TITLE);
+        setTitle(EDIT_METHOD_TITLE);
         
         // LOAD THE LECTURE INTO OUR LOCAL OBJECT
+        meths = new UMLMethods();
         meths.setName(methodsToEdit.getName());
         meths.setReturntype(methodsToEdit.getReturntype());
         meths.setAccesstype(methodsToEdit.getAccesstype());
         meths.setStatictype(methodsToEdit.isStatictype());
         meths.setAbstractype(methodsToEdit.isAbstractype());
-        //meths.setArgs(args);
         loadGUIData();
                
         // AND OPEN IT UP

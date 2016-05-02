@@ -2,139 +2,176 @@
 package jcd.data;
 
 import java.util.ArrayList;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.text.Text;
 
 /**
  *
  * @author dnlkhuu77
  */
-public class UMLMethods extends Text{
-    private String name;
-    private String returntype;
-    private boolean statictype;
-    private boolean abstractype;
-    private String accesstype;
-    private ArrayList<String> args = new ArrayList<>();
+public class UMLMethods{
+    
+    private ArrayList<UMLMArgs> args = new ArrayList<>();
+    
+    final StringProperty name;
+    final StringProperty returntype;
+    final BooleanProperty statictype;
+    final BooleanProperty abstractype;
+    final StringProperty accesstype;
     
     public UMLMethods(){
-        name = "DEFAULT";
-        returntype = "void";
-        statictype = false;
-        abstractype = false;
-        accesstype = "public";
+        this.name = new SimpleStringProperty("DEFAULT");
+        this.returntype = new SimpleStringProperty("void");
+        this.statictype = new SimpleBooleanProperty(false);
+        this.abstractype = new SimpleBooleanProperty(false);
+        this.accesstype = new SimpleStringProperty("public");
     }
     
     public UMLMethods(String n, String r, boolean s, boolean a, String at){
-        name = n;
-        returntype = r;
-        statictype = s;
-        abstractype = a;
-        accesstype = at;
+        this.name = new SimpleStringProperty(n);
+        this.returntype = new SimpleStringProperty(r);
+        this.statictype = new SimpleBooleanProperty(s);
+        this.abstractype = new SimpleBooleanProperty(a);
+        this.accesstype = new SimpleStringProperty(at);
     }
 
     /**
      * @return the name
      */
     public String getName() {
-        return name;
+        return name.get();
     }
 
     /**
      * @param name the name to set
      */
     public void setName(String name) {
-        this.name = name;
+        this.name.set(name);
+    }
+    
+    public StringProperty nameProperty(){
+        return name;
     }
 
     /**
      * @return the returnType
      */
     public String getReturntype() {
-        return returntype;
+        return returntype.get();
     }
 
     /**
      * @param returnType the returnType to set
      */
-    public void setReturntype(String returnType) {
-        this.returntype = returnType;
+    public void setReturntype(String returntype) {
+        this.returntype.set(returntype);
+    }
+    
+    public StringProperty returntypeProperty(){
+        return returntype;
     }
 
     /**
      * @return the statictype
      */
     public boolean isStatictype() {
-        return statictype;
+        return statictype.get();
     }
 
     /**
      * @param statictype the statictype to set
      */
     public void setStatictype(boolean statictype) {
-        this.statictype = statictype;
+        this.statictype.set(statictype);
+    }
+    
+    public BooleanProperty statictypeProperty(){
+        return statictype;
     }
 
     /**
      * @return the abstractype
      */
     public boolean isAbstractype() {
-        return abstractype;
+        return abstractype.get();
     }
 
     /**
      * @param abstractype the abstractype to set
      */
     public void setAbstractype(boolean abstractype) {
-        this.abstractype = abstractype;
+        this.abstractype.set(abstractype);
+    }
+    
+    public BooleanProperty abstractypeProperty(){
+        return abstractype;
     }
 
     /**
      * @return the accesstype
      */
     public String getAccesstype() {
-        return accesstype;
+        return accesstype.get();
     }
 
     /**
      * @param accesstype the accesstype to set
      */
     public void setAccesstype(String accesstype) {
-        this.accesstype = accesstype;
+        this.accesstype.set(accesstype);
     }
 
     /**
      * @return the args
      */
-    public ArrayList<String> getArgs() {
+    public ArrayList<UMLMArgs> getArgs() {
         return args;
     }
 
     /**
      * @param args the args to set
      */
-    public void setArgs(ArrayList<String> args) {
+    public void setArgs(ArrayList<UMLMArgs> args) {
         this.args = args;
     }
+    
+    public void addUMLMArgs(UMLMArgs s){
+        getArgs().add(s);
+    }
+    public void removeUMLArgs(UMLMArgs s){
+        getArgs().remove(s);
+    }
+    
+    //
+    
     public String toString(){
         String s = new String();
-        if(accesstype.equals("public"))
+        if(getAccesstype().equals("public"))
             s = s + "+";
-        else if (accesstype.equals("private"))
+        else if (getAccesstype().equals("private"))
             s = s + "-";
         else
             s = s + "#";
         
-        if(abstractype == true)
+        if(isStatictype() == true)
+            s = s + "$";
+        
+        if(isAbstractype() == true)
             s = s + "{abstract}";
         
-        s = s + name + "(";
+        s = s + getName() + "(";
+        
         int counter = 0;
-        for(String arguments: args){
-            s = s + "arg" + counter + ": " + arguments + ", ";
+        
+        for(UMLMArgs m: args){
+            s = s + "arg" + counter + ": " + m.getArgstype() + ", ";
             counter++;
         }
-        s = s + "): " + returntype;
-        
+
+        s = s + "): " + getReturntype();
         
         return s;
     }

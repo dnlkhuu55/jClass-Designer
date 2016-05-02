@@ -74,7 +74,7 @@ public class FileManager implements AppFileComponent {
         JsonArrayBuilder methodBuilder = Json.createArrayBuilder();
         JsonArrayBuilder argsBuilder = Json.createArrayBuilder();
         ArrayList<VBox> test = expo.getClassList();
-        ArrayList<Line> test_2 = expo.getLineList();
+        ArrayList<ClassLines> test_2 = expo.getLineList();
         ArrayList<UMLVariables> vars = new ArrayList<>();
         ArrayList<UMLMethods> mets = new ArrayList<>();
         ArrayList<UMLMArgs> args = new ArrayList<>();
@@ -82,9 +82,9 @@ public class FileManager implements AppFileComponent {
         int counter = 0;
         int counter2 = 0;
         
-        //JsonObjectBuilder ll = Json.createObjectBuilder();
-        //ll.add("LeftPaneX", leftPane.getScaleX()).add("LeftPaneY", leftPane.getScaleY());
-        //arrayBuilder.add(ll.build());
+        JsonObjectBuilder ll = Json.createObjectBuilder();
+        ll.add("LeftPaneX", leftPane.getScaleX()).add("LeftPaneY", leftPane.getScaleY()).add("Flag", -1);
+        arrayBuilder.add(ll.build());
         
         for(VBox sh: test){ //arrayBuilder is the array while testing is the object
             counter = 0;
@@ -95,7 +95,7 @@ public class FileManager implements AppFileComponent {
 		.add("Package", ((UMLClasses) sh).getPackageName())
                  .add("Flag", 0).add("T_X", ((UMLClasses) sh).getTranslateXer())
                     .add("T_Y", ((UMLClasses) sh).getTranslateYer()).add("Width", sh.getWidth())
-                    .add("Height", sh.getHeight());
+                    .add("Height", sh.getHeight()).add("Scale_X", sh.getScaleX()).add("Scale_Y", sh.getScaleY());
             if(((UMLClasses) sh).getParentName() != null)
                 testing.add("Parent", ((UMLClasses) sh).getParentName());
             
@@ -148,7 +148,7 @@ public class FileManager implements AppFileComponent {
                  .add("Package", ((UMLInterfaces) sh).getPackageName())
                  .add("Flag", 1).add("T_X", ((UMLInterfaces) sh).getTranslateXer())
                     .add("T_Y", ((UMLInterfaces) sh).getTranslateYer()).add("Width", sh.getWidth())
-                    .add("Height", sh.getHeight());
+                    .add("Height", sh.getHeight()).add("Scale_X", sh.getScaleX()).add("Scale_Y", sh.getScaleY());
             
             vars = ((UMLInterfaces) sh).getVariableNames(); //the inner variable class
             mets = ((UMLInterfaces) sh).getMethodNames();
@@ -193,7 +193,6 @@ public class FileManager implements AppFileComponent {
             testing.add("Flag", 2).add("Starting_X", ((ClassLines) s).getStartX())
 		.add("Starting_Y", ((ClassLines) s).getStartY())
                 .add("Ending_X", ((ClassLines) s).getEndX()).add("Ending_Y", ((ClassLines) s).getEndY())
-                    .add("Mid_X", ((ClassLines) s).getMid_x()).add("Mid_Y", ((ClassLines) s).getMid_y())
                     .add("Starting_Class", ((ClassLines) s).getStart_node())
                     .add("Ending_Class", ((ClassLines) s).getEnd_node());
             arrayBuilder.add(testing.build());
@@ -252,11 +251,15 @@ public class FileManager implements AppFileComponent {
         int counter = 0;
         int counter2 = 0;
 
-        //load that leftPane
-        
         for(JsonValue sh: json){
             JsonObject shaping = (JsonObject) sh;
             flag = shaping.getInt("Flag");
+            
+            if(flag == -1){
+                ll.setScaleX(shaping.getJsonNumber("LeftPaneX").doubleValue());
+                ll.setScaleY(shaping.getJsonNumber("LeftPaneY").doubleValue());
+                expo.setLeftPane(ll);
+            }
             
             if(flag == 0){
                 UMLClasses r = new UMLClasses(shaping.getString("Name"));
@@ -276,6 +279,8 @@ public class FileManager implements AppFileComponent {
                 r.setTranslateYer(shaping.getJsonNumber("T_Y").doubleValue());
                 r.setWidthy(shaping.getJsonNumber("Width").doubleValue());
                 r.setHeighty(shaping.getJsonNumber("Height").doubleValue());
+                r.setScaleX(shaping.getJsonNumber("Scale_X").doubleValue());
+                r.setScaleY(shaping.getJsonNumber("Scale_Y").doubleValue());
                 
                 counter2 = 0;
                 JsonArray parentInterfaces = shaping.getJsonArray("parentInterfaces");
@@ -345,6 +350,8 @@ public class FileManager implements AppFileComponent {
 
                 s.setTranslateXer(shaping.getJsonNumber("T_X").doubleValue());
                 s.setTranslateYer(shaping.getJsonNumber("T_Y").doubleValue());
+                s.setScaleX(shaping.getJsonNumber("Scale_X").doubleValue());
+                s.setScaleY(shaping.getJsonNumber("Scale_Y").doubleValue());
                 ////variables
                 vars = s.getVariableNames();
                 
@@ -400,8 +407,28 @@ public class FileManager implements AppFileComponent {
             l.setEndY(shaping.getJsonNumber("Ending_Y").doubleValue());
             l.setStart_node(shaping.getString("Starting_Class"));
             l.setEnd_node(shaping.getString("Ending_Class"));
-            l.setMid_x();
-            l.setMid_y();
+            
+            for(VBox v: expo.getClassList()){
+                if(v instanceof UMLClasses){
+                    if(l.getStart_node().equals(((UMLClasses) v).getClassNametoString())){
+                        l.startXProperty().bind(v.translateXProperty());
+                        l.startYProperty().bind(v.translateYProperty());
+                    }
+                }
+                for(VBox c: expo.getClassList()){
+                    if(c instanceof UMLClasses){
+                        if(l.getEnd_node().equals(((UMLClasses) c).getClassNametoString())){
+                            l.endXProperty().bind(c.translateXProperty());
+                            l.endYProperty().bind(c.translateYProperty());
+                        }
+                    }
+                    if(c instanceof UMLInterfaces){
+                        if(l.getEnd_node().equals(((UMLInterfaces) c).getInterNametoString())){
+                            l.endXProperty().bind(c.translateXProperty());
+                            l.endYProperty().bind(c.translateYProperty());
+                        }
+                    } 
+                }}
             expo.getLineList().add(l);
         }
         
@@ -630,11 +657,11 @@ public class FileManager implements AppFileComponent {
 
                              //is there a parent???
                             if(((UMLClasses) ll).getParentName().equals("") == false){
-                                 java_source = java_source + "extends " + ((UMLClasses) ll).getParentName();
+                                 java_source = java_source + "extends " + ((UMLClasses) ll).getParentName() + " ";
                             }
                              
                             if(!((UMLClasses) ll).getParentInterfaces().isEmpty()){
-                                java_source = java_source + "implements ";
+                                java_source = java_source + " implements ";
                                 for(int i = 0; i < ((UMLClasses) ll).getParentInterfaces().size() - 1; i++){
                                     java_source = java_source + ((UMLClasses) ll).getParentInterfaces().get(i) + ", ";
                                 }

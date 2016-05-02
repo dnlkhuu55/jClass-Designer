@@ -31,7 +31,8 @@ public class ClassLines extends Line{
         this.setEndY(this.getEndY());
         //set the x and y are already in the api
     }
-
+    
+    
     /**
      * @return the start_node
      */

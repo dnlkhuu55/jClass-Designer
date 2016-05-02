@@ -30,8 +30,8 @@ public class UMLClasses extends VBox{
     private double heighty;
     
     VBox classes;
-    VBox variables;
-    VBox method;
+    private VBox variables;
+    private VBox method;
 
     public UMLClasses(String a){
         classNametoString = a;
@@ -143,12 +143,20 @@ public class UMLClasses extends VBox{
     }
 
     /**
-     * @param currentVariableName the currentVariableName to set
+     * @param currentVariableName the toString of UMLVariables
      */
-    public void setCurrentVariableName(Text currentVariableName) {
-        this.currentVariableName = currentVariableName;
-        variables.getChildren().add(currentVariableName);
-        //variableNames.add(currentVariableName);
+    public void setCurrentVariableName(Text t) {
+        this.currentVariableName = t;
+        getVariables().getChildren().add(t);
+    }
+    
+    public void setCVariable(Text t){
+        this.currentVariableName = t;
+    }
+    
+    public void removeCurrentVariableName(Text t){
+       // System.out.println(t);
+        getVariables().getChildren().remove(t);
     }
     
     /**
@@ -177,8 +185,12 @@ public class UMLClasses extends VBox{
      */
     public void setCurrentMethodName(Text currentMethodName) {
         this.currentMethodName = currentMethodName;
-        method.getChildren().add(currentMethodName);
+        getMethod().getChildren().add(currentMethodName);
         //methodNames.add(currentMethodName);
+    }
+    
+    public void removeCurrentMethodName(Text t){
+        getMethod().getChildren().remove(t);
     }
 
     /**
@@ -307,4 +319,34 @@ public class UMLClasses extends VBox{
         this.abstracttype = isAbstract;
     }
 
+    /**
+     * @return the variables
+     */
+    public VBox getVariables() {
+        return variables;
+    }
+
+    /**
+     * @param variables the variables to set
+     */
+    public void setVariables(VBox variables) {
+        this.variables = variables;
+    }
+
+    /**
+     * @return the method
+     */
+    public VBox getMethod() {
+        return method;
+    }
+
+    /**
+     * @param method the method to set
+     */
+    public void setMethod(VBox method) {
+        this.method = method;
+    }
+    public void reload(){
+        
+    }
 }
