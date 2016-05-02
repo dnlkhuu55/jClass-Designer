@@ -70,6 +70,8 @@ import jcd.data.UMLInterfaces;
 import jcd.data.UMLMArgs;
 import jcd.data.UMLMethods;
 import jcd.data.UMLVariables;
+import jcd.data.URManager;
+import jcd.file.UndoRedoManager;
 
 /**
  * This class serves as the workspace component for this application, providing
@@ -122,7 +124,7 @@ public class Workspace extends AppWorkspaceComponent {
     VBox checkBox = new VBox();
     
     static final int BUTTON_TAG_WIDTH = 40;
-    UMLClasses sc;
+    UMLClasses sc, toLine;
     UMLInterfaces ie;
     UMLVariables var;
     UMLMethods methods;
@@ -146,6 +148,9 @@ public class Workspace extends AppWorkspaceComponent {
     VariablesDialog vy;
     MethodsDialog my;
     ArgsDialog ay;
+    
+    //UndoRedoManager doing = new UndoRedoManager();
+    URManager urtest = new URManager();
 
     /**
      * Constructor for initializing the workspace, note that this constructor
@@ -160,6 +165,7 @@ public class Workspace extends AppWorkspaceComponent {
        app = initApp;
        gui = app.getGUI();
        DataManager expo = (DataManager) app.getDataComponent();
+
        vy = new VariablesDialog(null);
        my = new MethodsDialog(null);
        ay = new ArgsDialog(null);
@@ -173,6 +179,8 @@ public class Workspace extends AppWorkspaceComponent {
        tempo = new ScrollPane();
        tempo.setContent(leftPane);
        expo.setLeftPane(leftPane);
+       expo.undoing();
+       urtest.undoing(app.getDataComponent());
        
        fileToolbarPane = gui.getFileToolbarPane();
        editToolbarPane = gui.getEditToolbarPane();
@@ -227,6 +235,8 @@ public class Workspace extends AppWorkspaceComponent {
                 minusButton.setDisable(true);
                 addMButton.setDisable(true);
                 minusMButton.setDisable(true);
+                addAButton.setDisable(true); //arguments button!!!!!
+                minusAButton.setDisable(true);
                 //resizeButton.setDisable(true); //always need on despite being selected or not
                 if (currentPane != null)
                     currentPane.setCursor(Cursor.DEFAULT);
@@ -245,6 +255,8 @@ public class Workspace extends AppWorkspaceComponent {
             minusButton.setDisable(false);
             addMButton.setDisable(false);
             minusMButton.setDisable(false);
+            addAButton.setDisable(false);
+            minusAButton.setDisable(false);
             gui.updateToolbarControls(false);
             gui.updatePhotoCodeButton();
             if (currentPane != null)
@@ -281,6 +293,9 @@ public class Workspace extends AppWorkspaceComponent {
         table1.getItems().clear();
         table2.getItems().clear();
         table3.getItems().clear();
+        
+        expo.undoing(); //test
+        urtest.undoing(app.getDataComponent());
         });
         
         addInterfaceButton.setOnAction(eh -> {
@@ -295,6 +310,8 @@ public class Workspace extends AppWorkspaceComponent {
             minusButton.setDisable(false);
             addMButton.setDisable(false);
             minusMButton.setDisable(false);
+            addAButton.setDisable(true);
+            minusAButton.setDisable(true);
             gui.updateToolbarControls(false);
             gui.updatePhotoCodeButton();
             if (currentPane != null)
@@ -329,6 +346,9 @@ public class Workspace extends AppWorkspaceComponent {
         table1.getItems().clear();
         table2.getItems().clear();
         table3.getItems().clear();
+        
+        expo.undoing();
+        urtest.undoing(app.getDataComponent());
         });
         
         removeButton.setOnAction(eh -> {
@@ -344,6 +364,7 @@ public class Workspace extends AppWorkspaceComponent {
                 resizeButton.setDisable(true);
                 removeButton.setDisable(true);
             }
+            expo.undoing(); //UNDO!!!!!!!
         });
         
         resizeButton.setOnAction(eh -> {
@@ -355,12 +376,25 @@ public class Workspace extends AppWorkspaceComponent {
             selectionButton.setDisable(false);
         });
         
+        //undo
+        undoButton.setOnAction(e -> {
+            //expo.loadUndo();
+            urtest.loadUndo(app.getDataComponent());
+            reloadWorkspace();
+        });
+        
+        
+        
+        
+        
+        
         zoominButton.setOnAction(eh -> {
             if(currentPane != null)
                 currentPane.setCursor(Cursor.DEFAULT);
             leftPane.setScaleX(leftPane.getScaleX() * 2);
             leftPane.setScaleY(leftPane.getScaleY() * 2);
             expo.setLeftPane(leftPane);
+            expo.undoing(); //!!!!!!!!!!!!!!!
         });
         
         zoomoutButton.setOnAction(eh -> {
@@ -369,6 +403,7 @@ public class Workspace extends AppWorkspaceComponent {
             leftPane.setScaleX(leftPane.getScaleX() / 2);
             leftPane.setScaleY(leftPane.getScaleY() / 2);
             expo.setLeftPane(leftPane);
+            expo.undoing(); //!!!!!!!!!!!!!!
         });
         
         gridBox.setOnAction(eh -> {
@@ -402,6 +437,7 @@ public class Workspace extends AppWorkspaceComponent {
                 lol.setInterName(dummy.getText());
                 lol.setInterNametoString(dummy.getText());
             }
+            expo.undoing(); //!!!!!!!!!!!!!
         });
         
         rightPane.getChildren().add(classPane);
@@ -424,6 +460,7 @@ public class Workspace extends AppWorkspaceComponent {
                 UMLInterfaces lol = (UMLInterfaces) currentPane; //!!!!!!!!!!
                 lol.setPackageName(dummyData.getText());
             }
+            expo.undoing(); //!!!!!!!!!!!!!!
         });
         
         rightPane.getChildren().add(packagePane);
@@ -448,12 +485,15 @@ public class Workspace extends AppWorkspaceComponent {
                 int flag_0 = 0; //custom external class 
                 for(VBox h: expo.getClassList()){ //we need to check if the string is a class or interface
                     if(h instanceof UMLClasses){
-                        if(acessy.equals(((UMLClasses) h).getClassNametoString()))
+                        if(acessy.equals(((UMLClasses) h).getClassNametoString())){
                             flag_0 = 1;
+                            toLine = (UMLClasses) h;
+                        }
                     }
                     if (h instanceof UMLInterfaces){
-                        if(acessy.equals(((UMLInterfaces) h).getInterNametoString()))
+                        if(acessy.equals(((UMLInterfaces) h).getInterNametoString())){
                             flag_0 = 2;
+                        }
                     }
                 }
                 if (currentPane instanceof UMLClasses){
@@ -470,6 +510,19 @@ public class Workspace extends AppWorkspaceComponent {
                     }
                     if(flag_0 == 1){
                         now.setParentName(acessy);
+                        ClassLines s = new ClassLines();
+                        //add the line here
+                        //Line s = new Line();
+                        s.setStartX(currentPane.getTranslateX() + 5);
+                        s.setStartY(currentPane.getTranslateY());
+                        s.setEndX(toLine.getTranslateX());
+                        s.setEndY(toLine.getTranslateY());
+                        //s.setEndY(100);
+                        s.startXProperty().bind(currentPane.translateXProperty());
+                        s.startYProperty().bind(currentPane.translateYProperty());
+                        s.endXProperty().bind(toLine.translateXProperty());
+                        s.endYProperty().bind(toLine.translateYProperty());
+                        leftPane.getChildren().add(s); //test
                     }
                     if(flag_0 == 0){
                         now.setParentName(acessy);
@@ -479,11 +532,13 @@ public class Workspace extends AppWorkspaceComponent {
                         leftPane.getChildren().add(ex);
                     }
                 } 
+                expo.undoing(); //!!!!!!!!!!!!!!!
             }catch(Exception e){
                         System.out.println("Clicking error");
                     }
             }
-        });
+        }
+        );
         
         removeParentButton.setOnAction(e -> {
             String lol = (String) parentComboBox.getSelectionModel().getSelectedItem();
@@ -498,6 +553,7 @@ public class Workspace extends AppWorkspaceComponent {
                     }
                 }
                 parentComboBox.getSelectionModel().clearSelection();
+                expo.undoing(); //!!!!!!!!!!!!!!
             }
         });
         
@@ -547,6 +603,7 @@ public class Workspace extends AppWorkspaceComponent {
                 
                 k.setCurrentVariableName(textTemp.get(tmp1));
             }
+            expo.undoing(); //!!!!!!!!!!!!!
         }
         else {
         }    
@@ -573,6 +630,7 @@ public class Workspace extends AppWorkspaceComponent {
                 }
                 gui.updateToolbarControls(false);
                 gui.updatePhotoCodeButton();
+                expo.undoing(); //!!!!!!!!!!!!
             }
         });
         rightPane.getChildren().add(variablePane);
@@ -661,6 +719,7 @@ public class Workspace extends AppWorkspaceComponent {
                     }
                     gui.updateToolbarControls(false);
                     gui.updatePhotoCodeButton();
+                    expo.undoing(); //!!!!!!!!!!!!!!
                 }
         else {
         }   }
@@ -690,6 +749,8 @@ public class Workspace extends AppWorkspaceComponent {
             currentMethod = me;
             table2.getItems().add(currentMethod);
             table3.getItems().clear();
+            addAButton.setDisable(false);
+            minusAButton.setDisable(false);
             
             if(currentPane instanceof UMLClasses){
                 UMLClasses j = (UMLClasses) currentPane;
@@ -715,6 +776,7 @@ public class Workspace extends AppWorkspaceComponent {
                 
                 k.setCurrentVariableName(textTemp.get(tmp2));
             }
+            expo.undoing(); //!!!!!!!!!!!!!
         }
         else {
         }    
@@ -743,6 +805,9 @@ public class Workspace extends AppWorkspaceComponent {
                 gui.updateToolbarControls(false);
                 gui.updatePhotoCodeButton();
                 currentMethod = null;
+                addAButton.setDisable(false);
+                minusAButton.setDisable(false);
+                expo.undoing(); //!!!!!!!!!!!!!!!!
             }
         });
         
@@ -782,6 +847,8 @@ public class Workspace extends AppWorkspaceComponent {
                 temp01 = currentMethod.toString();
                 table3.getItems().clear();
                 table3.getItems().addAll(currentMethod.getArgs()); 
+                addAButton.setDisable(false);
+                minusAButton.setDisable(false);
              }
 
             if (e.getClickCount() == 2) {
@@ -800,6 +867,8 @@ public class Workspace extends AppWorkspaceComponent {
                     
                     if(currentPane instanceof UMLClasses){
                         currentMethod = temps;
+                        addAButton.setDisable(false);
+                        minusAButton.setDisable(false);
                         
                         UMLClasses l = (UMLClasses) currentPane;
                         
@@ -818,6 +887,8 @@ public class Workspace extends AppWorkspaceComponent {
                     if(currentPane instanceof UMLInterfaces){
                         //Do something for interfaces
                         currentMethod = temps;
+                        addAButton.setDisable(false);
+                        minusAButton.setDisable(false);
                         
                         UMLInterfaces i = (UMLInterfaces) currentPane;
                         
@@ -834,6 +905,7 @@ public class Workspace extends AppWorkspaceComponent {
                     }
                     gui.updateToolbarControls(false);
                     gui.updatePhotoCodeButton();
+                    expo.undoing(); //!!!!!!!!!!!!!!
                 }
         else {
         }}
@@ -888,6 +960,7 @@ public class Workspace extends AppWorkspaceComponent {
                 }
                 gui.updateToolbarControls(false);
                 gui.updatePhotoCodeButton();
+                expo.undoing(); //!!!!!!!!!!!!!!
             }          
         } 
         else {
@@ -938,6 +1011,7 @@ public class Workspace extends AppWorkspaceComponent {
                 }
                 gui.updateToolbarControls(false);
                 gui.updatePhotoCodeButton();
+                expo.undoing(); //!!!!!!!!!!!!!
             }
         });
         
@@ -1020,6 +1094,7 @@ public class Workspace extends AppWorkspaceComponent {
                     }
                     gui.updateToolbarControls(false);
                     gui.updatePhotoCodeButton();
+                    expo.undoing(); //!!!!!!!!!
                 }
         else {
         }}
@@ -1043,6 +1118,8 @@ public class Workspace extends AppWorkspaceComponent {
         minusButton.setDisable(false);
         addMButton.setDisable(false);
         minusMButton.setDisable(false);
+        addAButton.setDisable(true);
+        minusAButton.setDisable(true);
         if(selectedButton == selectionButton || selectedButton == resizeButton){
            if (currentPane != null){
             currentPane.setStyle("-fx-border-color: #000000; -fx-background-color: #ffffff");
@@ -1116,6 +1193,7 @@ public class Workspace extends AppWorkspaceComponent {
                 lol.setTranslateY(e.getY() + s.getTranslateY());
                 lol.setTranslateXer(e.getX() + s.getTranslateX());
                 lol.setTranslateYer(e.getY() + s.getTranslateY());
+                expo.undoing(); //!!!!!!!!!!!!!!!!
             }
             if(s instanceof UMLInterfaces){
                 UMLInterfaces st = (UMLInterfaces) s;
@@ -1123,6 +1201,7 @@ public class Workspace extends AppWorkspaceComponent {
                 st.setTranslateY(e.getY() + s.getTranslateY());
                 st.setTranslateXer(e.getX() + s.getTranslateX());
                 st.setTranslateYer(e.getY() + s.getTranslateY());
+                expo.undoing(); //!!!!!!!!!!!!
             }
             }
             if(selectedButton == resizeButton && currentPane.getCursor() == Cursor.CROSSHAIR){ //resizing
@@ -1135,6 +1214,7 @@ public class Workspace extends AppWorkspaceComponent {
                     lol.setMinHeight(e.getSceneY() - lol.getTranslateY());
                     lol.setMaxHeight(e.getSceneY() - lol.getTranslateY());
                     lol.setHeighty(lol.getHeight());
+                    expo.undoing(); //!!!!!!!!!!!!!!
                 }
                 if(s instanceof UMLInterfaces){
                     UMLInterfaces st = (UMLInterfaces) s;
@@ -1144,12 +1224,14 @@ public class Workspace extends AppWorkspaceComponent {
                     st.setMinHeight(e.getSceneY() - st.getTranslateY());
                     st.setMaxHeight(e.getSceneY() - st.getTranslateY());
                     st.setHeighty(st.getHeight());
+                    expo.undoing(); //!!!!!!!!!!!!
                 }
                 
             }
         });
         
         s.setOnMouseReleased(e -> {
+            DataManager expo = (DataManager) app.getDataComponent();
             if(snapping == true){
                 double currentpositionX = s.getTranslateX();
                 double currentpositionY = s.getTranslateY();
@@ -1168,6 +1250,7 @@ public class Workspace extends AppWorkspaceComponent {
                 }
                 s.setTranslateX(currentpositionX);
                 s.setTranslateY(currentpositionY);
+                expo.undoing();
             }
         });
     }
@@ -1243,9 +1326,13 @@ public class Workspace extends AppWorkspaceComponent {
     }
       
     public void resetWorkspace(){
+        DataManager expo = (DataManager) app.getDataComponent();
+        expo.getClassList().clear();
+        expo.getLineList().clear();
         leftPane.getChildren().clear();
         leftPane.setScaleX(1);
         leftPane.setScaleY(1);
+        expo.setLeftPane(leftPane);
         dummy.clear();
         dummyData.clear();     
         table1.getItems().clear();
