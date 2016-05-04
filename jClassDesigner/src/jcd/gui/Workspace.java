@@ -180,7 +180,6 @@ public class Workspace extends AppWorkspaceComponent {
        tempo = new ScrollPane();
        tempo.setContent(leftPane);
        expo.setLeftPane(leftPane);
-       expo.undoing();
        urtest.undoing(app.getDataComponent());
        
        fileToolbarPane = gui.getFileToolbarPane();
@@ -295,7 +294,6 @@ public class Workspace extends AppWorkspaceComponent {
         table2.getItems().clear();
         table3.getItems().clear();
         
-        expo.undoing(); //test
         urtest.undoing(app.getDataComponent());
         });
         
@@ -348,7 +346,6 @@ public class Workspace extends AppWorkspaceComponent {
         table2.getItems().clear();
         table3.getItems().clear();
         
-        expo.undoing();
         urtest.undoing(app.getDataComponent());
         });
         
@@ -366,7 +363,7 @@ public class Workspace extends AppWorkspaceComponent {
                 resizeButton.setDisable(true);
                 removeButton.setDisable(true);
             }
-            expo.undoing(); //UNDO!!!!!!!
+            urtest.undoing(app.getDataComponent());
         });
         
         resizeButton.setOnAction(eh -> {
@@ -380,14 +377,22 @@ public class Workspace extends AppWorkspaceComponent {
         
         //undo
         undoButton.setOnAction(e -> {
-            //expo.loadUndo();
-            urtest.loadUndo(app.getDataComponent());
+           try {
+               urtest.loadUndo(app.getDataComponent());
+           } catch (CloneNotSupportedException ex) {
+               Logger.getLogger(Workspace.class.getName()).log(Level.SEVERE, null, ex);
+           }
             reloadWorkspace();
         });
         
-        
-        
-        
+        redoButton.setOnAction(e -> {
+           try {
+               urtest.loadRedo(app.getDataComponent());
+           } catch (CloneNotSupportedException ex) {
+               Logger.getLogger(Workspace.class.getName()).log(Level.SEVERE, null, ex);
+           }
+            reloadWorkspace();
+        });
         
         
         zoominButton.setOnAction(eh -> {
@@ -396,7 +401,7 @@ public class Workspace extends AppWorkspaceComponent {
             leftPane.setScaleX(leftPane.getScaleX() * 2);
             leftPane.setScaleY(leftPane.getScaleY() * 2);
             expo.setLeftPane(leftPane);
-            expo.undoing(); //!!!!!!!!!!!!!!!
+            urtest.undoing(app.getDataComponent());
         });
         
         zoomoutButton.setOnAction(eh -> {
@@ -405,7 +410,7 @@ public class Workspace extends AppWorkspaceComponent {
             leftPane.setScaleX(leftPane.getScaleX() / 2);
             leftPane.setScaleY(leftPane.getScaleY() / 2);
             expo.setLeftPane(leftPane);
-            expo.undoing(); //!!!!!!!!!!!!!!
+            urtest.undoing(app.getDataComponent());
         });
         
         gridBox.setOnAction(eh -> {
@@ -439,7 +444,7 @@ public class Workspace extends AppWorkspaceComponent {
                 lol.setInterName(dummy.getText());
                 lol.setInterNametoString(dummy.getText());
             }
-            expo.undoing(); //!!!!!!!!!!!!!
+            urtest.undoing(app.getDataComponent());
         });
         
         rightPane.getChildren().add(classPane);
@@ -462,7 +467,7 @@ public class Workspace extends AppWorkspaceComponent {
                 UMLInterfaces lol = (UMLInterfaces) currentPane; //!!!!!!!!!!
                 lol.setPackageName(dummyData.getText());
             }
-            expo.undoing(); //!!!!!!!!!!!!!!
+            urtest.undoing(app.getDataComponent());
         });
         
         rightPane.getChildren().add(packagePane);
@@ -546,7 +551,7 @@ public class Workspace extends AppWorkspaceComponent {
                     if(flag_0 == 0){
                         now.setParentName(acessy);
                         
-                        UMLClasses ex = new UMLClasses(acessy, null, null, null, null, 150, 150);
+                        UMLClasses ex = new UMLClasses(acessy, "", "", "", "", 150, 150);
                         createListener(ex);
                         leftPane.getChildren().add(ex);
                         
@@ -565,7 +570,34 @@ public class Workspace extends AppWorkspaceComponent {
                         expo.getLineList().add(ba);
                     }
                 } 
-                expo.undoing(); //!!!!!!!!!!!!!!!
+                
+                if(currentPane instanceof UMLInterfaces){
+                    int flag = 0; //0 means you must add the interface parent
+                    UMLInterfaces now = (UMLInterfaces) currentPane; //interfaces doesn't have parents
+                    if(flag_0 == 2){
+                        for(String h : now.getParentInterfaces()){
+                            if(acessy.equals(h))
+                            flag = 1; //1 means you already added it
+                        }
+                        if(flag == 0){
+                            now.getParentInterfaces().add(acessy);
+                            ba = new ClassLines();
+                            ba.setStartX(currentPane.getTranslateX());
+                            ba.setStartY(currentPane.getTranslateY());
+                            ba.setEndX(toInterface.getTranslateX());
+                            ba.setEndY(toInterface.getTranslateY());
+                            ba.startXProperty().bind(currentPane.translateXProperty());
+                            ba.startYProperty().bind(currentPane.translateYProperty());
+                            ba.endXProperty().bind(toInterface.translateXProperty());
+                            ba.endYProperty().bind(toInterface.translateYProperty());
+                            ba.setStart_node(now.getInterNametoString());
+                            ba.setEnd_node(toInterface.getInterNametoString());
+                            leftPane.getChildren().add(ba);
+                            expo.getLineList().add(ba);
+                        }}
+                }
+                
+                urtest.undoing(app.getDataComponent());
             }catch(Exception e){
                         System.out.println("Clicking error");
                     }
@@ -586,11 +618,10 @@ public class Workspace extends AppWorkspaceComponent {
                         no.getParentInterfaces().remove(lol);
                     }
                 }
-                trying(lol);
                 
                 
                 parentComboBox.getSelectionModel().clearSelection();
-                expo.undoing(); //!!!!!!!!!!!!!!
+                urtest.undoing(app.getDataComponent());
             }
         });
         
@@ -627,6 +658,71 @@ public class Workspace extends AppWorkspaceComponent {
                 textTemp.put(tmp1, temp);
                 
                 j.setCurrentVariableName(textTemp.get(tmp1));
+                int flaggy = 0;
+                
+                for(VBox s: expo.getClassList()){
+                    if(s instanceof UMLClasses){
+                        if(currentVariable.getType().equals(((UMLClasses) s).getClassNametoString())){
+                            if(!j.getParentName().equals(((UMLClasses) s).getClassNametoString())){
+                                flaggy = 1;
+                                ba = new ClassLines();
+                                ba.setStartX(currentPane.getTranslateX());
+                                ba.setStartY(currentPane.getTranslateY());
+                                ba.setEndX(s.getTranslateX());
+                                ba.setEndY(s.getTranslateY());
+                                ba.startXProperty().bind(currentPane.translateXProperty());
+                                ba.startYProperty().bind(currentPane.translateYProperty());
+                                ba.endXProperty().bind(s.translateXProperty());
+                                ba.endYProperty().bind(s.translateYProperty());
+                                ba.setStart_node(j.getClassNametoString());
+                                ba.setEnd_node(((UMLClasses) s).getClassNametoString());
+                                leftPane.getChildren().add(ba);
+                                expo.getLineList().add(ba);
+                                j.setParentName(((UMLClasses) s).getClassNametoString());
+                            }
+                        }
+                    }
+                }
+                
+                if(flaggy == 0){
+                    if(!currentVariable.getType().contains("int")){
+                        if(!currentVariable.getType().contains("double")){
+                            if(!currentVariable.getType().contains("boolean")){
+                                if(!currentVariable.getType().contains("float")){
+                                    if(!currentVariable.getType().contains("char")){
+                                        if(!currentVariable.getType().contains("byte")){
+                                            if(!currentVariable.getType().contains("short")){
+                                                if(!currentVariable.getType().contains("long")){
+                        UMLClasses ex = new UMLClasses(currentVariable.getType());
+                        createListener(ex);
+                        leftPane.getChildren().add(ex);
+                        expo.getClassList().add(ex);
+                        j.setParentName(ex.getClassNametoString());
+                        
+                        ba = new ClassLines();
+                        ba.setStartX(currentPane.getTranslateX());
+                        ba.setStartY(currentPane.getTranslateY());
+                        ba.setEndX(ex.getTranslateX());
+                        ba.setEndY(ex.getTranslateY());
+                        ba.startXProperty().bind(currentPane.translateXProperty());
+                        ba.startYProperty().bind(currentPane.translateYProperty());
+                        ba.endXProperty().bind(ex.translateXProperty());
+                        ba.endYProperty().bind(ex.translateYProperty());
+                        ba.setStart_node(j.getClassNametoString());
+                        ba.setEnd_node(ex.getClassNametoString());
+                        leftPane.getChildren().add(ba);
+                        expo.getLineList().add(ba);
+                        
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                }
+                }
+                urtest.undoing(app.getDataComponent());
             }
             if(currentPane instanceof UMLInterfaces){
                 UMLInterfaces k = (UMLInterfaces) currentPane;
@@ -639,8 +735,9 @@ public class Workspace extends AppWorkspaceComponent {
                 textTemp.put(tmp1, temp);
                 
                 k.setCurrentVariableName(textTemp.get(tmp1));
+                urtest.undoing(app.getDataComponent());
             }
-            expo.undoing(); //!!!!!!!!!!!!!
+            
         }
         else {
         }    
@@ -667,7 +764,7 @@ public class Workspace extends AppWorkspaceComponent {
                 }
                 gui.updateToolbarControls(false);
                 gui.updatePhotoCodeButton();
-                expo.undoing(); //!!!!!!!!!!!!
+                urtest.undoing(app.getDataComponent());
             }
         });
         rightPane.getChildren().add(variablePane);
@@ -735,7 +832,70 @@ public class Workspace extends AppWorkspaceComponent {
                 
                         l.setCurrentVariableName(textTemp.get(tmp1));
                         
+                        int flaggy = 0;
+                
+                for(VBox s: expo.getClassList()){
+                    if(s instanceof UMLClasses){
+                        if(currentVariable.getType().equals(((UMLClasses) s).getClassNametoString())){
+                            if(!l.getParentName().equals(((UMLClasses) s).getClassNametoString())){
+                                flaggy = 1;
+                                ba = new ClassLines();
+                                ba.setStartX(currentPane.getTranslateX());
+                                ba.setStartY(currentPane.getTranslateY());
+                                ba.setEndX(s.getTranslateX());
+                                ba.setEndY(s.getTranslateY());
+                                ba.startXProperty().bind(currentPane.translateXProperty());
+                                ba.startYProperty().bind(currentPane.translateYProperty());
+                                ba.endXProperty().bind(s.translateXProperty());
+                                ba.endYProperty().bind(s.translateYProperty());
+                                ba.setStart_node(l.getClassNametoString());
+                                ba.setEnd_node(((UMLClasses) s).getClassNametoString());
+                                leftPane.getChildren().add(ba);
+                                expo.getLineList().add(ba);
+                                l.setParentName(((UMLClasses) s).getClassNametoString());
+                            }
+                        }
                     }
+                }
+                
+                if(flaggy == 0){
+                    if(!currentVariable.getType().contains("int")){
+                        if(!currentVariable.getType().contains("double")){
+                            if(!currentVariable.getType().contains("boolean")){
+                                if(!currentVariable.getType().contains("float")){
+                                    if(!currentVariable.getType().contains("char")){
+                                        if(!currentVariable.getType().contains("byte")){
+                                            if(!currentVariable.getType().contains("short")){
+                                                if(!currentVariable.getType().contains("long")){
+                        UMLClasses ex = new UMLClasses(currentVariable.getType());
+                        createListener(ex);
+                        leftPane.getChildren().add(ex);
+                        expo.getClassList().add(ex);
+                        l.setParentName(ex.getClassNametoString());
+                        
+                        ba = new ClassLines();
+                        ba.setStartX(currentPane.getTranslateX());
+                        ba.setStartY(currentPane.getTranslateY());
+                        ba.setEndX(ex.getTranslateX());
+                        ba.setEndY(ex.getTranslateY());
+                        ba.startXProperty().bind(currentPane.translateXProperty());
+                        ba.startYProperty().bind(currentPane.translateYProperty());
+                        ba.endXProperty().bind(ex.translateXProperty());
+                        ba.endYProperty().bind(ex.translateYProperty());
+                        ba.setStart_node(l.getClassNametoString());
+                        ba.setEnd_node(ex.getClassNametoString());
+                        leftPane.getChildren().add(ba);
+                        expo.getLineList().add(ba);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                }
+                        
+                    }}
                     
                     if(currentPane instanceof UMLInterfaces){
                         //Do something for interfaces
@@ -756,7 +916,7 @@ public class Workspace extends AppWorkspaceComponent {
                     }
                     gui.updateToolbarControls(false);
                     gui.updatePhotoCodeButton();
-                    expo.undoing(); //!!!!!!!!!!!!!!
+                    urtest.undoing(app.getDataComponent());
                 }
         else {
         }   }
@@ -800,6 +960,74 @@ public class Workspace extends AppWorkspaceComponent {
                 textTemp.put(tmp2, temp2);
                 
                 j.setCurrentMethodName(textTemp.get(tmp2));
+                
+                
+                          int flaggy = 0;
+                
+                for(VBox s: expo.getClassList()){
+                    if(s instanceof UMLClasses){
+                        if(currentMethod.getReturntype().equals(((UMLClasses) s).getClassNametoString())){
+                            if(!currentMethod.getReturntype().equals(((UMLClasses) s).getClassNametoString())){
+                                flaggy = 1;
+                                ba = new ClassLines();
+                                ba.setStartX(currentPane.getTranslateX());
+                                ba.setStartY(currentPane.getTranslateY());
+                                ba.setEndX(s.getTranslateX());
+                                ba.setEndY(s.getTranslateY());
+                                ba.startXProperty().bind(currentPane.translateXProperty());
+                                ba.startYProperty().bind(currentPane.translateYProperty());
+                                ba.endXProperty().bind(s.translateXProperty());
+                                ba.endYProperty().bind(s.translateYProperty());
+                                ba.setStart_node(j.getClassNametoString());
+                                ba.setEnd_node(((UMLClasses) s).getClassNametoString());
+                                leftPane.getChildren().add(ba);
+                                expo.getLineList().add(ba);
+                                j.setParentName(((UMLClasses) s).getClassNametoString());
+                            }
+                        }
+                    }
+                }
+                
+                if(flaggy == 0){
+                    if(!currentMethod.getReturntype().contains("int")){
+                        if(!currentMethod.getReturntype().contains("double")){
+                            if(!currentMethod.getReturntype().contains("boolean")){
+                                if(!currentMethod.getReturntype().contains("float")){
+                                    if(!currentMethod.getReturntype().contains("char")){
+                                        if(!currentMethod.getReturntype().contains("byte")){
+                                            if(!currentMethod.getReturntype().contains("short")){
+                                                if(!currentMethod.getReturntype().contains("long")){
+                        UMLClasses ex = new UMLClasses(currentMethod.getReturntype());
+                        createListener(ex);
+                        leftPane.getChildren().add(ex);
+                        expo.getClassList().add(ex);
+                        j.setParentName(ex.getClassNametoString());
+                        
+                        ba = new ClassLines();
+                        ba.setStartX(currentPane.getTranslateX());
+                        ba.setStartY(currentPane.getTranslateY());
+                        ba.setEndX(ex.getTranslateX());
+                        ba.setEndY(ex.getTranslateY());
+                        ba.startXProperty().bind(currentPane.translateXProperty());
+                        ba.startYProperty().bind(currentPane.translateYProperty());
+                        ba.endXProperty().bind(ex.translateXProperty());
+                        ba.endYProperty().bind(ex.translateYProperty());
+                        ba.setStart_node(j.getClassNametoString());
+                        ba.setEnd_node(ex.getClassNametoString());
+                        leftPane.getChildren().add(ba);
+                        expo.getLineList().add(ba);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                }
+                        
+                    }
+                
+                
             }
             if(currentPane instanceof UMLInterfaces){
                 UMLInterfaces k = (UMLInterfaces) currentPane;
@@ -811,9 +1039,9 @@ public class Workspace extends AppWorkspaceComponent {
                 
                 textTemp.put(tmp2, temp2);
                 
-                k.setCurrentVariableName(textTemp.get(tmp2));
+                k.setCurrentMethodName(textTemp.get(tmp2));
             }
-            expo.undoing(); //!!!!!!!!!!!!!
+            urtest.undoing(app.getDataComponent());
         }
         else {
         }    
@@ -844,7 +1072,7 @@ public class Workspace extends AppWorkspaceComponent {
                 currentMethod = null;
                 addAButton.setDisable(false);
                 minusAButton.setDisable(false);
-                expo.undoing(); //!!!!!!!!!!!!!!!!
+                urtest.undoing(app.getDataComponent());
             }
         });
         
@@ -942,7 +1170,7 @@ public class Workspace extends AppWorkspaceComponent {
                     }
                     gui.updateToolbarControls(false);
                     gui.updatePhotoCodeButton();
-                    expo.undoing(); //!!!!!!!!!!!!!!
+                    urtest.undoing(app.getDataComponent());
                 }
         else {
         }}
@@ -986,6 +1214,69 @@ public class Workspace extends AppWorkspaceComponent {
                 textTemp.put(tmp2, temp2);
                 
                 j.setCurrentMethodName(textTemp.get(tmp2));
+                
+                int flaggy = 0;
+                
+                for(VBox s: expo.getClassList()){
+                    if(s instanceof UMLClasses){
+                        if(currentArg.getArgstype().equals(((UMLClasses) s).getClassNametoString())){
+                            if(!j.getParentName().equals(((UMLClasses) s).getClassNametoString())){
+                                flaggy = 1;
+                                ba = new ClassLines();
+                                ba.setStartX(currentPane.getTranslateX());
+                                ba.setStartY(currentPane.getTranslateY());
+                                ba.setEndX(s.getTranslateX());
+                                ba.setEndY(s.getTranslateY());
+                                ba.startXProperty().bind(currentPane.translateXProperty());
+                                ba.startYProperty().bind(currentPane.translateYProperty());
+                                ba.endXProperty().bind(s.translateXProperty());
+                                ba.endYProperty().bind(s.translateYProperty());
+                                ba.setStart_node(j.getClassNametoString());
+                                ba.setEnd_node(((UMLClasses) s).getClassNametoString());
+                                leftPane.getChildren().add(ba);
+                                expo.getLineList().add(ba);
+                                j.setParentName(((UMLClasses) s).getClassNametoString());
+                            }
+                        }
+                    }
+                }
+                
+                if(flaggy == 0){
+                    if(!currentArg.getArgstype().contains("int")){
+                        if(!currentArg.getArgstype().contains("double")){
+                            if(!currentArg.getArgstype().contains("boolean")){
+                                if(!currentArg.getArgstype().contains("float")){
+                                    if(!currentArg.getArgstype().contains("char")){
+                                        if(!currentArg.getArgstype().contains("byte")){
+                                            if(!currentArg.getArgstype().contains("short")){
+                                                if(!currentArg.getArgstype().contains("long")){
+                        UMLClasses ex = new UMLClasses(currentArg.getArgstype());
+                        createListener(ex);
+                        leftPane.getChildren().add(ex);
+                        expo.getClassList().add(ex);
+                        j.setParentName(ex.getClassNametoString());
+                        
+                        ba = new ClassLines();
+                        ba.setStartX(currentPane.getTranslateX());
+                        ba.setStartY(currentPane.getTranslateY());
+                        ba.setEndX(ex.getTranslateX());
+                        ba.setEndY(ex.getTranslateY());
+                        ba.startXProperty().bind(currentPane.translateXProperty());
+                        ba.startYProperty().bind(currentPane.translateYProperty());
+                        ba.endXProperty().bind(ex.translateXProperty());
+                        ba.endYProperty().bind(ex.translateYProperty());
+                        ba.setStart_node(j.getClassNametoString());
+                        ba.setEnd_node(ex.getClassNametoString());
+                        leftPane.getChildren().add(ba);
+                        expo.getLineList().add(ba);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                }}
                     
                 }
                 if(currentPane instanceof UMLInterfaces){
@@ -994,10 +1285,18 @@ public class Workspace extends AppWorkspaceComponent {
                     
                     j.removeCurrentMethodName(textTemp.get(currentMethod.toString()));
                     currentMethod.addUMLMArgs(currentArg);
+                    j.getMethodNames().add(currentMethod);
+                    
+                    String tmp2 = currentMethod.toString();
+                Text temp2 = new Text(tmp2);
+                
+                textTemp.put(tmp2, temp2);
+                
+                j.setCurrentMethodName(textTemp.get(tmp2));
                 }
                 gui.updateToolbarControls(false);
                 gui.updatePhotoCodeButton();
-                expo.undoing(); //!!!!!!!!!!!!!!
+                urtest.undoing(app.getDataComponent());
             }          
         } 
         else {
@@ -1048,7 +1347,7 @@ public class Workspace extends AppWorkspaceComponent {
                 }
                 gui.updateToolbarControls(false);
                 gui.updatePhotoCodeButton();
-                expo.undoing(); //!!!!!!!!!!!!!
+                urtest.undoing(app.getDataComponent());
             }
         });
         
@@ -1108,6 +1407,69 @@ public class Workspace extends AppWorkspaceComponent {
                 
                         l.setCurrentMethodName(textTemp.get(tmp2));
                         
+                        int flaggy = 0;
+                
+                for(VBox s: expo.getClassList()){
+                    if(s instanceof UMLClasses){
+                        if(currentArg.getArgstype().equals(((UMLClasses) s).getClassNametoString())){
+                            if(!l.getParentName().equals(((UMLClasses) s).getClassNametoString())){
+                                flaggy = 1;
+                                ba = new ClassLines();
+                                ba.setStartX(currentPane.getTranslateX());
+                                ba.setStartY(currentPane.getTranslateY());
+                                ba.setEndX(s.getTranslateX());
+                                ba.setEndY(s.getTranslateY());
+                                ba.startXProperty().bind(currentPane.translateXProperty());
+                                ba.startYProperty().bind(currentPane.translateYProperty());
+                                ba.endXProperty().bind(s.translateXProperty());
+                                ba.endYProperty().bind(s.translateYProperty());
+                                ba.setStart_node(l.getClassNametoString());
+                                ba.setEnd_node(((UMLClasses) s).getClassNametoString());
+                                leftPane.getChildren().add(ba);
+                                expo.getLineList().add(ba);
+                                l.setParentName(((UMLClasses) s).getClassNametoString());
+                            }
+                        }
+                    }
+                }
+                
+                if(flaggy == 0){
+                    if(!currentArg.getArgstype().contains("int")){
+                        if(!currentArg.getArgstype().contains("double")){
+                            if(!currentArg.getArgstype().contains("boolean")){
+                                if(!currentArg.getArgstype().contains("float")){
+                                    if(!currentArg.getArgstype().contains("char")){
+                                        if(!currentArg.getArgstype().contains("byte")){
+                                            if(!currentArg.getArgstype().contains("short")){
+                                                if(!currentArg.getArgstype().contains("long")){
+                        UMLClasses ex = new UMLClasses(currentArg.getArgstype());
+                        createListener(ex);
+                        leftPane.getChildren().add(ex);
+                        expo.getClassList().add(ex);
+                        l.setParentName(ex.getClassNametoString());
+                        
+                        ba = new ClassLines();
+                        ba.setStartX(currentPane.getTranslateX());
+                        ba.setStartY(currentPane.getTranslateY());
+                        ba.setEndX(ex.getTranslateX());
+                        ba.setEndY(ex.getTranslateY());
+                        ba.startXProperty().bind(currentPane.translateXProperty());
+                        ba.startYProperty().bind(currentPane.translateYProperty());
+                        ba.endXProperty().bind(ex.translateXProperty());
+                        ba.endYProperty().bind(ex.translateYProperty());
+                        ba.setStart_node(l.getClassNametoString());
+                        ba.setEnd_node(ex.getClassNametoString());
+                        leftPane.getChildren().add(ba);
+                        expo.getLineList().add(ba);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                }}
+                        
                     }
                     
                     if(currentPane instanceof UMLInterfaces){
@@ -1131,7 +1493,7 @@ public class Workspace extends AppWorkspaceComponent {
                     }
                     gui.updateToolbarControls(false);
                     gui.updatePhotoCodeButton();
-                    expo.undoing(); //!!!!!!!!!
+                    urtest.undoing(app.getDataComponent());
                 }
         else {
         }}
@@ -1214,7 +1576,18 @@ public class Workspace extends AppWorkspaceComponent {
                         table3.getItems().addAll(st.getMethodNames().get(0).getArgs());
                 }
                
-               parentComboBox.getItems().clear(); //interfaces could have parent interfaces, but too lazy
+               parentComboBox.getItems().clear();
+                for(VBox sh: expo.getClassList()){
+                    if(sh instanceof UMLInterfaces)
+                        parentComboBox.getItems().add(((UMLInterfaces) sh).getInterNametoString());
+                }  
+                if (!st.getParentInterfaces().isEmpty()){
+                    parentComboBox.setValue(st.getParentInterfaces().get(0));
+                }
+                else{
+                    //DO NOTHING
+                }
+                
            }
         }   
         
@@ -1230,7 +1603,7 @@ public class Workspace extends AppWorkspaceComponent {
                 lol.setTranslateY(e.getY() + s.getTranslateY());
                 lol.setTranslateXer(e.getX() + s.getTranslateX());
                 lol.setTranslateYer(e.getY() + s.getTranslateY());
-                expo.undoing(); //!!!!!!!!!!!!!!!!
+                urtest.undoing(app.getDataComponent());
             }
             if(s instanceof UMLInterfaces){
                 UMLInterfaces st = (UMLInterfaces) s;
@@ -1238,7 +1611,7 @@ public class Workspace extends AppWorkspaceComponent {
                 st.setTranslateY(e.getY() + s.getTranslateY());
                 st.setTranslateXer(e.getX() + s.getTranslateX());
                 st.setTranslateYer(e.getY() + s.getTranslateY());
-                expo.undoing(); //!!!!!!!!!!!!
+                urtest.undoing(app.getDataComponent());
             }
             }
             if(selectedButton == resizeButton && currentPane.getCursor() == Cursor.CROSSHAIR){ //resizing
@@ -1251,7 +1624,7 @@ public class Workspace extends AppWorkspaceComponent {
                     lol.setMinHeight(e.getSceneY() - lol.getTranslateY());
                     lol.setMaxHeight(e.getSceneY() - lol.getTranslateY());
                     lol.setHeighty(lol.getHeight());
-                    expo.undoing(); //!!!!!!!!!!!!!!
+                    urtest.undoing(app.getDataComponent());
                 }
                 if(s instanceof UMLInterfaces){
                     UMLInterfaces st = (UMLInterfaces) s;
@@ -1261,7 +1634,7 @@ public class Workspace extends AppWorkspaceComponent {
                     st.setMinHeight(e.getSceneY() - st.getTranslateY());
                     st.setMaxHeight(e.getSceneY() - st.getTranslateY());
                     st.setHeighty(st.getHeight());
-                    expo.undoing(); //!!!!!!!!!!!!
+                    urtest.undoing(app.getDataComponent());
                 }
                 
             }
@@ -1287,7 +1660,7 @@ public class Workspace extends AppWorkspaceComponent {
                 }
                 s.setTranslateX(currentpositionX);
                 s.setTranslateY(currentpositionY);
-                expo.undoing();
+                urtest.undoing(app.getDataComponent());
             }
         });
     }
@@ -1396,6 +1769,11 @@ public class Workspace extends AppWorkspaceComponent {
         minusButton.setDisable(true);
         addMButton.setDisable(true);
         minusMButton.setDisable(true);
+        addAButton.setDisable(true);
+        minusAButton.setDisable(true);
+        snapping = false;
+        gridBox.setSelected(false);
+        snapBox.setSelected(false);
         gui.updateToolbarControls(true);
         
     }
